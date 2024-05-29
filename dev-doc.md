@@ -345,3 +345,67 @@ function TryCallOffchain(bytes32 userKey, bytes memory req) public returns (uint
 	}	
 }
 ```
+
+In the code above, the contract checks an internal mapping to see if a response exists for the given request. If not then the method reverts with a special prefix, followed by an encoded version of the request parameters. If a response does exist then it is removed from the internal mapping and is returned to the caller. The map key encodes the request parameters, so that a response initiated by one request will not be returned later in response to a modified request from the caller.
+
+To populate the response mapping, HybridAccount contracts use another method in the Helper:
+
+```solidity
+function PutResponse(bytes32 subKey, bytes calldata response) public {
+   //require(msg.sender == address(this)); // _requireFromEntryPointOrOwner();
+   require(RegisteredCallers[msg.sender].owner != address(0), "Unregistered caller");
+   //require(ResponseCache[mapKey].length == 0, "Cache entry already exists");
+
+   require(response.length >= 32, "Response too short");
+   bytes32 mapKey = keccak256(abi.encodePacked(msg.sender, subKey));
+   ResponseCache[mapKey] = response;
+}
+```
+
+Note that the msg.sender is included in the calculation of the internal map key, ensuring that only that HybridAccount is able to populate the response which it will later receive back in the TryCallOffchain() call. However in the case of error results (success == false) there is also a provision for the HC implementation to insert a result under a different map key.
+
+PutResponse() is called using Account Abstraction and the offchain userOperation must carry a valid signature in order for the operation to be executed.
+
+### Reading the response data
+To retrieve the response from our "AddSub" contract, we handle the offchain call as follows:
+
+```solidity
+(uint32 error, bytes memory ret) = HA.CallOffchain(userKey, req);
+
+if (error == 0) {
+    (x,y) = abi.decode(ret,(uint256,uint256)); // x=(a+b), y=(a-b)
+}
+```
+
+In this snippet, we decode the returned object "ret" into two uint256 values, as the offchain function returns two integers. The variables x and y will hold the results of the addition and subtraction, respectively.
+
+## Step 4: Deploy the Smart Contract
+With a few adjustments to the deploy.py script, we can easily deploy our newly created smart contract.
+
+First, we need to configure the script to connect to our L1 and L2 networks:
+```solidity
+l1 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
+assert (l1.is_connected)
+l1.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+l2 = Web3(Web3.HTTPProvider("http://127.0.0.1:9545"))
+assert (l2.is_connected)
+l2.middleware_onion.inject(geth_poa_middleware, layer=0)
+```
+Next, we load the contract using the loadContract function:
+```solidity
+TC = loadContract(w3, "TestCounter",   path_prefix+"test/TestCounter.sol")
+```
+Here "path_prefix" indicates where the contract is located.
+
+After loading the contract, we can deploy it as follows:
+```solidity
+epAddr  = deploy2("EntryPoint", EP.constructor(),0)
+hhAddr  = deploy2("HCHelper", HH.constructor(epAddr, boba_addr, 0),0)
+saAddr  = deploy2("SimpleAccount", SA.constructor(epAddr),0)
+ha0Addr = deploy2("HybridAccount.0", HA.constructor(epAddr, hhAddr),0)
+ha1Addr = deploy2("HybridAccount.1", HA.constructor(epAddr, hhAddr),1)
+tcAddr  = deploy2("TestCounter", TC.constructor(ha1Addr),0)
+```
+
+The constructor of our smart contract takes an address as an argument. Therefore, we pass the address of HybridAccount.1, which, along with other necessary contracts, is deployed as shown above.
