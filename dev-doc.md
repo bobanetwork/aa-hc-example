@@ -49,8 +49,7 @@ greater control and functionality within the blockchain network
 
 Before you begin, make sure you have the following prerequisites in place:
 
-- [ ] API key: Obtain an API key from our system by following the instructions provided in
-  the [API Key Documentation](link-to-api-key-docs).
+- [ ] API key: Obtain an API key from our system by reaching out on [Discord](https://discord.com/invite/Hvu3zpFwWd).
 - [ ] Development environment: Set up your development environment with the necessary tools and dependencies. In this
   tutorial, make sure to have to following tools and technologies set up
     - Python
@@ -556,5 +555,4 @@ Let's integrate them into our `server-loop`
     // getPrice
     server.register_function(offchain_getprice, selector("getprice(string)"))
 ```
-
 
