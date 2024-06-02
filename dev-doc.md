@@ -5,7 +5,7 @@ Welcome to the developer documentation for implementing a basic example with our
 
 ## Prerequisites
 Before you begin, make sure you have the following prerequisites in place:
-- [ ] API key: Obtain an API key from our system by following the instructions provided in the [API Key Documentation](link-to-api-key-docs).
+- [ ] API key: Obtain an API key from our system by reaching out to us on [Discord](https://discord.com/invite/Hvu3zpFwWd).
 - [ ] Development environment: Set up your development environment with the necessary tools and dependencies.
 
 ## Step 1: Writing the offchain handler
