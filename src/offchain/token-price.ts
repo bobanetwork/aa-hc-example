@@ -92,27 +92,25 @@ async function getTokenPrice(tokenSymbol: string): Promise<number> {
 }
 
 function generateResponse(req: any, errorCode: number, respPayload: any) {
-  const err_code = 0;
-
   const ethabi = web3.eth.abi;
 
   const resp2 = ethabi.encodeParameters(
     ["address", "uint256", "uint32", "bytes"],
-    [req.srcAddr, req.srcNonce, err_code, respPayload]
+    [req.srcAddr, req.srcNonce, errorCode, respPayload]
   );
 
   console.log("reqkey", req.skey);
 
   const enc1 = ethabi.encodeParameters(["bytes32", "bytes"], [req.skey, resp2]);
 
-  const p_enc1 = "0x" + selector("PutResponse(bytes32,bytes)") + enc1.slice(2);
+  const pEnc1 = "0x" + selector("PutResponse(bytes32,bytes)") + enc1.slice(2);
 
   const enc2 = ethabi.encodeParameters(
     ["address", "uint256", "bytes"],
-    [web3.utils.toChecksumAddress(ENV_VARS.hcHelperAddr), 0, p_enc1]
+    [web3.utils.toChecksumAddress(ENV_VARS.hcHelperAddr), 0, pEnc1]
   );
 
-  const p_enc2 =
+  const pEnc2 =
     "0x" + selector("execute(address,uint256,bytes)") + enc2.slice(2);
 
   const limits = {
@@ -146,7 +144,7 @@ function generateResponse(req: any, errorCode: number, respPayload: any) {
       ENV_VARS.ocHybridAccount,
       req.opNonce,
       web3.utils.keccak256(web3.utils.hexToBytes("0x")), // initCode
-      web3.utils.keccak256(web3.utils.hexToBytes(p_enc2)), // p_enc2
+      web3.utils.keccak256(web3.utils.hexToBytes(pEnc2)), // p_enc2
       callGas,
       parseInt(limits.verificationGasLimit, 16),
       parseInt(limits.preVerificationGas, 16),
@@ -166,7 +164,7 @@ function generateResponse(req: any, errorCode: number, respPayload: any) {
   const account = web3.eth.accounts.privateKeyToAccount(ENV_VARS.ocPrivateKey);
   const signature = account.sign(ooHash);
 
-  const success = err_code === 0;
+  const success = errorCode === 0;
   console.log(
     `Method returning success=${success} response=${respPayload} signature=${signature.signature}`
   );
