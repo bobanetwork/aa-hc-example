@@ -12,8 +12,6 @@ import axios from "axios";
 
 const web3 = new Web3();
 
-const ENV_VARS = getEnvVars();
-
 export async function offchainTokenPrice(params: OffchainParameter) {
   console.log("##############################################");
   console.log("offchain token price: ");
@@ -37,20 +35,18 @@ export async function offchainTokenPrice(params: OffchainParameter) {
       tokenPrice
     );
 
-    console.log("passing request: ", request);
     return generateResponse(request, 0, encodedTokenPrice);
-  } catch (error) {
-    console.log("error: ", error);
-    const errorResponse = Web3.utils.utf8ToBytes("unknown error");
+  } catch (error: any) {
+    const errorResponse = Web3.utils.utf8ToBytes(error.message);
     return generateResponse(request, 1, errorResponse);
   }
 }
 
-async function getTokenPrice(tokenSymbol: string): Promise<number> {
+export async function getTokenPrice(tokenSymbol: string): Promise<number> {
   const coinListUrl = "https://api.coinranking.com/v2/coins";
   const headers = {
     accept: "application/json",
-    // "x-access-token": COINRANKING_API_KEY,
+    "x-access-token": getEnvVars().coinRankingApiKey,
   };
 
   let tokenUuid: string | undefined = undefined;
@@ -61,7 +57,6 @@ async function getTokenPrice(tokenSymbol: string): Promise<number> {
     const coinListJson = coinListResponse.data;
 
     for (const c of coinListJson.data.coins) {
-      console.log("c", c.symbol);
       if (c.symbol === tokenSymbol) {
         tokenUuid = c.uuid;
         tokenName = c.name;
@@ -78,7 +73,6 @@ async function getTokenPrice(tokenSymbol: string): Promise<number> {
 
     if (priceResponse.status === 200) {
       const price: number = priceResponse.data.data.price;
-      console.log(`Price for ${tokenName}: ${price}`);
       return price;
     } else {
       throw new Error(
@@ -86,12 +80,18 @@ async function getTokenPrice(tokenSymbol: string): Promise<number> {
       );
     }
   } catch (error) {
-    console.error("Request failed", error);
     throw error;
   }
 }
 
-function generateResponse(req: any, errorCode: number, respPayload: any) {
+export function generateResponse(
+  req: any,
+  errorCode: number,
+  respPayload: any
+) {
+
+  const envVars = getEnvVars();
+
   const ethabi = web3.eth.abi;
 
   const resp2 = ethabi.encodeParameters(
@@ -99,15 +99,13 @@ function generateResponse(req: any, errorCode: number, respPayload: any) {
     [req.srcAddr, req.srcNonce, errorCode, respPayload]
   );
 
-  console.log("reqkey", req.skey);
-
   const enc1 = ethabi.encodeParameters(["bytes32", "bytes"], [req.skey, resp2]);
 
   const pEnc1 = "0x" + selector("PutResponse(bytes32,bytes)") + enc1.slice(2);
 
   const enc2 = ethabi.encodeParameters(
     ["address", "uint256", "bytes"],
-    [web3.utils.toChecksumAddress(ENV_VARS.hcHelperAddr), 0, pEnc1]
+    [web3.utils.toChecksumAddress(envVars.hcHelperAddr), 0, pEnc1]
   );
 
   const pEnc2 =
@@ -119,14 +117,7 @@ function generateResponse(req: any, errorCode: number, respPayload: any) {
   };
 
   const callGas = 705 * respPayload.length + 170000;
-  console.log(
-    "callGas calculation",
-    respPayload.length,
-    4 + enc2.length,
-    callGas
-  );
 
-  console.log("opNonce:", req.opNonce);
   const p = ethabi.encodeParameters(
     [
       "address",
@@ -141,7 +132,7 @@ function generateResponse(req: any, errorCode: number, respPayload: any) {
       "bytes32",
     ],
     [
-      ENV_VARS.ocHybridAccount,
+      envVars.ocHybridAccount,
       req.opNonce,
       web3.utils.keccak256(web3.utils.hexToBytes("0x")), // initCode
       web3.utils.keccak256(web3.utils.hexToBytes(pEnc2)), // p_enc2
@@ -157,11 +148,11 @@ function generateResponse(req: any, errorCode: number, respPayload: any) {
   const ooHash = web3.utils.keccak256(
     ethabi.encodeParameters(
       ["bytes32", "address", "uint256"],
-      [web3.utils.keccak256(p), ENV_VARS.entryPointAddr, ENV_VARS.chainId]
+      [web3.utils.keccak256(p), envVars.entryPointAddr, envVars.chainId]
     )
   );
 
-  const account = web3.eth.accounts.privateKeyToAccount(ENV_VARS.ocPrivateKey);
+  const account = web3.eth.accounts.privateKeyToAccount(envVars.ocPrivateKey);
   const signature = account.sign(ooHash);
 
   const success = errorCode === 0;

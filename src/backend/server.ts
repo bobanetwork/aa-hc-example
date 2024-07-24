@@ -8,7 +8,7 @@ const port = ENV_VARS.ocListenPort;
 
 app.use(express.json());
 
-app.post('/hc', (req: Request, res: Response) => {
+app.post('/hc', async (req: Request, res: Response) => {
   const { method, params } = req.body;
 
   if (!method || !params) {
@@ -16,10 +16,10 @@ app.post('/hc', (req: Request, res: Response) => {
   }
 
   try {
-    const result = handleRpcMethod(method, params);
+    const result = await handleRpcMethod(method, params);
     return res.json({ result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error });
+    return res.status(500).send(error)
   }
 });
 
@@ -32,6 +32,10 @@ async function handleRpcMethod(method: string, params: any): Promise<unknown> {
   }
 }
 
-app.listen(port, () => {
-  console.log(`RPC server listening at http://localhost:${port}`);
-});
+if (!process.env.JEST_WORKER_ID) {
+  app.listen(port, () => {
+    console.log(`RPC server listening at http://localhost:${port}`);
+  });
+}
+
+export default app;
