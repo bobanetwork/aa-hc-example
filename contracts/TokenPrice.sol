@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
-import "./common/HybridAccount.sol";
+import "./samples/HybridAccount.sol";
 
 contract TokenPrice {
-    mapping(string => TokenPrice) public tokenPrices;
-    address payable immutable helperAddr;
+    mapping(string => TokenPriceStruct) public tokenPrices;
+    address payable immutable public helperAddr;
 
-    struct TokenPrice {
+    struct TokenPriceStruct {
         string price;
         uint256 timestamp;
     }
@@ -29,7 +29,7 @@ contract TokenPrice {
         }
 
         (price) = abi.decode(ret, (string));
-        tokenPrices[token] = TokenPrice({
+        tokenPrices[token] = TokenPriceStruct({
             price: price,
             timestamp: block.timestamp
         });

@@ -10,8 +10,7 @@ contract Lock {
 
     event Withdrawal(uint amount, uint when);
 
-    constructor() payable {
-        uint256 _unlockTime = block.timestamp + 5 minutes;
+    constructor(uint _unlockTime) payable {
         require(
             block.timestamp < _unlockTime,
             "Unlock time should be in the future"
