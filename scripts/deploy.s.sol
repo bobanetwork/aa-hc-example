@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
-import "account-abstraction/contracts/core/EntryPoint.sol";
-import "account-abstraction/contracts/core/HCHelper.sol";
-import "account-abstraction/contracts/samples/HybridAccountFactory.sol";
-import "account-abstraction/contracts/samples/SimpleAccountFactory.sol";
-import "account-abstraction/contracts/test/TestTokenPrice.sol";
-import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
+import "../contracts/core/EntryPoint.sol";
+import "../contracts/core/HCHelper.sol";
+import "../contracts/samples/HybridAccountFactory.sol";
+import "../contracts/samples/SimpleAccountFactory.sol";
+import "../contracts/TokenPrice.sol";
+//import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
 // forge script scripts/deploy.sol:DeployExample --rpc-url http://localhost:8545 --broadcast
 contract DeployExample is Script {
     // Configs
@@ -17,7 +17,7 @@ contract DeployExample is Script {
     EntryPoint public entrypoint;
     HCHelper public hcHelper;
     HybridAccount public hybridAccount;
-    TestTokenPrice public testTokenPrice;
+    TokenPrice public tokenPrice;
     SimpleAccount public simpleAccount;
     function run() public {
         // Prepare and start Broadcast
@@ -45,8 +45,8 @@ contract DeployExample is Script {
         hybridAccount = new HybridAccount(IEntryPoint(entrypoint), address(hcHelper));
         console.log("HybridAccount deployed to: ", address(hcHelper));
         // TestTokenPrice
-        testTokenPrice = new TestTokenPrice(payable(address(hcHelper)));
-        console.log("TestTokenPrice deployed to: ", address(testTokenPrice));
+        tokenPrice = new TokenPrice(payable(address(hcHelper)));
+        console.log("TestTokenPrice deployed to: ", address(tokenPrice));
         // TestTokenPrice
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
         console.log("TestTokenPrice deployed to: ", address(simpleAccount));
@@ -64,6 +64,6 @@ contract DeployExample is Script {
         hcHelper.AddCredit(address(hybridAccount), 100);
         // permit caller
         hybridAccount.initialize(deployerAddress);
-        hybridAccount.PermitCaller(address(testTokenPrice), true);
+        hybridAccount.PermitCaller(address(tokenPrice), true);
     }
 }

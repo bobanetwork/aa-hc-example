@@ -16,7 +16,7 @@ contract TokenPrice {
         helperAddr = _helperAddr;
     }
 
-    function fetchPrice(string calldata token) public returns (string memory) {
+    function fetchPrice(string calldata token) public {
         HybridAccount ha = HybridAccount(payable(helperAddr));
         string memory price;
 
