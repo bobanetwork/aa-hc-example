@@ -7,7 +7,7 @@ import "../contracts/samples/HybridAccountFactory.sol";
 import "../contracts/samples/SimpleAccountFactory.sol";
 import "../contracts/TokenPrice.sol";
 //import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
-// forge script scripts/deploy.sol:DeployExample --rpc-url http://localhost:8545 --broadcast
+// forge script scripts/deploy.sol:DeployExample --rpc-url http://localhost:9545 --broadcast
 contract DeployExample is Script {
     // Configs
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -49,7 +49,7 @@ contract DeployExample is Script {
         console.log("TestTokenPrice deployed to: ", address(tokenPrice));
         // TestTokenPrice
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
-        console.log("TestTokenPrice deployed to: ", address(simpleAccount));
+        console.log("SimpleAccount deployed to: ", address(simpleAccount));
     }
     function configureContracts() public {
         if (hcHelper.systemAccount() != address(hybridAccount)) {

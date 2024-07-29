@@ -5,7 +5,7 @@ import "./samples/HybridAccount.sol";
 
 contract TokenPrice {
     mapping(string => TokenPriceStruct) public tokenPrices;
-    address payable immutable public helperAddr;
+    address payable immutable helperAddr;
 
     struct TokenPriceStruct {
         string price;
@@ -16,7 +16,14 @@ contract TokenPrice {
         helperAddr = _helperAddr;
     }
 
-    function fetchPrice(string calldata token) public {
+    function getTest(string calldata token) public {
+        tokenPrices[token] = TokenPriceStruct({
+            price: "10",
+            timestamp: block.timestamp
+        });
+    }
+
+    function fetchPrice(string calldata token) public returns (string memory) {
         HybridAccount ha = HybridAccount(payable(helperAddr));
         string memory price;
 

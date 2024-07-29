@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { ethers } from "ethers";
+import { AbiCoder, ethers, Wallet } from "ethers";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { useContractAbi } from "@/hooks/useContractAbi";
+import Web3 from "web3";
 
 const TokenPriceFetcher: React.FC = () => {
   const [tokenSymbol, setTokenSymbol] = useState("");
@@ -15,6 +16,12 @@ const TokenPriceFetcher: React.FC = () => {
     setTokenSymbol(event.target.value);
   };
 
+  const selector = (name: string) => {
+    const web3 = new Web3();
+    const hex = web3.utils.toHex(web3.utils.keccak256(name));
+    return hex.slice(2, 10);
+  };
+
   const handleSubmit = async () => {
     try {
       setError(null);
@@ -23,19 +30,32 @@ const TokenPriceFetcher: React.FC = () => {
         return;
       }
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      console.log("signer: ", signer);
+      const provider = new ethers.JsonRpcProvider("http://192.168.178.59:9545");
+      console.log("provder", provider);
+      // simpleaccount: 0x9f5af42b870AA67D70D8146CFE375B873115C257
+      const wallet = new Wallet(
+        import.meta.env.VITE_PRIVATE_KEY ?? "",
+        provider
+      );
+      console.log("wallet: ", wallet);
+      //const signer = await provider.getSigner();
+      //console.log("signer: ", signer);
 
-      const contractAddress = "0xe9222E9Fa9bCc6b3c71aA524e8C799D1e8383959";
+      const contractAddress = "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c";
 
-      const contract = new ethers.Contract(contractAddress, abi, signer);
+      console.log("ABI", abi);
+      const contract = new ethers.Contract(contractAddress, abi, wallet);
+      console.log("contract: ", contract);
 
       // Call the smart contract method to get the token price
       //const price = await contract.getTokenPrice(tokenSymbol);
-      const x = await contract.withdraw();
-      //setTokenPrice(price.toString());
-      console.log("XXXX: ", x)
+      const tx = await contract.fetchPrice("ETH");
+      const receipt = await tx.wait();
+      console.log("tx mined: ", tx);
+      console.log("receipt: ", receipt);
+      const price = await contract.tokenPrices("ETH");
+      console.log("Price: ", price);
+      setTokenPrice(price);
     } catch (error) {
       console.error(error);
       // setError(error as string);
