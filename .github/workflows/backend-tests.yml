@@ -24,3 +24,11 @@ jobs:
     - name: Run tests
       run: pnpm test
       working-directory: ./backend
+      env:
+        OC_LISTEN_PORT: ${{ vars.OC_LISTEN_PORT }}
+        CONRANKING_API_KEY: ${{ secrets.CONRANKING_API_KEY }}
+        OC_HYBRID_ACCOUNT: ${{ vars.OC_HYBRID_ACCOUNT }}
+        ENTRY_POINT: ${{ vars.ENTRY_POINT }}
+        CHAIN_ID: ${{ vars.CHAIN_ID }}
+        OC_PRIVKEY: ${{ secrets.OC_PRIVKEY }}
+        HC_HELPER_ADDR: ${{ vars.HC_HELPER_ADDR }}
