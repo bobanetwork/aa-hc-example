@@ -16,13 +16,6 @@ contract TokenPrice {
         helperAddr = _helperAddr;
     }
 
-    function getTest(string calldata token) public {
-        tokenPrices[token] = TokenPriceStruct({
-            price: "10",
-            timestamp: block.timestamp
-        });
-    }
-
     function fetchPrice(string calldata token) public {
         HybridAccount ha = HybridAccount(payable(helperAddr));
         string memory price;

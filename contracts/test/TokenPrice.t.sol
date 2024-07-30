@@ -2,7 +2,7 @@
 pragma solidity ^0.8.12;
 
 import "forge-std/Test.sol";
-import "../contracts/TokenPrice.sol";
+import "../src/TokenPrice.sol";
 
 contract MockHybridAccount {
     function CallOffchain(bytes32, bytes memory) public pure returns (uint32, bytes memory) {
@@ -10,6 +10,7 @@ contract MockHybridAccount {
     }
 }
 
+/** @dev Unit tests */
 contract TokenPriceTest is Test {
     TokenPrice public tokenPrice;
     MockHybridAccount public mockHybridAccount;

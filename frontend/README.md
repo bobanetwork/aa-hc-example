@@ -1,83 +1,44 @@
-# Counter App HC-AA (Meta Mask Flask)
+# Frontend | HC-AA (Meta Mask Flask)
 
+## Get Started
+1. BOBA's Snap is not yet on Metamask's official allowlist. For that reason you need to install the [development build](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk) in order to use Hybrid Compute via DApps.
+2. Disable the production version of Metamask (the orange one) in your browser [extension settings](chrome://extensions/). 
+3. For Boba Sepolia head over to our offial AA-HC wallet creation site: [hc-wallet.sepolia.boba.network](https://hc-wallet.sepolia.boba.network/)
+4. Once you got your snap account: Choose it in your Metamask and connect on your DApp.
+
+## Deployment / Start DApp
+### Docker
+1. Copy `.env-template` and rename it to `.env` (adapt your environment vars accordingly).
+2. Run `docker-compose up`
+
+Of course you can use the Dockerfile / Docker-Compose to deploy to the cloud of your choice as well.
+
+### Without Docker
+1. Run `pnpm i`
+2. then `pnpm dev`
+
+### Deploy to production
+Of course you can use whichever cloud provider you like. But for demo purposes we have used *render.com* as they provide allow you to deploy a web app for free.
+
+Our demo frontend will spin down with inactivity since we are using the free version. In that case the page might take longer to load.
+
+The demo frontend should be live here (free, so might have some delay on cold starts):
+https://aa-hc-example-fe.onrender.com
+
+If you want to setup your own server on Render, just follow these steps:
+1. Create account on [render.com](https://render.com)
+2. Click on **New** and choose **Static site**
+3. Connect your Git repository with Render
+4. If you are using this example repo you need to change the **Root directory** to `frontend/` since the frontend is located there.
+5. Set the build command to `pnpm build` and the build folder to `dist/`.
+6. Select the instance type you prefer, we chose "Free" for now.
+7. Then import your environment variables either one by one or via **Add from .env** import.
+
+
+Your DApp should be ready!
 
 ## Stack 
 - Vite 
 - React Ts
 - [Shadcn UI](https://ui.shadcn.com/docs) 
 - [Tailwind Css](https://tailwindcss.com/docs/installation)
-
-
-## Clone 
-
-```
-git clone git@github.com:bobanetwork/aws-3tier-template.git
-
-cd src/frontend/
-
-```
-
-## To Install deps.
-
-``` yarn ```
-
-## To start the local server  
-
-```
-yarn run dev
-```
-
-## To build the package to be used by pipelie.
-
-```
-yarn run build.
-```
-
-## Test Counter Address.
-
-1. Test Counter Example  - `0x7A9c74bEa653bBa510aAAe280981C117bc92273D`
-2. Test Counter Example (prefered) - `0x63BceAfAF62fB12394ecbEf10dBF1c5c36ba8b38`
-
-
-## Use shadcn ui 
-
-Add Component Button 
-
-```
-  npx shadcn-ui@latest add button
-```
-
-You can now go ahead and customize your Button component and add more shadcn components from here.
-
-
-
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list

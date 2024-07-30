@@ -1,5 +1,5 @@
 {
-  "name": "aa-hc-backend",
+  "name": "aa-hc-example-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
