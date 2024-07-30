@@ -1,13 +1,13 @@
 // @ts-ignore
 import express, { Request, Response } from 'express';
-import { getEnvVars, selector } from './common/utils';
-import { offchainTokenPrice } from './offchain/token-price';
+import { offchainTokenPrice } from './token-price';
+import {selector} from "./utils";
 
 const app = express();
-const ENV_VARS = getEnvVars();
-const port = ENV_VARS.ocListenPort;
+const port = process.env.OC_LISTEN_PORT;
 
 app.use(express.json());
+
 
 app.post('/hc', async (req: Request, res: Response) => {
   const { method, params } = req.body;
