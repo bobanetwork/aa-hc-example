@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
+
 import "forge-std/Script.sol";
 import "../contracts/core/EntryPoint.sol";
 import "../contracts/core/HCHelper.sol";
@@ -8,17 +9,20 @@ import "../contracts/samples/SimpleAccountFactory.sol";
 import "../contracts/TokenPrice.sol";
 //import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
 // forge script scripts/deploy.sol:DeployExample --rpc-url http://localhost:9545 --broadcast
+
 contract DeployExample is Script {
     // Configs
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     string public  backendURL = vm.envString("BACKEND_URL");
     address public deployerAddress;
+
     // Contracts
     EntryPoint public entrypoint;
     HCHelper public hcHelper;
     HybridAccount public hybridAccount;
     TokenPrice public tokenPrice;
     SimpleAccount public simpleAccount;
+
     function run() public {
         // Prepare and start Broadcast
         prepare();
@@ -28,12 +32,14 @@ contract DeployExample is Script {
         configureContracts();
         vm.stopBroadcast();
     }
+
     function prepare() public {
         deployerAddress = vm.addr(deployerPrivateKey);
         console.log("Balance deployer =", deployerAddress.balance);
         console.log("----");
         vm.startBroadcast(deployerPrivateKey);
     }
+
     function deployContracts() public {
         // EntryPoint
         entrypoint = new EntryPoint();
@@ -51,6 +57,7 @@ contract DeployExample is Script {
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
         console.log("SimpleAccount deployed to: ", address(simpleAccount));
     }
+
     function configureContracts() public {
         if (hcHelper.systemAccount() != address(hybridAccount)) {
             hcHelper.initialize(msg.sender, address(hybridAccount));

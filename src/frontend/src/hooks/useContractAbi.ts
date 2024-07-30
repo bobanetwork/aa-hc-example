@@ -1,7 +1,7 @@
 // src/hooks/useContractAbi.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-export function useContractAbi() {
+export function useContractAbi(contract: "TokenPrice" | "EP") {
   const [abi, setAbi] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -9,16 +9,18 @@ export function useContractAbi() {
   useEffect(() => {
     const fetchAbi = async () => {
       try {
-        const response = await fetch('/TokenPrice.json');
+        //const response = await fetch('/TokenPrice.json');
+        //const response = await fetch("/test.json");
         //const response = await fetch('/Lock.json');
+        const response = await fetch("/" + contract + ".json");
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         const json = await response.json();
-        console.log("JSON: ", json.abi)
+        console.log("JSON: ", json.abi);
         setAbi(json.abi);
       } catch (error) {
-        setError('Error fetching ABI: ' + error);
+        setError("Error fetching ABI: " + error);
       } finally {
         setLoading(false);
       }
