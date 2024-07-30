@@ -12,13 +12,14 @@ describe("RPC Server", () => {
       payload: web3.eth.abi.encodeParameter("string", "BTC"),
       sk: "76e2c074d436bac1cf246c55e408088fd19fb8c7034eeee8efb7215217f8e728",
       src_addr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
-      src_nonce: "0000000000000000000000000000000000000000000004b00000000000000000",
+      src_nonce:
+        "0000000000000000000000000000000000000000000004b00000000000000000",
       ver: "0.2",
     };
 
     const response = await request(app)
-        .post("/hc")
-        .send({ method: selector("getprice(string)"), params });
+      .post("/hc")
+      .send({ method: selector("getprice(string)"), params });
 
     expect(response.status).toBe(200);
     expect(response.body.result).toBeDefined();
@@ -33,13 +34,14 @@ describe("RPC Server", () => {
       payload: web3.eth.abi.encodeParameter("string", "invalidSymbol"),
       sk: "76e2c074d436bac1cf246c55e408088fd19fb8c7034eeee8efb7215217f8e728",
       src_addr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
-      src_nonce: "0000000000000000000000000000000000000000000004b00000000000000000",
+      src_nonce:
+        "0000000000000000000000000000000000000000000004b00000000000000000",
       ver: "0.2",
     };
 
     const response = await request(app)
-        .post("/hc")
-        .send({ method: selector("getprice(string)"), params });
+      .post("/hc")
+      .send({ method: selector("getprice(string)"), params });
 
     expect(response.status).toBe(200);
     expect(response.body.result.success).toBe(false);
@@ -49,8 +51,8 @@ describe("RPC Server", () => {
 
   it("should return error for invalid method", async () => {
     const response = await request(app)
-        .post("/hc")
-        .send({ method: "invalidMethod", params: {} });
+      .post("/hc")
+      .send({ method: "invalidMethod", params: {} });
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBeDefined();

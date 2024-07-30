@@ -1,9 +1,13 @@
-import assert from "assert";
 import Web3 from "web3";
 
 import axios from "axios";
 import "dotenv/config";
-import {OffchainParameter, parseOffchainParameter, parseRequest, selector} from "./utils";
+import {
+  OffchainParameter,
+  parseOffchainParameter,
+  parseRequest,
+  selector,
+} from "./utils";
 
 const web3 = new Web3();
 
@@ -14,8 +18,6 @@ export async function offchainTokenPrice(params: OffchainParameter) {
 
   const { ooNonce, payload, sk, srcAddr, srcNonce, ver } = parsedParams;
   console.log(ooNonce, payload, sk, srcAddr, srcNonce, ver);
-
-  assert(ver === "0.2", `Version ${ver} is not 0.2`);
 
   const request = parseRequest(parsedParams);
   try {
@@ -84,78 +86,90 @@ export function generateResponse(
   errorCode: number,
   respPayload: any
 ) {
+  try {
+    const ethabi = web3.eth.abi;
 
-  const ethabi = web3.eth.abi;
+    const resp2 = ethabi.encodeParameters(
+      ["address", "uint256", "uint32", "bytes"],
+      [req.srcAddr, req.srcNonce, errorCode, respPayload]
+    );
 
-  const resp2 = ethabi.encodeParameters(
-    ["address", "uint256", "uint32", "bytes"],
-    [req.srcAddr, req.srcNonce, errorCode, respPayload]
-  );
+    const enc1 = ethabi.encodeParameters(
+      ["bytes32", "bytes"],
+      [req.skey, resp2]
+    );
 
-  const enc1 = ethabi.encodeParameters(["bytes32", "bytes"], [req.skey, resp2]);
+    const pEnc1 = "0x" + selector("PutResponse(bytes32,bytes)") + enc1.slice(2);
 
-  const pEnc1 = "0x" + selector("PutResponse(bytes32,bytes)") + enc1.slice(2);
+    const enc2 = ethabi.encodeParameters(
+      ["address", "uint256", "bytes"],
+      [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR ?? ""), 0, pEnc1]
+    );
 
-  const enc2 = ethabi.encodeParameters(
-    ["address", "uint256", "bytes"],
-    [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR ?? ''), 0, pEnc1]
-  );
+    const pEnc2 =
+      "0x" + selector("execute(address,uint256,bytes)") + enc2.slice(2);
 
-  const pEnc2 =
-    "0x" + selector("execute(address,uint256,bytes)") + enc2.slice(2);
+    const limits = {
+      verificationGasLimit: "0x10000",
+      preVerificationGas: "0x10000",
+    };
 
-  const limits = {
-    verificationGasLimit: "0x10000",
-    preVerificationGas: "0x10000",
-  };
+    const callGas = 705 * respPayload.length + 170000;
 
-  const callGas = 705 * respPayload.length + 170000;
+    const p = ethabi.encodeParameters(
+      [
+        "address",
+        "uint256",
+        "bytes32",
+        "bytes32",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "bytes32",
+      ],
+      [
+        process.env.OC_HYBRID_ACCOUNT,
+        req.opNonce,
+        web3.utils.keccak256(web3.utils.hexToBytes("0x")), // initCode
+        web3.utils.keccak256(web3.utils.hexToBytes(pEnc2)), // p_enc2
+        callGas,
+        parseInt(limits.verificationGasLimit, 16),
+        parseInt(limits.preVerificationGas, 16),
+        0, // maxFeePerGas
+        0, // maxPriorityFeePerGas
+        web3.utils.keccak256(web3.utils.hexToBytes("0x")), // paymasterAndData
+      ]
+    );
 
-  const p = ethabi.encodeParameters(
-    [
-      "address",
-      "uint256",
-      "bytes32",
-      "bytes32",
-      "uint256",
-      "uint256",
-      "uint256",
-      "uint256",
-      "uint256",
-      "bytes32",
-    ],
-    [
-      process.env.OC_HYBRID_ACCOUNT,
-      req.opNonce,
-      web3.utils.keccak256(web3.utils.hexToBytes("0x")), // initCode
-      web3.utils.keccak256(web3.utils.hexToBytes(pEnc2)), // p_enc2
-      callGas,
-      parseInt(limits.verificationGasLimit, 16),
-      parseInt(limits.preVerificationGas, 16),
-      0, // maxFeePerGas
-      0, // maxPriorityFeePerGas
-      web3.utils.keccak256(web3.utils.hexToBytes("0x")), // paymasterAndData
-    ]
-  );
+    const ooHash = web3.utils.keccak256(
+      ethabi.encodeParameters(
+        ["bytes32", "address", "uint256"],
+        [
+          web3.utils.keccak256(p),
+          process.env.ENTRY_POINTS,
+          process.env.CHAIN_ID,
+        ]
+      )
+    );
 
-  const ooHash = web3.utils.keccak256(
-    ethabi.encodeParameters(
-      ["bytes32", "address", "uint256"],
-      [web3.utils.keccak256(p), process.env.ENTRY_POINT, process.env.CHAIN_ID]
-    )
-  );
+    const account = web3.eth.accounts.privateKeyToAccount(
+      process.env.OC_PRIVKEY ?? ""
+    );
+    const signature = account.sign(ooHash);
 
-  const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY ?? '');
-  const signature = account.sign(ooHash);
+    const success = errorCode === 0;
+    console.log(
+      `Method returning success=${success} response=${respPayload} signature=${signature.signature}`
+    );
 
-  const success = errorCode === 0;
-  console.log(
-    `Method returning success=${success} response=${respPayload} signature=${signature.signature}`
-  );
-
-  return {
-    success,
-    response: respPayload,
-    signature: signature.signature,
-  };
+    return {
+      success,
+      response: respPayload,
+      signature: signature.signature,
+    };
+  } catch (error) {
+    console.log("error: ", error);
+  }
 }
