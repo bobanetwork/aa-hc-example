@@ -6,13 +6,13 @@ import { concat, FunctionFragment } from "ethers"
 import { AbiCoder } from "ethers"
 import { hexlify } from "ethers"
 import { CopyIcon } from "./CopyIcon"
-import { ADD_SUB_CONTRACT } from "@/config/snap"
+import { YOUR_CONTRACT } from "@/config/snap"
 
 const FormComponent = () => {
   const [state] = useContext(MetaMaskContext)
   const [inputA, setinputA] = useState<any>(0)
   const [inputB, setinputB] = useState<any>(0)
-  const [testContract, setTestContract] = useState(ADD_SUB_CONTRACT)
+  const [testContract, setTestContract] = useState(YOUR_CONTRACT)
   const [response, setResponse] = useState<any>(null)
   const [error, setError] = useState<any>(null)
 
@@ -84,7 +84,7 @@ const FormComponent = () => {
         <div className="flex flex-col justify-start items-start w-10/12">
           <label className="block text-sm font-medium leading-6 text-teal-900">Test Contract Address</label>
           <div className="relative mt-2 rounded-md shadow-sm w-full">
-            <input type="text" defaultValue={ADD_SUB_CONTRACT} value={testContract} onChange={(e) => setTestContract(e.target.value)} name="input A" id="input A" className="block w-full bg-teal-200 rounded-md border-0 py-1.5 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="0x" />
+            <input type="text" defaultValue={YOUR_CONTRACT} value={testContract} onChange={(e) => setTestContract(e.target.value)} name="input A" id="input A" className="block w-full bg-teal-200 rounded-md border-0 py-1.5 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="0x" />
           </div>
         </div>
       </div>

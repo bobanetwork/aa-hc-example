@@ -1,9 +1,8 @@
 {
-  "name": "aa-hc",
+  "name": "aa-hc-example-contracts",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/backend/server.ts",
     "test": "jest"
   },
   "license": "MIT",
