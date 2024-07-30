@@ -62,7 +62,6 @@ const TokenPriceFetcher: React.FC = () => {
       }
 
       const provider = new ethers.JsonRpcProvider("http://192.168.178.37:9545");
-      console.log("provder", provider);
       // simpleaccount: 0x9f5af42b870AA67D70D8146CFE375B873115C257
       const wallet = new Wallet(
         import.meta.env.VITE_PRIVATE_KEY ?? "",
