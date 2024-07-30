@@ -4,8 +4,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Contract } from "ethers";
 
 describe("TokenPrice", function () {
+  let tokenPrice: Contract
 
-  it("should call fetchPrice function", async function () {
+  before(async () => {
     const [owner] = await ethers.getSigners();
 
     // Deploy the HybridAccount contract
@@ -15,8 +16,11 @@ describe("TokenPrice", function () {
 
     // Deploy the TokenPrice contract
     const TokenPrice = await ethers.getContractFactory("TokenPrice");
-    const tokenPrice = await TokenPrice.deploy(hybridAccount.address);
+    tokenPrice = await TokenPrice.deploy(hybridAccount.address);
     await tokenPrice.deployed();
+  })
+
+  it("should call fetchPrice function", async function () {
 
     // Call the fetchPrice function
     const tx = await tokenPrice.fetchPrice("ETH");
