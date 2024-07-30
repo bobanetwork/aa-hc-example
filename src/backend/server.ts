@@ -1,3 +1,4 @@
+// @ts-ignore
 import express, { Request, Response } from 'express';
 import { getEnvVars, selector } from './common/utils';
 import { offchainTokenPrice } from './offchain/token-price';

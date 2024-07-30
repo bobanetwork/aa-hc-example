@@ -17,11 +17,14 @@ describe("RPC Server", () => {
     };
 
     const response = await request(app)
-      .post("/hc")
-      .send({ method: selector("getprice(string)"), params });
+        .post("/hc")
+        .send({ method: selector("getprice(string)"), params });
 
     expect(response.status).toBe(200);
     expect(response.body.result).toBeDefined();
+    expect(response.body.result.success).toBe(true);
+    expect(response.body.result.response).toBeDefined();
+    expect(response.body.result.signature).toBeDefined();
   });
 
   it("should respond with error for invalid token symbol", async () => {
@@ -36,19 +39,20 @@ describe("RPC Server", () => {
 
     const response = await request(app)
         .post("/hc")
-        .send({method: selector("getprice(string)"), params});
+        .send({ method: selector("getprice(string)"), params });
 
     expect(response.status).toBe(200);
     expect(response.body.result.success).toBe(false);
     expect(response.body.result.response).toBeDefined();
     expect(response.body.result.signature).toBeDefined();
-  })
+  });
 
   it("should return error for invalid method", async () => {
     const response = await request(app)
-      .post("/hc")
-      .send({ method: "invalidMethod", params: {} });
+        .post("/hc")
+        .send({ method: "invalidMethod", params: {} });
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
   });
 });
