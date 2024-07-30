@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../core/BaseAccount.sol";
 import "./callback/TokenCallbackHandler.sol";
+import "forge-std/console.sol";
 
 interface IHCHelper {
   function TryCallOffchain(bytes32, bytes memory) external returns (uint32, bytes memory);
@@ -155,6 +156,8 @@ contract HybridAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
        IHCHelper HC = IHCHelper(_helperAddr);
 
        userKey = keccak256(abi.encodePacked(userKey, msg.sender));
+       console.log("userkey: ");
+       console.logBytes32(userKey);
        return HC.TryCallOffchain(userKey, req);
     }
 }
