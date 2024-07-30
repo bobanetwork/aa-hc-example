@@ -10,6 +10,7 @@ contract MockHybridAccount {
     }
 }
 
+/** @dev Unit tests */
 contract TokenPriceTest is Test {
     TokenPrice public tokenPrice;
     MockHybridAccount public mockHybridAccount;
