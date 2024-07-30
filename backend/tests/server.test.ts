@@ -1,6 +1,7 @@
 import request from "supertest";
 import { selector } from "../common/utils";
 import Web3 from "web3";
+import "dotenv/config";
 import app from "../offchain/server";
 
 const web3 = new Web3();

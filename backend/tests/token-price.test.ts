@@ -1,6 +1,7 @@
 import Web3 from "web3";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
+import "dotenv/config";
 import { getTokenPrice, generateResponse } from "../offchain/token-price";
 import { getEnvVars, parseRequest, selector } from "../common/utils";
 import { OffchainParameterParsed } from "../offchain/utils";
