@@ -1,6 +1,12 @@
 # Frontend | HC-AA (Meta Mask Flask)
 
-## Get started
+## Get Started
+1. BOBA's Snap is not yet on Metamask's official allowlist. For that reason you need to install the [development build](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk) in order to use Hybrid Compute via DApps.
+2. Disable the production version of Metamask (the orange one) in your browser [extension settings](chrome://extensions/). 
+3. For Boba Sepolia head over to our offial AA-HC wallet creation site: [hc-wallet.sepolia.boba.network](https://hc-wallet.sepolia.boba.network/)
+4. Once you got your snap account: Choose it in your Metamask and connect on your DApp.
+
+## Deployment / Start DApp
 ### Docker
 1. Copy `.env-template` and rename it to `.env` (adapt your environment vars accordingly).
 2. Run `docker-compose up`
