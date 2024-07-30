@@ -1,7 +1,7 @@
 import request from "supertest";
-import { getEnvVars, selector } from "../common/utils";
+import { selector } from "../common/utils";
 import Web3 from "web3";
-import app from "../server";
+import app from "../offchain/server";
 
 const web3 = new Web3();
 

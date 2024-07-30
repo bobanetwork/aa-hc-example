@@ -1,14 +1,9 @@
 import assert from "assert";
 import Web3 from "web3";
-import {
-  decodeAbi,
-  getEnvVars,
-  parseOffchainParameter,
-  parseRequest,
-  selector,
-} from "../common/utils";
-import { OffchainParameter } from "../common/types";
+
 import axios from "axios";
+import "dotenv/config";
+import {OffchainParameter, parseOffchainParameter, parseRequest, selector} from "./utils";
 
 const web3 = new Web3();
 
@@ -46,7 +41,7 @@ export async function getTokenPrice(tokenSymbol: string): Promise<number> {
   const coinListUrl = "https://api.coinranking.com/v2/coins";
   const headers = {
     accept: "application/json",
-    "x-access-token": getEnvVars().coinRankingApiKey,
+    "x-access-token": process.env.COINRANKING_API_KEY,
   };
 
   let tokenUuid: string | undefined = undefined;
@@ -90,8 +85,6 @@ export function generateResponse(
   respPayload: any
 ) {
 
-  const envVars = getEnvVars();
-
   const ethabi = web3.eth.abi;
 
   const resp2 = ethabi.encodeParameters(
@@ -105,7 +98,7 @@ export function generateResponse(
 
   const enc2 = ethabi.encodeParameters(
     ["address", "uint256", "bytes"],
-    [web3.utils.toChecksumAddress(envVars.hcHelperAddr), 0, pEnc1]
+    [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR ?? ''), 0, pEnc1]
   );
 
   const pEnc2 =
@@ -132,7 +125,7 @@ export function generateResponse(
       "bytes32",
     ],
     [
-      envVars.ocHybridAccount,
+      process.env.OC_HYBRID_ACCOUNT,
       req.opNonce,
       web3.utils.keccak256(web3.utils.hexToBytes("0x")), // initCode
       web3.utils.keccak256(web3.utils.hexToBytes(pEnc2)), // p_enc2
@@ -148,11 +141,11 @@ export function generateResponse(
   const ooHash = web3.utils.keccak256(
     ethabi.encodeParameters(
       ["bytes32", "address", "uint256"],
-      [web3.utils.keccak256(p), envVars.entryPointAddr, envVars.chainId]
+      [web3.utils.keccak256(p), process.env.ENTRY_POINT, process.env.CHAIN_ID]
     )
   );
 
-  const account = web3.eth.accounts.privateKeyToAccount(envVars.ocPrivateKey);
+  const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY ?? '');
   const signature = account.sign(ooHash);
 
   const success = errorCode === 0;

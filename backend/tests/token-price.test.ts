@@ -3,7 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import axios from 'axios';
 import { getTokenPrice, generateResponse } from '../offchain/token-price';
 import { getEnvVars, parseRequest, selector } from '../common/utils';
-import { OffchainParameter, OffchainParameterParsed } from '../common/types';
+import {OffchainParameterParsed} from "../offchain/utils";
 
 jest.mock('../common/utils', () => ({
   ...jest.requireActual('../common/utils'),

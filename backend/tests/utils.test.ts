@@ -6,8 +6,7 @@ import {
   parseRequest,
   selector,
 } from "../common/utils";
-import { OffchainParameter } from "../common/types";
-import { expect, describe, it } from "@jest/globals";
+import {OffchainParameter} from "../offchain/utils";
 
 const web3 = new Web3();
 
