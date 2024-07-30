@@ -1,5 +1,8 @@
 node_modules
 .env
+broadcast/
+cache_forge/
+dist/
 
 # Hardhat files
 /cache
