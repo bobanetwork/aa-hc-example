@@ -23,6 +23,7 @@ jobs:
         cache: 'pnpm'
      - name: Install dependencies
        run: pnpm install
+       working-directory: ./backend
      - name: Run tests
        run: pnpm test
        working-directory: ./backend
