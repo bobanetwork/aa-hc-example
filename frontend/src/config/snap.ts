@@ -1,4 +1,4 @@
-require('dotenv').config()
+import 'dotenv'
 
 /**
  * The snap origin to use.
