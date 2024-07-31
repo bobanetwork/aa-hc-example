@@ -61,7 +61,7 @@ const TokenPriceFetcher: React.FC = () => {
         return;
       }
 
-      const provider = new ethers.JsonRpcProvider("http://192.168.178.37:9545");
+      const provider = new ethers.JsonRpcProvider("https://sepolia.boba.network");
       // simpleaccount: 0x9f5af42b870AA67D70D8146CFE375B873115C257
       const wallet = new Wallet(
         import.meta.env.VITE_PRIVATE_KEY ?? "",
@@ -71,10 +71,10 @@ const TokenPriceFetcher: React.FC = () => {
       //const signer = await provider.getSigner();
       //console.log("signer: ", signer);
 
-      const contractAddress = "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c";
+      const tokenPriceAddress = "0xDCE96d537f279E1A1A1c83894E0c5D24435dF123";
       const abiCoder = new AbiCoder();
       console.log("ABI", tokenAbi);
-      const contract = new ethers.Contract(contractAddress, tokenAbi, wallet);
+      const contract = new ethers.Contract(tokenPriceAddress, tokenAbi, wallet);
       console.log("contract: ", contract);
       const tokenSymbol = "ETH";
       const gameCall = ethers.hexlify(
@@ -84,7 +84,7 @@ const TokenPriceFetcher: React.FC = () => {
         ])
       );
 
-      const TokenPriceContract = { address: contractAddress };
+      const TokenPriceContract = { address: tokenPriceAddress };
       const exCall = ethers.hexlify(
         ethers.concat([
           "0x" + selector("execute(address,uint256,bytes)"),
@@ -95,12 +95,12 @@ const TokenPriceFetcher: React.FC = () => {
         ])
       );
       const EP = new ethers.Contract(
-        "0x4667F5C81e302Cb770944F4aEd2d6BCbf98097fB",
+        "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789",
         epAbi,
         provider
       );
       const uAddr = Web3.utils.toChecksumAddress(
-        "0x77Fe14A710E33De68855b0eA93Ed8128025328a9"
+        "0x08150bAB13edC834FD5b436C9416dC849f410C66"
       );
       const transactionCount = await provider.getTransactionCount(uAddr);
 
@@ -147,7 +147,7 @@ const TokenPriceFetcher: React.FC = () => {
     provider: JsonRpcProvider
   ) {
     const EP = new ethers.Contract(
-      "0x4667F5C81e302Cb770944F4aEd2d6BCbf98097fB",
+      "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789",
       epAbi,
       provider
     );

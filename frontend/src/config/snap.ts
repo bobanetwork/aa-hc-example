@@ -14,4 +14,4 @@ export const defaultSnapOrigin = 'npm:@bobanetwork/snap-account-abstraction-keyr
 export const snapPackageVersion = "1.1.3";
 
 /* Contract address that you want to invoke. */
-export const YOUR_CONTRACT = process.env.SMART_CONTRACT;
+export const YOUR_CONTRACT = import.meta.env.VITE_SMART_CONTRACT;

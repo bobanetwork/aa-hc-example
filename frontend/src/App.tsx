@@ -9,6 +9,7 @@ import "./styles/global.css";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
 import TokenPriceFetcher from "./components/TokenPriceFetcher";
+import FormComponent from "./components/FormComponent";
 
 function App() {
   return (
@@ -22,8 +23,9 @@ function App() {
               <NetworkAlert />
             </div>
             <div className="flex-grow flex items-center justify-center">
-              <TokenPriceFetcher /> 
+              <TokenPriceFetcher />
             </div>
+            <FormComponent></FormComponent>
           </div>
         </StoryProvider>
       </MetaMaskProvider>
