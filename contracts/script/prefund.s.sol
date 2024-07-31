@@ -2,22 +2,33 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Script.sol";
+import "forge-std/console.sol";
+
+interface IL1StandardBridge {
+    function depositETH(
+        uint32 _l2Gas,
+        bytes calldata _data
+    ) external payable;
+}
 
 contract L1ToL2DepositScript is Script {
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-    address public deployerAddress = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
-    address constant L1_PORTAL_ADDRESS = 0x3fdc08D815cc4ED3B7F69Ee246716f2C8bCD6b07;
+    address private l1StandardBridge = 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9;
+    uint256 private l2GasLimit = 10_300_000;
+    bytes private byteData = abi.encodePacked(block.timestamp);
 
     function run() external {
-        deployerAddress = vm.addr(deployerPrivateKey);
-        console.log("Balance deployer =", deployerAddress.balance);
-        console.log("----");
-        vm.startBroadcast(deployerPrivateKey);
+        address deployerAddress = vm.addr(deployerPrivateKey);
 
-        // Send ETH directly to the portal address
-        (bool success, ) = L1_PORTAL_ADDRESS.call{value: 1000}("");
-        require(success, "L1 to L2 ETH transfer failed");
+        IL1StandardBridge bridge = IL1StandardBridge(l1StandardBridge);
 
-        vm.stopBroadcast();
+        // need to prank single; function can only be called from an EOA
+        vm.prank(deployerAddress);
+        bridge.depositETH{value: 10}(
+            uint32(l2GasLimit),
+            byteData
+        );
+
+        vm.stopPrank();
     }
 }

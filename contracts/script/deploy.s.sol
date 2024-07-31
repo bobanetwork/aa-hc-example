@@ -2,13 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/core/EntryPoint.sol";
-import "../src/core/HCHelper.sol";
-import "../src/samples/HybridAccountFactory.sol";
-import "../src/samples/SimpleAccountFactory.sol";
-import "../src/TokenPrice.sol";
-//import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
-// forge script scripts/deploy.sol:DeployExample --rpc-url http://localhost:9545 --broadcast
+import "../contracts/core/EntryPoint.sol";
+import "../contracts/core/HCHelper.sol";
+import "../contracts/samples/HybridAccountFactory.sol";
+import "../contracts/samples/SimpleAccountFactory.sol";
+import "../contracts/TokenPrice.sol";
 
 contract DeployExample is Script {
     // Configs
@@ -30,32 +28,22 @@ contract DeployExample is Script {
         deployContracts();
         // Fund where needed, register urls, configure
         configureContracts();
+        // log
+        logContracts();
         vm.stopBroadcast();
     }
 
     function prepare() public {
         deployerAddress = vm.addr(deployerPrivateKey);
-        console.log("Balance deployer =", deployerAddress.balance);
-        console.log("----");
         vm.startBroadcast(deployerPrivateKey);
     }
 
     function deployContracts() public {
-        // EntryPoint
         entrypoint = new EntryPoint();
-        console.log("EntryPoint deployed to:", address(entrypoint));
-        // HCHelper
         hcHelper = new HCHelper(address(entrypoint), address(0x4200000000000000000000000000000000000023), 0);
-        console.log("HCHelper deployed to: ", address(hcHelper));
-        // HybridAccount
         hybridAccount = new HybridAccount(IEntryPoint(entrypoint), address(hcHelper));
-        console.log("HybridAccount deployed to: ", address(hcHelper));
-        // TestTokenPrice
         tokenPrice = new TokenPrice(payable(address(hcHelper)));
-        console.log("TestTokenPrice deployed to: ", address(tokenPrice));
-        // TestTokenPrice
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
-        console.log("SimpleAccount deployed to: ", address(simpleAccount));
     }
 
     function configureContracts() public {
@@ -72,5 +60,15 @@ contract DeployExample is Script {
         // permit caller
         hybridAccount.initialize(deployerAddress);
         hybridAccount.PermitCaller(address(tokenPrice), true);
+    }
+
+    function logContracts() public view {
+        console.log("ENTRY_POINTS=", address(entrypoint));
+        console.log("HC_HELPER_ADDR=", address(hcHelper));
+        console.log("OC_HYBRID_ACCOUNT=", address(hybridAccount));
+        console.log("TEST_TOKEN_PRICE=", address(tokenPrice));
+        console.log("SIMPLE_ACCOUNT=", address(simpleAccount));
+        console.log("CLIENT_PRIVKEY=", deployerPrivateKey);
+        console.log("HC_SYS_OWNER", address(deployerAddress));
     }
 }
