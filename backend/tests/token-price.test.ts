@@ -3,7 +3,7 @@ import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 import "dotenv/config";
 import { getTokenPrice, generateResponse } from "../offchain/token-price";
-import { getEnvVars, parseRequest } from "../common/utils";
+import { parseRequest } from "../common/utils";
 import { OffchainParameterParsed } from "../offchain/utils";
 
 jest.mock("../common/utils", () => ({
@@ -16,17 +16,16 @@ const web3 = new Web3();
 const mockAxios = new MockAdapter(axios);
 
 describe("getTokenPrice", () => {
-  const ENV_VARS = {
-    hcHelperAddr: "0x1234567890abcdef1234567890abcdef12345678",
-    ocHybridAccount: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
-    entryPointAddr: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
-    chainId: 1,
-    ocPrivateKey:
-      "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae9d1a70c060d56a2",
-  };
-
   beforeAll(() => {
-    (getEnvVars as jest.Mock).mockReturnValue(ENV_VARS);
+    process.env.OC_LISTEN_PORT = "1234";
+    process.env.COINRANKING_API_KEY = "fake-api-key";
+    process.env.OC_HYBRID_ACCOUNT =
+      "0xd0ca3C1ECa49635259f6c577A09634053Ab79577";
+    process.env.ENTRY_POINTS = "0x43536f912f87490fa70d0AB6D58f8B9CD250394A";
+    process.env.CHAIN_ID = "901";
+    process.env.OC_PRIVKEY =
+      "0x7c0c629efc797f8c5f658919b7efbae01275470d59d03fdeb0fca1e6bd11d7fa";
+    process.env.HC_HELPER_ADDR = "0x351B40044aa4D5A3Eb69Cb36d6895897EA8Aa844";
   });
 
   beforeEach(() => {
@@ -81,16 +80,16 @@ describe("getTokenPrice", () => {
 });
 
 describe("generateResponse", () => {
-
   beforeAll(() => {
-    (getEnvVars as jest.Mock).mockReturnValue({
-      hcHelperAddr: "0x351B40044aa4D5A3Eb69Cb36d6895897EA8Aa844",
-      ocHybridAccount: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
-      entryPointAddr: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
-      chainId: 1,
-      ocPrivateKey:
-        "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae9d1a70c060d56a2",
-    });
+    process.env.OC_LISTEN_PORT = "1234";
+    process.env.COINRANKING_API_KEY = "fake-api-key";
+    process.env.OC_HYBRID_ACCOUNT =
+      "0xd0ca3C1ECa49635259f6c577A09634053Ab79577";
+    process.env.ENTRY_POINTS = "0x43536f912f87490fa70d0AB6D58f8B9CD250394A";
+    process.env.CHAIN_ID = "901";
+    process.env.OC_PRIVKEY =
+      "0x7c0c629efc797f8c5f658919b7efbae01275470d59d03fdeb0fca1e6bd11d7fa";
+    process.env.HC_HELPER_ADDR = "0x351B40044aa4D5A3Eb69Cb36d6895897EA8Aa844";
   });
 
   const req = {
