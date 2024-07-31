@@ -3,7 +3,7 @@ import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 import "dotenv/config";
 import { getTokenPrice, generateResponse } from "../offchain/token-price";
-import { getEnvVars, parseRequest, selector } from "../common/utils";
+import { getEnvVars, parseRequest } from "../common/utils";
 import { OffchainParameterParsed } from "../offchain/utils";
 
 jest.mock("../common/utils", () => ({
@@ -80,16 +80,7 @@ describe("getTokenPrice", () => {
   });
 });
 
-// TODO: Fix tests in this describe block
 describe("generateResponse", () => {
-  const ENV_VARS = {
-    hcHelperAddr: "0x1234567890abcdef1234567890abcdef12345678",
-    ocHybridAccount: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
-    entryPointAddr: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
-    chainId: 1,
-    ocPrivateKey:
-      "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae9d1a70c060d56a2",
-  };
 
   beforeAll(() => {
     (getEnvVars as jest.Mock).mockReturnValue({
