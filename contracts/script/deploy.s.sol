@@ -2,17 +2,17 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../contracts/core/EntryPoint.sol";
-import "../contracts/core/HCHelper.sol";
-import "../contracts/samples/HybridAccountFactory.sol";
-import "../contracts/samples/SimpleAccountFactory.sol";
-import "../contracts/TokenPrice.sol";
+import "../src/core/EntryPoint.sol";
+import "../src/core/HCHelper.sol";
+import "../src/samples/HybridAccountFactory.sol";
+import "../src/samples/SimpleAccountFactory.sol";
+import "../src/TokenPrice.sol";
 
 contract DeployExample is Script {
     // Configs
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-    string public  backendURL = vm.envString("BACKEND_URL");
-    string public bundlerAddr = vm.envString("BUNDLER_ADDR");
+    string public backendURL = vm.envString("BACKEND_URL");
+    address public bundlerAddress = vm.envAddress("BUNDLER_ADDR");
     address public deployerAddress;
 
     // Contracts
@@ -63,7 +63,7 @@ contract DeployExample is Script {
         hybridAccount.initialize(deployerAddress);
         hybridAccount.PermitCaller(address(tokenPrice), true);
         // fund the bundler
-        (bool success, ) = address(bundlerAddress).call{value: 1 ether}("");
+        (bool success, ) = bundlerAddress.call{value: 1 ether}("");
         require(success, "ETH transfer failed");
     }
 

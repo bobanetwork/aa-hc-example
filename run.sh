@@ -15,7 +15,7 @@ printf "\033[0;32m ✓ (1/4) Contracts Funded\033[0m\n"
 # Deploy Contracts on L2
 echo
 echo "→ Deploying L2 Contracts..."
-forge script scripts/deterministic-deploy.s.sol:DeployExample broadcast rpc-url http://localhost:9545 > deploy.log 2>&1
+forge script script/deploy.s.sol:DeployExample --broadcast --rpc-url http://localhost:9545
 printf "\033[0;32m ✓ (2/4) Contracts Deployed\033[0m\n"
 
 # Grab Contracts and parse into ENV file
