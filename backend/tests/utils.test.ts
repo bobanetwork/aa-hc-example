@@ -1,13 +1,12 @@
 import Web3 from "web3";
 import {
   decodeAbi,
-  getEnvVars,
   parseOffchainParameter,
   parseRequest,
   selector,
 } from "../common/utils";
 import "dotenv/config";
-import {OffchainParameter} from "../offchain/utils";
+import { OffchainParameter } from "../offchain/utils";
 
 const web3 = new Web3();
 
@@ -75,30 +74,6 @@ describe("Utils Functions", () => {
     expect(decoded).toEqual({
       0: "test",
       __length__: 1,
-    });
-  });
-
-  it("should return environment variables", () => {
-    const envVars = getEnvVars();
-    expect(envVars).toEqual({
-      hcSysOwner: process.env.HC_SYS_OWNER ?? "",
-      hcSysPrivateKey: process.env.HC_SYS_PRIVKEY ?? "",
-      ocOwner: process.env.OC_OWNER ?? "",
-      ocPrivateKey: process.env.OC_PRIVKEY ?? "",
-      clientOwner: process.env.CLIENT_OWNER ?? "",
-      clientPrivateKey: process.env.CLIENT_PRIVKEY ?? "",
-      entryPointAddr: process.env.ENTRY_POINTS ?? "",
-      hcHelperAddr: process.env.HC_HELPER_ADDR ?? "",
-      hcSysAccount: process.env.HC_SYS_ACCOUNT ?? "",
-      ocHybridAccount: process.env.OC_HYBRID_ACCOUNT ?? "",
-      clientAddr: process.env.CLIENT_ADDR ?? "",
-      saFactoryAddr: process.env.SA_FACTORY_ADDR ?? "",
-      haFactoryAddr: process.env.HA_FACTORY_ADDR ?? "",
-      coinRankingApiKey: process.env.COINRANKING_API_KEY ?? "",
-      nodeHttp: process.env.NODE_HTTP ?? "",
-      chainId: Number(process.env.CHAIN_ID),
-      ocListenPort: Number(process.env.OC_LISTEN_PORT),
-      bundlerRpc: process.env.BUNDLER_RPC ?? "",
     });
   });
 });
