@@ -9,9 +9,6 @@ export function useContractAbi(contract: "TokenPrice" | "EP") {
   useEffect(() => {
     const fetchAbi = async () => {
       try {
-        //const response = await fetch('/TokenPrice.json');
-        //const response = await fetch("/test.json");
-        //const response = await fetch('/Lock.json');
         const response = await fetch("/" + contract + ".json");
         if (!response.ok) {
           throw new Error("Network response was not ok");

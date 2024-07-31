@@ -1,31 +1,12 @@
 import React, { useState } from "react";
 import { AbiCoder, BytesLike, ethers, JsonRpcProvider, Wallet } from "ethers";
 import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { useContractAbi } from "@/hooks/useContractAbi";
 import Web3 from "web3";
 import axios from "axios";
-
-interface OpParams {
-  sender: string;
-  nonce: string;
-  initCode: string;
-  callData: string;
-  callGasLimit: string;
-  verificationGasLimit: string;
-  preVerificationGas: string;
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-  paymasterAndData: string;
-  signature: string;
-}
-
-interface EstimationResult {
-  preVerificationGas: string;
-  verificationGasLimit: string;
-  callGasLimit: string;
-}
+import { hasMetaMask } from "@/lib/metamask";
+import { OpParams, EstimationResult } from "@/types/tokenPriceFetcher";
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -56,27 +37,24 @@ const TokenPriceFetcher: React.FC = () => {
   const handleSubmit = async () => {
     try {
       setError(null);
-      if (!window.ethereum) {
+      if (await hasMetaMask()) {
         setError("MetaMask is not installed");
         return;
       }
 
-      const provider = new ethers.JsonRpcProvider("http://192.168.178.37:9545");
+      const provider = new ethers.JsonRpcProvider("http://192.168.178.59:9545");
       // simpleaccount: 0x9f5af42b870AA67D70D8146CFE375B873115C257
       const wallet = new Wallet(
         import.meta.env.VITE_PRIVATE_KEY ?? "",
         provider
       );
-      console.log("wallet: ", wallet);
       //const signer = await provider.getSigner();
       //console.log("signer: ", signer);
 
       const contractAddress = "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c";
       const abiCoder = new AbiCoder();
-      console.log("ABI", tokenAbi);
       const contract = new ethers.Contract(contractAddress, tokenAbi, wallet);
-      console.log("contract: ", contract);
-      const tokenSymbol = "ETH";
+
       const gameCall = ethers.hexlify(
         ethers.concat([
           "0x" + selector("fetchPrice(string)"),
@@ -253,7 +231,7 @@ const TokenPriceFetcher: React.FC = () => {
     // p.maxFeePerGas = "0x1E8480";
     // p.maxPriorityFeePerGas = "0x1E8480";
     p.preVerificationGas = "0xffffff";
-    p.verificationGasLimit = "0xffffff"
+    p.verificationGasLimit = "0xffffff";
     p.callGasLimit = "0x0";
     const estParams = [p, epAddress];
     //console.log(`Estimation params ${JSON.stringify(estParams)}`);
