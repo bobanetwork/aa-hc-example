@@ -13,7 +13,7 @@ RUN npm i
 COPY *.ts .
 
 # Expose the port the app runs on
-EXPOSE ${OC_LISTEN_PORT:-3000}
+EXPOSE ${OC_LISTEN_PORT:-1234}
 
 # Build the TypeScript application
 CMD ["npm", "start"]
