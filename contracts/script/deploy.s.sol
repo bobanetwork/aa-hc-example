@@ -12,6 +12,7 @@ contract DeployExample is Script {
     // Configs
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     string public  backendURL = vm.envString("BACKEND_URL");
+    string public bundlerAddr = vm.envString("BUNDLER_ADDR");
     address public deployerAddress;
 
     // Contracts
@@ -54,12 +55,16 @@ contract DeployExample is Script {
         if (bal < 0.01 ether) {
             entrypoint.depositTo{value: 0.01 ether - bal}(address(address(hybridAccount)));
         }
+
         // register url, add credit
         hcHelper.RegisterUrl(address(hybridAccount), backendURL);
         hcHelper.AddCredit(address(hybridAccount), 100);
         // permit caller
         hybridAccount.initialize(deployerAddress);
         hybridAccount.PermitCaller(address(tokenPrice), true);
+        // fund the bundler
+        (bool success, ) = address(bundlerAddress).call{value: 1 ether}("");
+        require(success, "ETH transfer failed");
     }
 
     function logContracts() public view {

@@ -15,7 +15,7 @@
 
 services:
   rundler-hc:
-    image: rundler-hc:latest
+    image: bobanetwork/rundler-hc:sepolia-rc11
     environment:
       HC_HELPER_ADDR:       ${HC_HELPER_ADDR}  # Deployed contract address
       HC_SYS_ACCOUNT:       ${HC_SYS_ACCOUNT}  # Deployed contract address

@@ -9,7 +9,7 @@ cd contracts/ || exit
 # Fund on L2
 echo
 echo "→ Funding L2 Contracts..."
-forge script scripts/prefund.s.sol:L1ToL2DepositScript broadcast rpc-url http://localhost:8545 > /dev/null 2>&1
+node script/fundL2.js > deploy.log
 printf "\033[0;32m ✓ (1/4) Contracts Funded\033[0m\n"
 
 # Deploy Contracts on L2
@@ -21,13 +21,12 @@ printf "\033[0;32m ✓ (2/4) Contracts Deployed\033[0m\n"
 # Grab Contracts and parse into ENV file
 echo
 echo "→ Parsing logs..."
-node parseEnvironment.js
+node script/parseEnvironment.js
 printf "\033[0;32m ✓ (3/4) Contracts addresses parsed into .env\033[0m\n"
 
 # Final step, deploy the rundler
 echo
 echo "→ Deploying Rundler..."
-echo "Needs to be created..."
 docker-compose up
 printf "\033[0;32m ✓ (4/4) (TODO) Rundler deployed\033[0m\n"
 
