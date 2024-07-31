@@ -12,3 +12,13 @@ docs/
 
 # Dotenv file
 .env
+
+# Hardhat files
+/cache
+/artifacts
+/ignition/deployments
+
+
+# TypeChain files
+/typechain
+/typechain-types
