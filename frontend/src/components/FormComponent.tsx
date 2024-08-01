@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { Button } from "./ui/button";
 import { defaultSnapOrigin } from "@/config";
-import { MetaMaskContext } from "@/hooks/MetamaskContext";
+import { MetaMaskContext } from "@/context/MetamaskContext";
 import { concat, FunctionFragment } from "ethers";
 import { AbiCoder } from "ethers";
 import { hexlify } from "ethers";

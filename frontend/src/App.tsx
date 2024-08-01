@@ -3,8 +3,7 @@ import NetworkAlert from "@/components/AccountAlert";
 import Navbar from "@/components/Navbar";
 import "./App.css";
 import Alert from "./components/Alert";
-import { StoryProvider } from "./context/StoryContext";
-import { MetaMaskProvider } from "./hooks/MetamaskContext";
+import { MetaMaskProvider } from "./context/MetamaskContext";
 import "./styles/global.css";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
@@ -15,19 +14,17 @@ function App() {
   return (
     <>
       <MetaMaskProvider>
-        <StoryProvider>
-          <div className="min-h-screen flex flex-col">
-            <div className="sticky top-0 w-full gradient-bg-welcome">
-              <Navbar />
-              <Alert />
-              <NetworkAlert />
-            </div>
-            <div className="flex-grow flex items-center justify-center">
-              <TokenPriceFetcher />
-            </div>
-            <FormComponent></FormComponent>
+        <div className="min-h-screen flex flex-col">
+          <div className="sticky top-0 w-full gradient-bg-welcome">
+            <Navbar />
+            <Alert />
+            <NetworkAlert />
           </div>
-        </StoryProvider>
+          <div className="flex-grow flex items-center justify-center">
+            <TokenPriceFetcher />
+          </div>
+          <FormComponent></FormComponent>
+        </div>
       </MetaMaskProvider>
     </>
   );

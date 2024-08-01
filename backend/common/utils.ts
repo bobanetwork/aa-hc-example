@@ -1,5 +1,5 @@
-import Web3, { HexString, Web3Eth } from "web3";
-import { EnvironmentVars, Request } from "./types";
+import Web3, { HexString } from "web3";
+import { Request } from "./types";
 import "dotenv/config";
 import { OffchainParameter, OffchainParameterParsed } from "../offchain/utils";
 

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { AbiCoder, BytesLike, ethers, JsonRpcProvider, Wallet } from "ethers";
+import { AbiCoder, ethers, JsonRpcProvider, Wallet } from "ethers";
 import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { useContractAbi } from "@/hooks/useContractAbi";
 import Web3 from "web3";
 import axios from "axios";
+import { hasMetaMask } from "@/lib/metamask";
 
 interface OpParams {
   sender: string;
@@ -56,7 +56,7 @@ const TokenPriceFetcher: React.FC = () => {
   const handleSubmit = async () => {
     try {
       setError(null);
-      if (!window.ethereum) {
+      if (await hasMetaMask()) {
         setError("MetaMask is not installed");
         return;
       }

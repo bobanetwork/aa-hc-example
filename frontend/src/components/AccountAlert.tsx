@@ -1,4 +1,4 @@
-import { MetaMaskContext } from '@/hooks/MetamaskContext'
+import { MetaMaskContext } from '@/context/MetamaskContext'
 import { AlertTriangle, } from 'lucide-react'
 import { useContext } from 'react'
 import { Button } from './ui/button'

@@ -1,6 +1,6 @@
 import logo from '@/assets/enya-logo.svg';
 import { snapPackageVersion } from '@/config';
-import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext';
+import { MetamaskActions, MetaMaskContext } from '@/context/MetamaskContext';
 import { useContext } from 'react';
 import { HeaderButtons } from './ConnectButton';
 import { connectSnap, getSnap } from '@/lib/snap';

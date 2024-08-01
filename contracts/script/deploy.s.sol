@@ -2,11 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/core/EntryPoint.sol";
-import "../src/core/HCHelper.sol";
-import "../src/samples/HybridAccountFactory.sol";
-import "../src/samples/SimpleAccountFactory.sol";
-import "../src/TokenPrice.sol";
+import "../contracts/core/EntryPoint.sol";
+import "../contracts/core/HCHelper.sol";
+import "../contracts/samples/HybridAccountFactory.sol";
+import "../contracts/samples/SimpleAccountFactory.sol";
+import "../contracts/TokenPrice.sol";
 //import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
 // forge script scripts/deploy.sol:DeployExample --rpc-url http://localhost:9545 --broadcast
 

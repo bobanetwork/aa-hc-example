@@ -1,4 +1,3 @@
-// src/hooks/useContractAbi.ts
 import { useState, useEffect } from "react";
 
 export function useContractAbi(contract: "TokenPrice" | "EP") {
@@ -9,10 +8,7 @@ export function useContractAbi(contract: "TokenPrice" | "EP") {
   useEffect(() => {
     const fetchAbi = async () => {
       try {
-        //const response = await fetch('/TokenPrice.json');
-        //const response = await fetch("/test.json");
-        //const response = await fetch('/Lock.json');
-        const response = await fetch("/" + contract + ".json");
+        const response = await fetch(`/src/abi/${contract}.json`);
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
