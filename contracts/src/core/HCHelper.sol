@@ -68,7 +68,8 @@ contract HCHelper {
         if (pricePerCall > 0) {
             uint256 tokenPrice = numCredits * pricePerCall;
             IERC20(tokenAddr).safeTransferFrom(msg.sender, address(this), tokenPrice);
-	}
+	    }
+
         RegisteredCallers[contract_addr].credits += numCredits;
     }
 
