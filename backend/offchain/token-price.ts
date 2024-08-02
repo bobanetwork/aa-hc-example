@@ -20,20 +20,28 @@ export async function offchainTokenPrice(params: OffchainParameter) {
   console.log(ooNonce, payload, sk, srcAddr, srcNonce, ver);
 
   const request = parseRequest(parsedParams);
+  console.log('got request...', request);
   try {
     const decoded = web3.eth.abi.decodeParameter(
       "string",
       request["reqBytes"]
     ) as string;
 
+    console.log('decoded: ', decoded)
+
     const tokenPrice = (await getTokenPrice(decoded)).toString();
+
+    console.log('tokenPrice: ', tokenPrice)
+
     const encodedTokenPrice = web3.eth.abi.encodeParameter(
       "string",
       tokenPrice
     );
 
+    console.log('Generating valid response...');
     return generateResponse(request, 0, encodedTokenPrice);
   } catch (error: any) {
+    console.log("Error inside offchainTokenPrice", error);
     const errorResponse = Web3.utils.utf8ToBytes(error.message);
     return generateResponse(request, 1, errorResponse);
   }
