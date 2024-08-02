@@ -29,7 +29,7 @@ async function handleRpcMethod(method: string, params: any): Promise<unknown> {
     case selector("getprice(string)"):
       return await offchainTokenPrice(params);
     default:
-      throw new Error('Method not found');
+      throw new Error('Offchain RPC: Method not found');
   }
 }
 
