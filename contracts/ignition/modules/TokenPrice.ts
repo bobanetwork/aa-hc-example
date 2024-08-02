@@ -1,8 +1,12 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+require("dotenv").config();
 
 const TokenModule = buildModule("TokenPrice", (m) => {
+  if (!process.env.HYBRID_ACCOUNT) {
+    throw Error("HYBRID_ACCOUNT must be set!")
+  }
   const tokenPrice = m.contract("TokenPrice", [
-    "0x587a06089ed54101dd6d9A8ecDe1d146f97Af6B8",
+    process.env.HYBRID_ACCOUNT,
   ]);
 
   return { tokenPrice };

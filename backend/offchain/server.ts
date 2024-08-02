@@ -18,6 +18,7 @@ app.post('/hc', async (req: Request, res: Response) => {
 
   try {
     const result = await handleRpcMethod(method, params);
+    console.log('result received from handler: ', result);
     return res.json({ result });
   } catch (error: any) {
     return res.status(400).json({error: error.message})
@@ -27,7 +28,9 @@ app.post('/hc', async (req: Request, res: Response) => {
 async function handleRpcMethod(method: string, params: any): Promise<unknown> {
   switch (method) {
     case selector("getprice(string)"):
-      return await offchainTokenPrice(params);
+      const res = await offchainTokenPrice(params);
+      console.log('inside handleRpcMethod: ', res);
+      return res;
     default:
       throw new Error('Offchain RPC: Method not found');
   }

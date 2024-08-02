@@ -116,6 +116,8 @@ export function generateResponse(
 
     const callGas = 705 * respPayload.length + 170000;
 
+    console.log('Using OC_HYBRID_ACCOUNT', process.env.OC_HYBRID_ACCOUNT);
+
     const p = ethabi.encodeParameters(
       [
         "address",
