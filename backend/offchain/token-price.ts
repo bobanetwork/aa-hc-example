@@ -91,7 +91,7 @@ export function generateResponse(
 
     const resp2 = ethabi.encodeParameters(
       ["address", "uint256", "uint32", "bytes"],
-      [`0x${req.srcAddr}`, req.srcNonce, errorCode, respPayload]
+      [req.srcAddr, req.srcNonce, errorCode, respPayload]
     );
 
     const enc1 = ethabi.encodeParameters(
