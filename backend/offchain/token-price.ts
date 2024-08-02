@@ -95,6 +95,8 @@ export function generateResponse(
   respPayload: any
 ) {
   try {
+    console.log('generating...', req.srcAddr, req.srcNonce, errorCode, respPayload);
+
     const ethabi = web3.eth.abi;
 
     const resp2 = ethabi.encodeParameters(
@@ -109,6 +111,8 @@ export function generateResponse(
 
     const pEnc1 = "0x" + selector("PutResponse(bytes32,bytes)") + enc1.slice(2);
 
+    console.log('putting Response...', enc1.slice(2));
+
     const enc2 = ethabi.encodeParameters(
       ["address", "uint256", "bytes"],
       [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR ?? ""), 0, pEnc1]
@@ -116,6 +120,8 @@ export function generateResponse(
 
     const pEnc2 =
       "0x" + selector("execute(address,uint256,bytes)") + enc2.slice(2);
+
+    console.log('executing', pEnc2.slice(2));
 
     const limits = {
       verificationGasLimit: "0x10000",
