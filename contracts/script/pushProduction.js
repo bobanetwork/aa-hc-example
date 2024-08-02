@@ -5,12 +5,20 @@ const RPC_URL = 'https://sepolia.boba.network/';
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY_BOBA_SEPOLIA, new ethers.JsonRpcProvider(RPC_URL));
 
 // CONTRACTS
-const HC_HELPER_ADDR = '0x587a06089ed54101dd6d9A8ecDe1d146f97Af6B8';
+const HC_HELPER_ADDR = process.env.HC_HELPER_ADDR;
 const HYBRID_ACCOUNT = process.env.HYBRID_ACCOUNT;
 const TOKEN_PRICE_ACCOUNT_ADDR = process.env.TOKEN_PRICE_CONTRACT;
-
 // OTHER CONSTS
 const BACKEND_URL = process.env.BACKEND_URL;
+
+console.log('HCH = ', HC_HELPER_ADDR)
+console.log('HA = ', HYBRID_ACCOUNT);
+console.log('TTP = ', TOKEN_PRICE_ACCOUNT_ADDR);
+console.log('BE = ', BACKEND_URL)
+
+if (!HC_HELPER_ADDR || !HYBRID_ACCOUNT || !TOKEN_PRICE_ACCOUNT_ADDR || !BACKEND_URL) {
+    throw Error("Configuration missing")
+}
 
 async function main() {
     const hybridAccountABI = [
@@ -90,7 +98,7 @@ async function main() {
         console.log('Credits added successfully.');
     }
 
-    /** @DEV Needs to be called by maintainers/owners */
+    /** @DEV No restrictions */
     async function permitCaller(caller) {
         let tx = await hybridAccountContract.PermitCaller(caller, true);
         await tx.wait();
