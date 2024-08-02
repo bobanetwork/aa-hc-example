@@ -31,4 +31,13 @@ contract TokenPriceTest is Test {
         assertEq(price, expectedPrice);
         assertTrue(timestamp > 0);
     }
+
+    function testThisShit() public {
+        string memory price;
+
+    bytes memory res = 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000011333031352e363533333736363331373039000000000000000000000000000000;
+        (price) = abi.decode(res, (string));
+        console.log(price);
+        assertEq(price, '1000');
+    }
 }
