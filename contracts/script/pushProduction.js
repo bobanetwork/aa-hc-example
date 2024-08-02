@@ -6,11 +6,11 @@ const signer = new ethers.Wallet(process.env.PRIVATE_KEY_BOBA_SEPOLIA, new ether
 
 // CONTRACTS
 const HC_HELPER_ADDR = '0x587a06089ed54101dd6d9A8ecDe1d146f97Af6B8';
-const HYBRID_ACCOUNT = '0x7fcd41c67f2cf2ebbd9efcf1481d1dd9fc979aca';
-const TOKEN_PRICE_ACCOUNT_ADDR = '0xA9EbF7c613294fc2a52d730A0FFe1d517265412b';
+const HYBRID_ACCOUNT = process.env.HYBRID_ACCOUNT;
+const TOKEN_PRICE_ACCOUNT_ADDR = process.env.TOKEN_PRICE_CONTRACT;
 
 // OTHER CONSTS
-const BACKEND_URL = "https://aa-hc-example.onrender.com/hc";
+const BACKEND_URL = process.env.BACKEND_URL;
 
 async function main() {
     const hybridAccountABI = [

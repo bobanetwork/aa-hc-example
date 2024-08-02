@@ -44,7 +44,7 @@ const FormComponent = () => {
       const transactionDetails = {
         payload: {
           //to: testContract,
-          to: "0xA9EbF7c613294fc2a52d730A0FFe1d517265412b",
+          to: import.meta.env.VITE_SMART_CONTRACT,
           value: "0",
           data: txData,
         },
