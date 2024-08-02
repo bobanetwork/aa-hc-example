@@ -56,7 +56,7 @@ const TokenPriceFetcher: React.FC = () => {
   const handleSubmit = async () => {
     try {
       setError(null);
-      if (await hasMetaMask()) {
+      if (!window.ethereum) {
         setError("MetaMask is not installed");
         return;
       }
