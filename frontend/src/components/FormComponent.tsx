@@ -33,7 +33,6 @@ const FormComponent = () => {
         return;
       }
 
-
       const funcSelector = FunctionFragment.getSelector("fetchPrice", [
         "string",
       ]);
@@ -44,7 +43,8 @@ const FormComponent = () => {
 
       const transactionDetails = {
         payload: {
-          to: testContract,
+          //to: testContract,
+          to: "0xA9EbF7c613294fc2a52d730A0FFe1d517265412b",
           value: "0",
           data: txData,
         },

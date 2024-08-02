@@ -71,7 +71,7 @@ const TokenPriceFetcher: React.FC = () => {
       //const signer = await provider.getSigner();
       //console.log("signer: ", signer);
 
-      const tokenPriceAddress = "0xDCE96d537f279E1A1A1c83894E0c5D24435dF123";
+      const tokenPriceAddress = "0xA9EbF7c613294fc2a52d730A0FFe1d517265412b";
       const abiCoder = new AbiCoder();
       console.log("ABI", tokenAbi);
       const contract = new ethers.Contract(tokenPriceAddress, tokenAbi, wallet);
@@ -100,7 +100,7 @@ const TokenPriceFetcher: React.FC = () => {
         provider
       );
       const uAddr = Web3.utils.toChecksumAddress(
-        "0x08150bAB13edC834FD5b436C9416dC849f410C66"
+        "0xf2b8654129363f0F653957Fb5091C1be9c78808E"
       );
       const transactionCount = await provider.getTransactionCount(uAddr);
 
