@@ -125,8 +125,8 @@ const TokenPriceFetcher: React.FC = () => {
         signature: hexSignature,
       };
       const epAddress = await EP.getAddress();
-      // const estOp = await estimateOp(p, epAddress);
-      // console.log('estOP is: ', estOp);
+      const estOp = await estimateOp(p, epAddress);
+      console.log('estOP is: ', estOp);
 
       // Call the smart contract method to get the token price
       //const price = await contract.getTokenPrice(tokenSymbol);

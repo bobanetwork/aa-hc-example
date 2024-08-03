@@ -37,6 +37,10 @@ async function getTokenPrice(tokenSymbol: string): Promise<number> {
 }
 
 function generateResponse(req: any, errorCode: number, respPayload: string) {
+    if (!process.env.HC_HELPER_ADDR) {
+        throw new Error("HC_HELPER_ADDR not defined!")
+    }
+
     const resp2 = web3.eth.abi.encodeParameters(
         ["address", "uint256", "uint32", "bytes"],
         [req.srcAddr, req.srcNonce, errorCode, respPayload]
@@ -47,7 +51,7 @@ function generateResponse(req: any, errorCode: number, respPayload: string) {
 
     const enc2 = web3.eth.abi.encodeParameters(
         ["address", "uint256", "bytes"],
-        [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR ?? ""), 0, pEnc1]
+        [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR), 0, pEnc1]
     );
 
     const pEnc2 = "0x" + selector("execute(address,uint256,bytes)") + enc2.slice(2);
