@@ -5,6 +5,7 @@ import "dotenv/config";
 import { getTokenPrice, generateResponse } from "../offchain/token-price";
 import { parseRequest } from "../common/utils";
 import { OffchainParameterParsed } from "../offchain/utils";
+import {AbiCoder} from "ethers";
 
 jest.mock("../common/utils", () => ({
   ...jest.requireActual("../common/utils"),
@@ -124,5 +125,14 @@ describe("generateResponse", () => {
     expect(response?.success).toBe(false);
     expect(response?.response).toBe(errorRespPayload);
     expect(response?.signature).toBeDefined();
+  });
+
+  it('should decode something', function () {
+    // Remove the '0x' prefix and decode
+    const encoder = new AbiCoder();
+    const encodedData = '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000012323931362e383533383835323736303531360000000000000000000000000000';
+    const decodedData = encoder.decode(['string'], encodedData);
+
+    expect(decodedData).toEqual(['2916.8538852760516']);
   });
 });

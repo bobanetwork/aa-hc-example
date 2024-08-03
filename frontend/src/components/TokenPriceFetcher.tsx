@@ -6,6 +6,7 @@ import { useContractAbi } from "@/hooks/useContractAbi";
 import Web3 from "web3";
 import axios from "axios";
 import { hasMetaMask } from "@/lib/metamask";
+import * as process from "process";
 
 interface OpParams {
   sender: string;
@@ -71,7 +72,7 @@ const TokenPriceFetcher: React.FC = () => {
       //const signer = await provider.getSigner();
       //console.log("signer: ", signer);
 
-      const tokenPriceAddress = "0xA9EbF7c613294fc2a52d730A0FFe1d517265412b";
+      const tokenPriceAddress = import.meta.env.VITE_TOKEN_PRICE_CONTRACT!;
       const abiCoder = new AbiCoder();
       console.log("ABI", tokenAbi);
       const contract = new ethers.Contract(tokenPriceAddress, tokenAbi, wallet);
@@ -95,13 +96,13 @@ const TokenPriceFetcher: React.FC = () => {
         ])
       );
       const EP = new ethers.Contract(
-        "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789",
+        import.meta.env.VITE_ENTRY_POINT,
         epAbi,
         provider
       );
-      const uAddr = Web3.utils.toChecksumAddress(
-        "0xf2b8654129363f0F653957Fb5091C1be9c78808E"
-      );
+
+      // connected Addr sending the tx
+      const uAddr = Web3.utils.toChecksumAddress(import.meta.env.VITE_CLIENT_ADDR);
       const transactionCount = await provider.getTransactionCount(uAddr);
 
       // Calculate nKey
@@ -113,6 +114,7 @@ const TokenPriceFetcher: React.FC = () => {
         exCall,
         provider
       );
+      console.log('userOp is: ', p);
       const opHash = await EP.getFunction("getUserOpHash")(packOp(p));
       const messageHash = ethers.getBytes(opHash);
       const encodedMessage = ethers.hashMessage(messageHash);
@@ -123,7 +125,8 @@ const TokenPriceFetcher: React.FC = () => {
         signature: hexSignature,
       };
       const epAddress = await EP.getAddress();
-      const estOp = await estimateOp(p, epAddress);
+      // const estOp = await estimateOp(p, epAddress);
+      // console.log('estOP is: ', estOp);
 
       // Call the smart contract method to get the token price
       //const price = await contract.getTokenPrice(tokenSymbol);
@@ -132,8 +135,18 @@ const TokenPriceFetcher: React.FC = () => {
       // console.log("tx mined: ", tx);
       // console.log("receipt: ", receipt);
       const price = await contract.tokenPrices("ETH");
-      console.log("Price: ", price);
-      setTokenPrice(price);
+      const price2 = price[0] || price['0'];  // Assuming the first property is the price string
+
+        // 0x08150bAB13edC834FD5b436C9416dC849f410C66
+
+      console.log('proxy returns: ', price);
+
+      if (price2 === '' || price2 === 0) {
+        setTokenPrice('0')
+      } else {
+        setTokenPrice(price);
+      }
+
     } catch (error) {
       console.error(error);
       // setError(error as string);
@@ -147,7 +160,7 @@ const TokenPriceFetcher: React.FC = () => {
     provider: JsonRpcProvider
   ) {
     const EP = new ethers.Contract(
-      "0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789",
+      "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       epAbi,
       provider
     );
@@ -198,6 +211,8 @@ const TokenPriceFetcher: React.FC = () => {
         "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
     };
 
+
+    console.log('p is : ', p);
     return p;
   }
 
@@ -245,21 +260,16 @@ const TokenPriceFetcher: React.FC = () => {
     p: OpParams,
     epAddress: any
   ): Promise<[OpParams, BigInt]> {
-    // p.signature =
-    //   "0xb49d2d5abcfbe61fecb4f14ae24c62a20a5a28105fefe6cecf36e60f6166392b23f7dcc6a30ae591d3d9a791e34ea66ba92776d447537be3e44ce2d0ac60ab091c";
-    // p.preVerificationGas = "0x1E8480";
-    // p.verificationGasLimit = "0x1E8480";
-    // p.callGasLimit = "0x1E8480";
-    // p.maxFeePerGas = "0x1E8480";
-    // p.maxPriorityFeePerGas = "0x1E8480";
     p.preVerificationGas = "0xffffff";
     p.verificationGasLimit = "0xffffff"
     p.callGasLimit = "0x0";
+
     const estParams = [p, epAddress];
-    //console.log(`Estimation params ${JSON.stringify(estParams)}`);
+
     let gasFees = {
       estGas: BigInt(0),
     };
+
     try {
       const test = [
         {
@@ -280,13 +290,11 @@ const TokenPriceFetcher: React.FC = () => {
         "0x4667F5C81e302Cb770944F4aEd2d6BCbf98097fB",
       ];
       console.log("estParams: ", JSON.stringify(estParams));
-      console.log("copied:", test);
 
       const response = await axios.post(bundlerRpc, {
         jsonrpc: "2.0",
         method: "eth_estimateUserOperationGas",
         params: estParams,
-        // params: test,
         id: 1,
       });
 
