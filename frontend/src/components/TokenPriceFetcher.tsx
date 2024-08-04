@@ -64,7 +64,7 @@ const TokenPriceFetcher: React.FC = () => {
       );
       console.log("wallet: ", wallet);
 
-      const tokenPriceAddress = import.meta.env.VITE_TOKEN_PRICE_CONTRACT!;
+      const tokenPriceAddress = import.meta.env.VITE_SMART_CONTRACT!;
       const contract = new ethers.Contract(tokenPriceAddress, tokenAbi, wallet);
 
       const price = await contract.tokenPrices("ETH");

@@ -18,7 +18,7 @@ app.post('/hc', async (req: Request, res: Response) => {
 
   try {
     const result = await handleRpcMethod(method, params);
-    console.log('result received from handler: ', result);
+    console.log('FINAL RESULT RETURNING', result);
     return res.json({ result });
   } catch (error: any) {
     return res.status(400).json({error: error.message})
