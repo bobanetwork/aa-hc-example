@@ -10,42 +10,35 @@ contract MockHybridAccount {
     }
 }
 
+interface ITokenPrice {
+    struct TokenPriceStruct {
+        string price;
+        uint256 timestamp;
+    }
+    event FetchPriceError(uint32 err);
+    function tokenPrices(string memory) external view returns (TokenPriceStruct memory);
+    function HA() external view returns (address);
+    function fetchPrice(string calldata token) external;
+}
+
 /** @dev Unit tests */
 contract TokenPriceTest is Test {
-    TokenPrice public tokenPrice;
-    MockHybridAccount public mockHybridAccount;
+    ITokenPrice public tokenPrice;
 
     function setUp() public {
-        mockHybridAccount = new MockHybridAccount();
-        tokenPrice = new TokenPrice(payable(address(mockHybridAccount)));
+        tokenPrice = ITokenPrice(vm.envAddress("TOKEN_PRICE_CONTRACT"));
     }
 
-//    function testFetchPrice() public {
-//        string memory token = "ETH";
-//        string memory expectedPrice = "2000";
-//
-//        tokenPrice.fetchPrice(token);
-//
-//        (string memory price, uint256 timestamp) = tokenPrice.tokenPrices(token);
-//
-//        assertEq(price, expectedPrice);
-//        assertTrue(timestamp > 0);
-//    }
+    function testFetchPrice() view public {
+        string memory token = "ETH";
+        string memory expectedPrice = "2000";
+        assertEq(tokenPrice.tokenPrices(token).price, expectedPrice);
+    }
 
-    function testFetchPriceInBytesSequence() public {
+    function testFetchPriceInBytesSequence() pure public {
         string memory price;
         bytes memory sequence = hex"00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000011323931392e353239373036373134313335000000000000000000000000000000";
-
         (price) = abi.decode(sequence, (string));
         assertEq(price, "2919.529706714135");
     }
-
-//    function testThisShit() public {
-//        string memory price;
-//
-//    bytes memory res = 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000011333031352e363533333736363331373039000000000000000000000000000000;
-//        (price) = abi.decode(res, (string));
-//        console.log(price);
-//        assertEq(price, '1000');
-//    }
 }

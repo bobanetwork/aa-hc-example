@@ -9,6 +9,9 @@ contract TokenPrice is ERC20, Ownable {
     mapping(string => TokenPriceStruct) public tokenPrices;
     HybridAccount public HA;
 
+    event FetchPriceError(uint32 err);
+    event FetchPriceRet(bytes err);
+
     struct TokenPriceStruct {
         string price;
         uint256 timestamp;
@@ -29,6 +32,8 @@ contract TokenPrice is ERC20, Ownable {
         (uint32 error, bytes memory ret) = HA.CallOffchain(userKey, req);
 
         if (error != 0) {
+            emit FetchPriceError(error);
+            emit FetchPriceRet(ret);
             revert(string(ret));
         }
 
