@@ -25,25 +25,17 @@ const FormComponent = () => {
 
   const onSubmit = async () => {
     try {
-      // check for selected account
-      // check for balance.
-
-      // if snap account not selected
       if (!state.selectedAcount || Number(state.chain) !== 28882) {
         return;
       }
-
-      const funcSelector = FunctionFragment.getSelector("fetchPrice", [
-        "string",
-      ]);
-
+      const funcSelector = FunctionFragment.getSelector("fetchPrice", ["string"]);
       const encodedParams = abiCoder.encode(["string"], ["ETH"]);
-
       const txData = hexlify(concat([funcSelector, encodedParams]));
+
+      console.log('using contract: ', import.meta.env.VITE_SMART_CONTRACT);
 
       const transactionDetails = {
         payload: {
-          //to: testContract,
           to: import.meta.env.VITE_SMART_CONTRACT,
           value: "0",
           data: txData,
@@ -57,13 +49,14 @@ const FormComponent = () => {
         params: {
           snapId: defaultSnapOrigin,
           request: {
-            method: "eth_sendUserOpBoba", // operation to send the data to bundler
+            method: "eth_sendUserOpBoba",
             params: [transactionDetails],
-            id: state.selectedAcount?.id,
+            id: state.selectedAcount.id,
           },
         },
       });
 
+      console.log('txResponse:', txResponse)
       setResponse(txResponse);
     } catch (error: any) {
       console.log(`error`, error);

@@ -48,12 +48,6 @@ const TokenPriceFetcher: React.FC = () => {
     setTokenSymbol(event.target.value);
   };
 
-  const selector = (name: string) => {
-    const web3 = new Web3();
-    const hex = web3.utils.toHex(web3.utils.keccak256(name));
-    return hex.slice(2, 10);
-  };
-
   const handleSubmit = async () => {
     try {
       setError(null);
@@ -69,77 +63,14 @@ const TokenPriceFetcher: React.FC = () => {
         provider
       );
       console.log("wallet: ", wallet);
-      //const signer = await provider.getSigner();
-      //console.log("signer: ", signer);
 
       const tokenPriceAddress = import.meta.env.VITE_TOKEN_PRICE_CONTRACT!;
-      const abiCoder = new AbiCoder();
-      console.log("ABI", tokenAbi);
       const contract = new ethers.Contract(tokenPriceAddress, tokenAbi, wallet);
-      console.log("contract: ", contract);
-      const tokenSymbol = "ETH";
-      const gameCall = ethers.hexlify(
-        ethers.concat([
-          "0x" + selector("fetchPrice(string)"),
-          abiCoder.encode(["string"], [tokenSymbol]),
-        ])
-      );
 
-      const TokenPriceContract = { address: tokenPriceAddress };
-      const exCall = ethers.hexlify(
-        ethers.concat([
-          "0x" + selector("execute(address,uint256,bytes)"),
-          abiCoder.encode(
-            ["address", "uint256", "bytes"],
-            [TokenPriceContract.address, 0, gameCall]
-          ),
-        ])
-      );
-      const EP = new ethers.Contract(
-        import.meta.env.VITE_ENTRY_POINT,
-        epAbi,
-        provider
-      );
-
-      // connected Addr sending the tx
-      const uAddr = Web3.utils.toChecksumAddress(import.meta.env.VITE_CLIENT_ADDR);
-      const transactionCount = await provider.getTransactionCount(uAddr);
-
-      // Calculate nKey
-      const nKey = 1200 + (transactionCount % 7);
-
-      let p = await buildOp(
-        import.meta.env.VITE_CLIENT_ADDR,
-        nKey,
-        exCall,
-        provider
-      );
-      console.log('userOp is: ', p);
-      const opHash = await EP.getFunction("getUserOpHash")(packOp(p));
-      const messageHash = ethers.getBytes(opHash);
-      const encodedMessage = ethers.hashMessage(messageHash);
-      const signature = wallet.signMessage(ethers.getBytes(encodedMessage));
-      const hexSignature = await signature;
-      p = {
-        ...p,
-        signature: hexSignature,
-      };
-      const epAddress = await EP.getAddress();
-      const estOp = await estimateOp(p, epAddress);
-      console.log('estOP is: ', estOp);
-
-      // Call the smart contract method to get the token price
-      //const price = await contract.getTokenPrice(tokenSymbol);
-      // const tx = await contract.fetchPrice("ETH");
-      // const receipt = await tx.wait();
-      // console.log("tx mined: ", tx);
-      // console.log("receipt: ", receipt);
       const price = await contract.tokenPrices("ETH");
       const price2 = price[0] || price['0'];  // Assuming the first property is the price string
 
-        // 0x08150bAB13edC834FD5b436C9416dC849f410C66
-
-      console.log('proxy returns: ', price);
+      console.log('fetched price: ', price)
 
       if (price2 === '' || price2 === 0) {
         setTokenPrice('0')
@@ -153,188 +84,6 @@ const TokenPriceFetcher: React.FC = () => {
     }
   };
 
-  async function buildOp(
-    senderAddr: string,
-    nKey: number,
-    payload: string,
-    provider: JsonRpcProvider
-  ) {
-    const EP = new ethers.Contract(
-      "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      epAbi,
-      provider
-    );
-    const w3 = new Web3(Web3.givenProvider);
-
-    const senderNonce = await EP.getFunction("getNonce")(senderAddr, nKey);
-    console.log("sendernonce: ", senderNonce);
-
-    const maxPriorityFeePerGas = await w3.eth.getMaxPriorityFeePerGas();
-    const gasPrice = await w3.eth.getGasPrice();
-    const baseFee = gasPrice - maxPriorityFeePerGas;
-    if (baseFee <= 0) throw new Error("Base fee must be greater than 0");
-
-    const fee = BigInt(
-      Math.max(
-        Number(gasPrice),
-        Number(baseFee) + Math.max(Number(maxPriorityFeePerGas), 2500000)
-      )
-    );
-
-    console.log(
-      "Using gas prices",
-      fee,
-      Math.max(Number(maxPriorityFeePerGas), 2500000),
-      "detected",
-      gasPrice,
-      maxPriorityFeePerGas
-    );
-
-    //console.log("nonce: :", ethers.hexlify(senderNonce));
-
-    const p = {
-      sender: senderAddr,
-      //nonce: ethers.hexlify(senderNonce),
-      nonce: Web3.utils.toHex(senderNonce),
-      initCode: "0x",
-      callData: Web3.utils.toHex(payload),
-      callGasLimit: "0x0",
-      //verificationGasLimit: ethers.hexlify(uintArr),
-      verificationGasLimit: "0x0",
-      preVerificationGas: "0x0",
-      maxFeePerGas: ethers.hexlify(ethers.toUtf8Bytes(fee.toString())),
-      maxPriorityFeePerGas: w3.utils.toHex(
-        BigInt(Math.max(Number(maxPriorityFeePerGas), 2500000))
-      ),
-      paymasterAndData: "0x",
-      signature:
-        "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
-    };
-
-
-    console.log('p is : ', p);
-    return p;
-  }
-
-  function packOp(op: {
-    sender: string;
-    nonce: string;
-    initCode: string;
-    callData: string;
-    callGasLimit: string;
-    verificationGasLimit: string;
-    preVerificationGas: string;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-    paymasterAndData: string;
-    signature: string;
-  }): [
-    string,
-    BigInt,
-    string,
-    Uint8Array,
-    BigInt,
-    BigInt,
-    BigInt,
-    BigInt,
-    BigInt,
-    string,
-    Uint8Array
-  ] {
-    return [
-      op.sender,
-      BigInt(op.nonce),
-      op.initCode,
-      ethers.getBytes(op.callData),
-      BigInt(op.callGasLimit),
-      BigInt(op.verificationGasLimit),
-      BigInt(op.preVerificationGas),
-      BigInt(op.maxFeePerGas),
-      BigInt(op.maxPriorityFeePerGas),
-      op.paymasterAndData,
-      ethers.getBytes(op.signature),
-    ];
-  }
-
-  async function estimateOp(
-    p: OpParams,
-    epAddress: any
-  ): Promise<[OpParams, BigInt]> {
-    p.preVerificationGas = "0xffffff";
-    p.verificationGasLimit = "0xffffff"
-    p.callGasLimit = "0x0";
-
-    const estParams = [p, epAddress];
-
-    let gasFees = {
-      estGas: BigInt(0),
-    };
-
-    try {
-      const test = [
-        {
-          sender: "0x632e348E9dE85C51EC6bd68eC9E9a4a24a918129",
-          nonce: "0x4b00000000000000000",
-          initCode: "0x",
-          callData:
-            "0xb61d27f60000000000000000000000003aa5ebb10dc797cac828524e59a333d0a371443c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000649782dd2a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003455448000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-          callGasLimit: "0x0",
-          verificationGasLimit: "0x0",
-          preVerificationGas: "0x0",
-          maxFeePerGas: "0x28dba0",
-          maxPriorityFeePerGas: "0x2625a0",
-          paymasterAndData: "0x",
-          signature:
-            "0xb49d2d5abcfbe61fecb4f14ae24c62a20a5a28105fefe6cecf36e60f6166392b23f7dcc6a30ae591d3d9a791e34ea66ba92776d447537be3e44ce2d0ac60ab091c",
-        },
-        "0x4667F5C81e302Cb770944F4aEd2d6BCbf98097fB",
-      ];
-      console.log("estParams: ", JSON.stringify(estParams));
-
-      const response = await axios.post(bundlerRpc, {
-        jsonrpc: "2.0",
-        method: "eth_estimateUserOperationGas",
-        params: estParams,
-        id: 1,
-      });
-
-      console.log("estimateGas response", response.data);
-
-      if (response.data.error) {
-        console.log("*** eth_estimateUserOperationGas failed");
-        // Use default gas limits in case of failure
-        p.preVerificationGas = "0xffff";
-        p.verificationGasLimit = "0xffff";
-        p.callGasLimit = "0x40000";
-      } else {
-        const estResult: EstimationResult = response.data.result;
-
-        p.preVerificationGas = ethers.hexlify(
-          Web3.utils.toHex(BigInt(estResult.preVerificationGas))
-        );
-        p.verificationGasLimit = ethers.hexlify(
-          Web3.utils.toHex(BigInt(estResult.verificationGasLimit))
-        );
-        p.callGasLimit = ethers.hexlify(
-          Web3.utils.toHex(BigInt(estResult.callGasLimit))
-        );
-
-        gasFees.estGas =
-          BigInt(estResult.preVerificationGas) +
-          BigInt(estResult.verificationGasLimit) +
-          BigInt(estResult.callGasLimit);
-
-        console.log("estimateGas total =", gasFees.estGas);
-      }
-    } catch (error) {
-      console.error("Error estimating gas:", error);
-      p.preVerificationGas = "0xffff";
-      p.verificationGasLimit = "0xffff";
-      p.callGasLimit = "0x40000";
-    }
-
-    return [p, gasFees.estGas || BigInt(0)];
-  }
 
   return (
     <div className="flex flex-col items-center space-y-2">

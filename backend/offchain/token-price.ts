@@ -12,9 +12,12 @@ export async function offchainTokenPrice(params: OffchainParameter) {
     try {
         const tokenSymbol = web3.eth.abi.decodeParameter("string", request["reqBytes"]) as string;
         const tokenPrice = (await getTokenPrice(tokenSymbol)).toString();
+        console.log('token price: ', tokenPrice);
         const encodedTokenPrice = web3.eth.abi.encodeParameter("string", tokenPrice);
+        console.log('ENCODED TOKEN PRICE = ', encodedTokenPrice);
         return generateResponse(request, 0, encodedTokenPrice);
     } catch (error: any) {
+        console.log('received error: ', error);
         return generateResponse(request, 1, web3.utils.asciiToHex(error.message));
     }
 }
@@ -83,6 +86,8 @@ function generateResponse(req: any, errorCode: number, respPayload: string) {
 
     const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY ?? "");
     const signature = account.sign(ooHash);
+
+    console.log('returning resppayload: ', respPayload)
 
     return {
         success: errorCode === 0,
