@@ -42,7 +42,6 @@ const TokenPriceFetcher: React.FC = () => {
     error: abiError,
   } = useContractAbi("TokenPrice");
   const { abi: epAbi, loading: _, error: epError } = useContractAbi("EP");
-  const bundlerRpc = import.meta.env.VITE_BUNDLER_RPC;
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTokenSymbol(event.target.value);
