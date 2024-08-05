@@ -14,7 +14,7 @@ contract TokenPrice is ERC20, Ownable {
 
     struct TokenPriceStruct {
         string price;
-        uint256 timestamp;
+        uint256 timestamp; // Timestamp of when the price was fetched.
     }
 
     constructor(
@@ -27,13 +27,14 @@ contract TokenPrice is ERC20, Ownable {
     function fetchPrice(string calldata token) public {
         string memory price;
 
+        // Encode function signature, which is called on the offchain rpc server.
         bytes memory req = abi.encodeWithSignature("getprice(string)", token);
         bytes32 userKey = bytes32(abi.encode(msg.sender));
         (uint32 error, bytes memory ret) = HA.CallOffchain(userKey, req);
 
         if (error != 0) {
             tokenPrices[token] = TokenPriceStruct({
-                price: 'ERROR',
+                price: "ERROR",
                 timestamp: block.timestamp
             });
             emit FetchPriceError(error);
@@ -41,6 +42,7 @@ contract TokenPrice is ERC20, Ownable {
             revert(string(ret));
         }
 
+        // Decode price, which was encoded as a string on the offchain rpc server.
         (price) = abi.decode(ret, (string));
         tokenPrices[token] = TokenPriceStruct({
             price: price,

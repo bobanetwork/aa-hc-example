@@ -1,38 +1,39 @@
 // @ts-ignore
-import express, { Request, Response } from 'express';
-import { offchainTokenPrice } from './token-price';
-import {selector} from "./utils";
+import express, { Request, Response } from "express";
+import { offchainTokenPrice } from "./token-price";
+import { selector } from "./utils";
 
 const app = express();
 const port = process.env.OC_LISTEN_PORT;
 
 app.use(express.json());
 
-
-app.post('/hc', async (req: Request, res: Response) => {
+app.post("/hc", async (req: Request, res: Response) => {
   const { method, params } = req.body;
 
   if (!method || !params) {
-    return res.status(400).json({ error: 'Invalid request' });
+    return res.status(400).json({ error: "Invalid request" });
   }
 
   try {
     const result = await handleRpcMethod(method, params);
-    console.log('FINAL RESULT RETURNING', result);
+    console.log("FINAL RESULT RETURNING", result);
     return res.json({ result });
   } catch (error: any) {
-    return res.status(400).json({error: error.message})
+    return res.status(400).json({ error: error.message });
   }
 });
 
 async function handleRpcMethod(method: string, params: any): Promise<unknown> {
   switch (method) {
+    // Since the targeting method-name is converted by the calling smart-contract,
+    // we need to convert it here aswell.
     case selector("getprice(string)"):
       const res = await offchainTokenPrice(params);
-      console.log('inside handleRpcMethod: ', res);
+      console.log("inside handleRpcMethod: ", res);
       return res;
     default:
-      throw new Error('Offchain RPC: Method not found');
+      throw new Error("Offchain RPC: Method not found");
   }
 }
 

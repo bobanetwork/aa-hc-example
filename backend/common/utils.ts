@@ -1,7 +1,6 @@
 import Web3, { HexString } from "web3";
-import { Request } from "./types";
+import { OffchainParameter, OffchainParameterParsed, Request } from "./types";
 import "dotenv/config";
-import { OffchainParameter, OffchainParameterParsed } from "../offchain/utils";
 
 const web3 = new Web3();
 
