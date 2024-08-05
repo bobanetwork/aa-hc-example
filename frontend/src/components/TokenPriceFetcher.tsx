@@ -8,6 +8,7 @@ import { hexlify } from "ethers";
 import { CopyIcon } from "./CopyIcon";
 import { YOUR_CONTRACT } from "@/config/snap";
 import { useContractAbi } from "@/hooks/useContractAbi";
+import { Loader2 } from "lucide-react";
 
 const FormComponent = () => {
   const [state] = useContext(MetaMaskContext);
@@ -16,8 +17,9 @@ const FormComponent = () => {
   const [inputSymbol, setInputSymbol] = useState("");
   const [tokenPrice, setTokenPrice] = useState("");
   const { abi: contractAbi } = useContractAbi("TokenPrice");
-
   const [txResponse, setTxResponse] = useState<any>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
 
   const abiCoder = new AbiCoder();
@@ -27,6 +29,10 @@ const FormComponent = () => {
       if (!state.selectedAcount || Number(state.chain) !== 28882) {
         return;
       }
+      setIsLoading(true);
+      setTokenPrice("");
+      setTxResponse("");
+      setError("");
       setTokenSymbol(inputSymbol);
 
       // Prepare the function selector and encoded parameters for the smart contract interaction.
@@ -73,10 +79,7 @@ const FormComponent = () => {
         import.meta.env.VITE_RPC_PROVIDER
       );
 
-      const wallet = new Wallet(
-        import.meta.env.VITE_PRIVATE_KEY,
-        provider
-      );
+      const wallet = new Wallet(import.meta.env.VITE_PRIVATE_KEY, provider);
 
       const contract = new ethers.Contract(
         contractAddress,
@@ -84,6 +87,7 @@ const FormComponent = () => {
         wallet
       );
 
+      // Fetch token-price from the struct inside the smart-contract.
       const price = await contract.tokenPrices(tokenSymbol);
       const price2 = price[0] || price["0"]; // Assuming the first property is the price string
 
@@ -92,6 +96,8 @@ const FormComponent = () => {
     } catch (error: any) {
       console.log(`error`, error);
       setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,8 +139,16 @@ const FormComponent = () => {
             onClick={onSubmit}
             className="py-2 px-7 mx-4 rounded-md text-sm"
             variant="destructive"
+            disabled={isLoading}
           >
-            Submit
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Submit"
+            )}
           </Button>
         </div>
       </div>
