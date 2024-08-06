@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  offchain-service:
+    build:
+      context: ./offchain
+      dockerfile: ../Dockerfile
+    ports:
+      - "${OC_LISTEN_PORT:-1234}:${OC_LISTEN_PORT:-1234}"
+    env_file: .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${OC_LISTEN_PORT:-1234}/hc"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    name: offchain-network
