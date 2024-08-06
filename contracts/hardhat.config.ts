@@ -1,7 +1,14 @@
+import * as dotenv from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-ignition-ethers";
+
+dotenv.config();
+
+if (!process.env.PRIVATE_KEY || !process.env.RPC_URL) {
+  throw new Error("PRIVATE_KEY OR RPC_URL ENV NOT SET!");
+}
 
 const config: HardhatUserConfig & {
   etherscan: { apiKey: any; customChains: any };
@@ -12,13 +19,17 @@ const config: HardhatUserConfig & {
       optimizer: { enabled: true, runs: 200 },
     },
   },
+  ignition: {
+    requiredConfirmations: 1,
+  },
+  sourcify: {
+    enabled: false,
+  },
   networks: {
     boba_sepolia: {
-      url: "https://sepolia.boba.network",
-      //accounts: [process.env.DEPLOYER_PK ?? ""],
-      accounts: [
-        "76311f390a17908fe1f07a11d5dc4b4e3bc326d3011d2c4c547e71648ed06511",
-      ],
+      url: process.env.RPC_URL,
+      accounts: [process.env.PRIVATE_KEY],
+      allowUnlimitedContractSize: true,
     },
   },
   etherscan: {

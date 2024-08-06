@@ -1,20 +1,20 @@
 const {ethers} = require('ethers');
-require("dotenv").config();
 
-const RPC_URL = 'https://sepolia.boba.network/';
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY_BOBA_SEPOLIA, new ethers.JsonRpcProvider(RPC_URL));
+const args = process.argv.slice(2);
 
-// CONTRACTS
-const HC_HELPER_ADDR = process.env.HC_HELPER_ADDR;
-const HYBRID_ACCOUNT = process.env.HYBRID_ACCOUNT;
-const TOKEN_PRICE_ACCOUNT_ADDR = process.env.TOKEN_PRICE_CONTRACT;
-// OTHER CONSTS
-const BACKEND_URL = process.env.BACKEND_URL;
+const RPC_URL = args[0];
+const PRIVATE_KEY = args[1];
+const HC_HELPER_ADDR = args[2];
+const HYBRID_ACCOUNT = args[3];
+const TOKEN_PRICE_ACCOUNT_ADDR = args[4];
+const BACKEND_URL = args[5];
 
 console.log('HCH = ', HC_HELPER_ADDR)
 console.log('HA = ', HYBRID_ACCOUNT);
 console.log('TTP = ', TOKEN_PRICE_ACCOUNT_ADDR);
 console.log('BE = ', BACKEND_URL)
+
+const signer = new ethers.Wallet(PRIVATE_KEY, new ethers.JsonRpcProvider(RPC_URL));
 
 if (!HC_HELPER_ADDR || !HYBRID_ACCOUNT || !TOKEN_PRICE_ACCOUNT_ADDR || !BACKEND_URL) {
     throw Error("Configuration missing")

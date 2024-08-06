@@ -6,7 +6,7 @@ import "../contracts/samples/HybridAccount.sol";
 
 contract DeployExample is Script {
     // Configs
-    uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY_BOBA_SEPOLIA");
+    uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     address public deployerAddress;
 
     // Contracts
