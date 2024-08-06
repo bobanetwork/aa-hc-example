@@ -48,7 +48,7 @@ export async function offchainTokenPrice(params: OffchainParameter) {
  * @returns {Promise<number>} - A promise that resolves to the current price of the token.
  * @throws {Error} - If the token is not found or if there is an issue with the API requests.
  */
-async function getTokenPrice(tokenSymbol: string): Promise<number> {
+export async function getTokenPrice(tokenSymbol: string): Promise<number> {
   const headers = {
     accept: "application/json",
     "x-access-token": process.env.COINRANKING_API_KEY,
@@ -88,7 +88,11 @@ async function getTokenPrice(tokenSymbol: string): Promise<number> {
  * @returns {object} - An object containing the success status, response payload, and signature.
  * @throws {Error}
  */
-function generateResponse(req: any, errorCode: number, respPayload: string) {
+export function generateResponse(
+  req: any,
+  errorCode: number,
+  respPayload: string
+) {
   if (!process.env.HC_HELPER_ADDR) {
     throw new Error("HC_HELPER_ADDR not defined!");
   }
