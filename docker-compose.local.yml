@@ -1,6 +1,13 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  snap:
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    command: yarn start
   # Nginx served static DApp
   frontend:
     build:
@@ -11,7 +18,7 @@ services:
     ports:
       - "8081:80"
     restart: unless-stopped
-    
+
   # Backend that is being called by your smart contract through Hybrid Compute
   offchain-service:
     build:
@@ -22,7 +29,7 @@ services:
     env_file: ./backend/.env
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${OC_LISTEN_PORT:-1234}/hc" ]
+      test: ["CMD", "curl", "-f", "http://localhost:${OC_LISTEN_PORT:-1234}/hc"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -69,9 +76,6 @@ services:
       - --miner.threads=1
       - --networkid=1337
 
-
-
 networks:
   default:
     name: aa-hc-network
-
