@@ -1,5 +1,4 @@
 import Web3, { HexString } from "web3";
-import { OffchainParameter, OffchainParameterParsed } from "../common/types";
 
 const web3 = new Web3();
 
@@ -52,3 +51,21 @@ export function parseRequest(params: OffchainParameterParsed) {
     reqBytes: params.payload,
   } as const;
 }
+
+export type OffchainParameterParsed = {
+  ver: string;
+  sk: string;
+  srcAddr: string;
+  srcNonce: string;
+  ooNonce: string;
+  payload: string;
+};
+
+export type OffchainParameter = {
+  ver: string;
+  sk: string;
+  src_addr: string;
+  src_nonce: string;
+  oo_nonce: string;
+  payload: string;
+};

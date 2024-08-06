@@ -1,8 +1,12 @@
 import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
-import { parseOffchainParameter, parseRequest, selector } from "./utils";
-import { OffchainParameter } from "../common/types";
+import {
+  OffchainParameter,
+  parseOffchainParameter,
+  parseRequest,
+  selector,
+} from "./utils";
 
 const web3 = new Web3();
 
