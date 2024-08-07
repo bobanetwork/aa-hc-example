@@ -1,0 +1,45 @@
+name: Smart Contract Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Forge and Hardhat Tests
+    runs-on: ubuntu-latest
+    environment: tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./contracts
+
+      - name: Run Forge tests
+        run: forge test -vvv
+        working-directory: ./contracts
+       
+      - name: Run Hardhat tests
+        run: npx hardhat test
+        working-directory: ./contracts
+        env:
+          TOKEN_PRICE_CONTRACT: ${{ vars.TOKEN_PRICE_CONTRACT }}
+          RPC_URL: ${{ vars.RPC_URL}}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
