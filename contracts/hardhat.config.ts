@@ -6,7 +6,6 @@ import "@nomicfoundation/hardhat-ignition-ethers";
 
 dotenv.config();
 
-
 const config: HardhatUserConfig & {
   etherscan: { apiKey: any; customChains: any };
 } = {
@@ -25,7 +24,10 @@ const config: HardhatUserConfig & {
   networks: {
     boba_sepolia: {
       url: process.env.RPC_URL,
-      accounts: [process.env.PRIVATE_KEY!],
+      accounts: [
+        process.env.PRIVATE_KEY ??
+          "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      ],
       allowUnlimitedContractSize: true,
     },
   },
