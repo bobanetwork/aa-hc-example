@@ -6,6 +6,14 @@ import "@nomicfoundation/hardhat-ignition-ethers";
 
 dotenv.config();
 
+let privateKey = process.env.PRIVATE_KEY;
+if (!privateKey || privateKey?.length === 0) {
+  // We need a dummy key here for CI, even though we don't use the privateKey in our tests.
+  // Otherwise hardhat config initialization fails.
+  privateKey =
+    "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+}
+
 const config: HardhatUserConfig & {
   etherscan: { apiKey: any; customChains: any };
 } = {
@@ -24,10 +32,7 @@ const config: HardhatUserConfig & {
   networks: {
     boba_sepolia: {
       url: process.env.RPC_URL,
-      accounts: [
-        process.env.PRIVATE_KEY ??
-          "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-      ],
+      accounts: [privateKey],
       allowUnlimitedContractSize: true,
     },
   },
