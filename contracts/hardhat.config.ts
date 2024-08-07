@@ -6,9 +6,6 @@ import "@nomicfoundation/hardhat-ignition-ethers";
 
 dotenv.config();
 
-if (!process.env.PRIVATE_KEY || !process.env.RPC_URL) {
-  throw new Error("PRIVATE_KEY OR RPC_URL ENV NOT SET!");
-}
 
 const config: HardhatUserConfig & {
   etherscan: { apiKey: any; customChains: any };
@@ -28,7 +25,7 @@ const config: HardhatUserConfig & {
   networks: {
     boba_sepolia: {
       url: process.env.RPC_URL,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.PRIVATE_KEY!],
       allowUnlimitedContractSize: true,
     },
   },
