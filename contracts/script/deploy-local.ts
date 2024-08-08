@@ -85,8 +85,7 @@ const execPromise = (
   });
 };
 
-const updateEnvVariable = (key: string, value: string) => {
-  const envPath = path.resolve(__dirname, "../.env");
+const updateEnvVariable = (key: string, value: string, envPath: string) => {
   let envFile = fs.readFileSync(envPath, "utf8");
   const regex = new RegExp(`^${key}=.*`, "m");
   if (regex.test(envFile)) {
@@ -101,7 +100,7 @@ const updateEnvVariable = (key: string, value: string) => {
 const parseLocalDeployAddresses = () => {
   const jsonPath = path.resolve(
     __dirname,
-    "../broadcast/LocalDeploy.s.sol/901/run-latest.json"
+    "../broadcast/deploy.s.sol/901/run-latest.json"
   );
 
   try {
@@ -114,21 +113,21 @@ const parseLocalDeployAddresses = () => {
         address: transaction.contractAddress ?? "",
       }));
 
-    const hybridAccount = jsonData.transactions
-      .map((transaction: any) => {
-        if (
-          transaction.contractName === "HybridAccountFactory" &&
-          transaction.function === "createAccount(address,uint256)"
-        ) {
-          return {
-            contractName: "HybridAccount",
-            address: transaction.additionalContracts[0].address,
-          };
-        }
-      })
-      .filter((ha: any) => ha); // filter out undefined values
+    // const hybridAccount = jsonData.transactions
+    //   .map((transaction: any) => {
+    //     if (
+    //       transaction.contractName === "HybridAccountFactory" &&
+    //       transaction.function === "createAccount(address,uint256)"
+    //     ) {
+    //       return {
+    //         contractName: "HybridAccount",
+    //         address: transaction.additionalContracts[0].address,
+    //       };
+    //     }
+    //   })
+    //   .filter((ha: any) => ha); // filter out undefined values
 
-    contracts.push(...hybridAccount);
+    // contracts.push(...hybridAccount);
 
     console.log("Parsed JSON data:", contracts);
     return contracts;
@@ -137,25 +136,55 @@ const parseLocalDeployAddresses = () => {
   }
 };
 
+const deleteIgnitionDeployments = () => {
+  const deploymentsPath = path.resolve(__dirname, "../ignition/deployments");
+  if (fs.existsSync(deploymentsPath)) {
+    fs.rmSync(deploymentsPath, { recursive: true, force: true });
+    console.log("Ignition deployments folder deleted.");
+  } else {
+    console.log(
+      "Ignition deployments folder does not exist. Skipping deletion."
+    );
+  }
+};
+
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
 async function main() {
   try {
-    updateEnvVariable("DEPLOY_ADDR", deployAddr);
-    updateEnvVariable("HC_SYS_OWNER", ha0Owner);
-    updateEnvVariable("BUNDLER_ADDR", bundlerAddr);
-    //updateEnvVariable("PRIVATE_KEY", deployKey)
-    console.log("privkey: ", process.env.PRIVATE_KEY);
-    //await execPromise("node fundL2.js")
-    //await execPromise("forge script --json --broadcast --silent --rpc-url=http://127.0.0.1:9545 prefund.s.sol")
-    //const result = await execPromise("forge script --json --broadcast --silent --rpc-url=http://127.0.0.1:9545 deploy.s.sol")
-    //console.log(result)
-    //await execPromise("node fundL2.js");
-    //    const output = await execPromise(
-    //      "forge script --json --broadcast --silent --rpc-url=http://127.0.0.1:9545 LocalDeploy.s.sol:LocalDeploy"
-    //    );
-    //    console.log("output:", output);
+     await execPromise(
+       "pnpm install",
+       [],
+       path.resolve(__dirname, "../../boba")
+     );
+     await execPromise(
+       "make devnet-hardhat-up",
+       [],
+       path.resolve(__dirname, "../../boba")
+     );
+
+    const fundL2Vars = {
+      ...process.env,
+      PRIVATE_KEY: deployKey,
+    };
+     await execPromise("node fundL2.js", undefined, undefined, fundL2Vars);
+    console.log("Funding L2 done...");
+
+    const baseDeployVars = {
+      ...process.env,
+      PRIVATE_KEY: deployKey,
+      BUNDLER_ADDR: bundlerAddr,
+      HC_SYS_OWNER: ha1Owner,
+      DEPLOY_ADDR: deployAddr,
+      BACKEND_URL: process.env.BACKEND_URL,
+    };
+
+    await execPromise(
+      "forge script --json --broadcast --silent --rpc-url=http://127.0.0.1:9545 deploy.s.sol",
+      undefined,
+      undefined,
+      baseDeployVars
+    );
     const contracts = parseLocalDeployAddresses();
-    // HC_HELPER_ADDR=0x7d7c459eb74b9f6bd92c9605d6c77f404809bded HC_SYS_ACCOUNT=0x72f4a4fbdd19e8dee9680758c5542b1677125d27 HC_SYS_OWNER=0x2A9099A58E0830A4Ab418c2a19710022466F1ce7 HC_SYS_PRIVKEY=0x75cd983f0f4714969b152baa258d849473732905e2301467303dacf5a09fdd57 ENTRY_POINTS=0xb8fa1a952843bd53d711239b0264d90dc973ca27 BUILDER_PRIVKEY=0xf91be07ef5a01328015cae4f2e5aefe3c4577a90abb8e2e913fe071b0e3732ed NODE_HTTP=http://192.168.178.59:9545 CHAIN_ID=901
     const envVars = {
       HC_HELPER_ADDR: contracts?.find((c) => c.contractName === "HCHelper")
         ?.address,
@@ -169,13 +198,134 @@ async function main() {
       NODE_HTTP: `http://${getLocalIpAddress()}:9545`,
       CHAIN_ID: "901",
     };
+
     await execPromise(
       "docker compose up -d --build rundler-hc",
       [],
       path.resolve(__dirname, "../../rundler-hc/hybrid-compute/"),
       { ...process.env, ...envVars }
     );
-   await execPromise("docker compose up -d", [], path.resolve(__dirname, "../../backend"))
+
+    //
+    deleteIgnitionDeployments();
+    console.log(
+      "HA ADDRESS: ",
+      contracts?.find((c) => c.contractName === "HybridAccount")?.address
+    );
+    console.log("path: ", path.resolve(__dirname, "../"));
+    const ignitionOutput = await execPromise(
+      "npx hardhat ignition deploy ./ignition/modules/TokenPrice.ts --network boba_local",
+      ["y"],
+      path.resolve(__dirname, "../"),
+      {
+        ...process.env,
+        HYBRID_ACCOUNT: contracts?.find(
+          (c) => c.contractName === "HybridAccount"
+        )?.address,
+      }
+    );
+
+    const tokenPriceMatch = ignitionOutput.match(
+      /TokenPrice#TokenPrice - (0x[a-fA-F0-9]{40})/
+    );
+    if (!tokenPriceMatch) {
+      throw new Error(
+        "Failed to extract TokenPrice address from Ignition output"
+      );
+    }
+    const tokenPriceAddress = tokenPriceMatch[1];
+    console.log("TokenPrice Contract deployed to: ", tokenPriceAddress);
+
+    // Frontend env vars
+    const frontendEnvPath = path.resolve(__dirname, "../../frontend/.env");
+    updateEnvVariable("VITE_PRIVATE_KEY", deployKey, frontendEnvPath);
+    // updateEnvVariable("VITE_CLIENT_ADDR", ) // not needed i think
+    updateEnvVariable(
+      "VITE_SMART_CONTRACT",
+      tokenPriceAddress,
+      frontendEnvPath
+    );
+    updateEnvVariable(
+      "VITE_ENTRY_POINT",
+      contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? "",
+      frontendEnvPath
+    );
+    updateEnvVariable(
+      "VITE_RPC_PROVIDER",
+      "http://localhost:9545",
+      frontendEnvPath
+    );
+
+    console.log("Frontend ENV vars set...");
+
+    // Backend env vars
+    const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
+    updateEnvVariable(
+      "OC_HYBRID_ACCOUNT",
+      contracts?.find((c) => c.contractName === "HybridAccount")?.address ?? "",
+      backendEnvPath
+    );
+    updateEnvVariable(
+      "ENTRY_POINTS",
+      contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? "",
+      backendEnvPath
+    );
+    updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
+    updateEnvVariable("OC_PRIVKEY", deployKey, backendEnvPath);
+    updateEnvVariable(
+      "HC_HELPER_ADDR",
+      contracts?.find((c) => c.contractName === "HCHelper")?.address ?? "",
+      backendEnvPath
+    );
+
+    console.log("Backend ENV vars set...");
+
+    // Contract env vars
+    const contractsEnvPath = path.resolve(__dirname, "../.env");
+    updateEnvVariable(
+      "HYBRID_ACCOUNT",
+      contracts?.find((c) => c.contractName === "HybridAccount")?.address ?? "",
+      contractsEnvPath
+    );
+    updateEnvVariable(
+      "ENTRY_POINT",
+      contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? "",
+      contractsEnvPath
+    );
+    updateEnvVariable(
+      "TOKEN_PRICE_CONTRACT",
+      tokenPriceAddress,
+      contractsEnvPath
+    );
+    updateEnvVariable(
+      "HC_HELPER_ADDR",
+      contracts?.find((c) => c.contractName === "HCHelper")?.address ?? "",
+      contractsEnvPath
+    );
+    updateEnvVariable("PRIVATE_KEY", deployKey, contractsEnvPath);
+    updateEnvVariable(
+      "CLIENT_ADDR",
+      contracts?.find((c) => c.contractName === "SimpleAccount")?.address ?? "",
+      contractsEnvPath
+    );
+
+    console.log("Contracts ENV vars set...");
+
+    await execPromise(
+      "docker compose up -d",
+      [],
+      path.resolve(__dirname, "../../backend")
+    );
+
+    console.log("Backend container started...");
+
+    await execPromise(
+      "docker compose up -d",
+      [],
+      path.resolve(__dirname, "../../frontend")
+    );
+
+    console.log("Frontend container started...");
   } catch (error) {
     console.error(error);
   }

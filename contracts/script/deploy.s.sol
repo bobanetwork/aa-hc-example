@@ -23,6 +23,7 @@ contract DeployExample is Script {
     HybridAccount public hybridAccount;
     TokenPrice public tokenPrice;
     SimpleAccount public simpleAccount;
+    SimpleAccountFactory public saf;
 
     function run() public {
         // Prepare and start Broadcast
@@ -43,19 +44,29 @@ contract DeployExample is Script {
 
     function deployContracts() public {
         entrypoint = new EntryPoint();
-        hcHelper = new HCHelper(address(entrypoint), address(0x4200000000000000000000000000000000000023));
-        hybridAccount = new HybridAccount(IEntryPoint(entrypoint), address(hcHelper));
-        tokenPrice = new TokenPrice(payable(address(hcHelper)));
+        hcHelper = new HCHelper(
+            address(entrypoint),
+            address(0x4200000000000000000000000000000000000023)
+        );
+        hybridAccount = new HybridAccount(
+            IEntryPoint(entrypoint),
+            address(hcHelper)
+        );
+        tokenPrice = new TokenPrice(payable(hybridAccount));
+        saf = new SimpleAccountFactory(entrypoint);
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
     }
 
     function configureContracts() public {
         if (hcHelper.systemAccount() != address(hybridAccount)) {
-            hcHelper.initialize(msg.sender, address(hybridAccount));
+            hcHelper.initialize(deployerAddress, address(hybridAccount));
+            hcHelper.SetPrice(0);
         }
-        (uint112 bal,,,,) = entrypoint.deposits(address(hybridAccount));
+        (uint112 bal, , , , ) = entrypoint.deposits(address(hybridAccount));
         if (bal < 0.01 ether) {
-            entrypoint.depositTo{value: 0.01 ether - bal}(address(address(hybridAccount)));
+            entrypoint.depositTo{value: 0.01 ether - bal}(
+                address(address(hybridAccount))
+            );
         }
 
         // register url, add credit
