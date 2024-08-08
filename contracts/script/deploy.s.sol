@@ -43,7 +43,7 @@ contract DeployExample is Script {
 
     function deployContracts() public {
         entrypoint = new EntryPoint();
-        hcHelper = new HCHelper(address(entrypoint), address(0x4200000000000000000000000000000000000023), 0);
+        hcHelper = new HCHelper(address(entrypoint), address(0x4200000000000000000000000000000000000023));
         hybridAccount = new HybridAccount(IEntryPoint(entrypoint), address(hcHelper));
         tokenPrice = new TokenPrice(payable(address(hcHelper)));
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));

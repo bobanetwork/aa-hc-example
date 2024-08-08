@@ -58,7 +58,7 @@ const updateEnvVariable = (key: string, value: string) => {
     envFile += `\n${key}=${value}`;
   }
   fs.writeFileSync(envPath, envFile);
-  dotenv.config(); 
+  dotenv.config();
 };
 
 const readHybridAccountAddress = () => {

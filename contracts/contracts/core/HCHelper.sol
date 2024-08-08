@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.12;
 
-interface NonceMgr {
-    function getNonce(address sender, uint192 key) external view returns (uint256 nonce);
-}
-
+import "../interfaces/INonceManager.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract HCHelper {
@@ -27,7 +24,7 @@ contract HCHelper {
     // address but could be extended to a list of authorized accounts if needed.
     address public systemAccount;
 
-
+    // Data stored per RegisteredCaller
     struct callerInfo {
       address owner;
       string url;
@@ -37,33 +34,45 @@ contract HCHelper {
     // Contracts which are allowed to use Hybrid Compute.
     mapping(address=>callerInfo) public RegisteredCallers;
 
+    // AA EntryPoint
     address immutable entryPoint;
 
-    constructor(address _entryPoint, address _tokenAddr, uint256 _pricePerCall) {
+    // Constructor
+    constructor(address _entryPoint, address _tokenAddr) {
 	entryPoint = _entryPoint;
 	tokenAddr = _tokenAddr;
-	pricePerCall = _pricePerCall;
     }
 
-    function RegisterUrl(address contract_addr, string calldata url) public {
-        // Temporary method, until an auto-registration protocol is developed
-        RegisteredCallers[contract_addr].owner = msg.sender;
-        RegisteredCallers[contract_addr].url = url;
-    }
-
+    // Initialize system addresses. Note - can be called again to change
+    // these addresses if necessary.
     function initialize(address _owner, address _systemAccount) public {
         require(msg.sender == owner || address(0) == owner, "Only owner");
         owner = _owner;
         systemAccount = _systemAccount;
     }
 
+    // Change the SystemAccount address (used for error responses)
     function SetSystemAccount(address _systemAccount) public {
         require(msg.sender == owner, "Only owner");
         systemAccount = _systemAccount;
     }
 
-    // Placeholder - this will transfer Boba tokens to this contract (or to a beneficiary)
-    // and add a corresponding number of credits for the specified contract address.
+    // Temporary method, until an auto-registration protocol is developed.
+    function RegisterUrl(address contract_addr, string calldata url) public {
+        require(msg.sender == owner, "Only owner");
+        RegisteredCallers[contract_addr].owner = msg.sender;
+        RegisteredCallers[contract_addr].url = url;
+    }
+
+    // Set or change the per-call token price (0 is allowed). Does not affect
+    // existing credit balances, only applies to new AddCredit() calls.
+    function SetPrice(uint256 _pricePerCall) public {
+        require(msg.sender == owner, "Only owner");
+	pricePerCall = _pricePerCall;
+    }
+
+    // Purchase credits allowing the specified contract to perform HC calls.
+    // The token cost is (pricePerCall() * numCredits) and is non-refundable
     function AddCredit(address contract_addr, uint256 numCredits) public {
         if (pricePerCall > 0) {
             uint256 tokenPrice = numCredits * pricePerCall;
@@ -72,6 +81,7 @@ contract HCHelper {
         RegisteredCallers[contract_addr].credits += numCredits;
     }
 
+    // Allow the owner to withdraw tokens
     function WithdrawTokens(uint256 amount, address withdrawTo) public {
         require(msg.sender == owner, "Only owner");
         IERC20(tokenAddr).safeTransferFrom(address(this), withdrawTo, amount);
@@ -132,7 +142,7 @@ contract HCHelper {
 	    (srcAddr, srcNonce, errCode, response) = abi.decode(entry,(address, uint256, uint32, bytes));
 	    uint192 nonceKey = uint192(srcNonce >> 64);
 
-            NonceMgr NM = NonceMgr(entryPoint);
+            INonceManager NM = INonceManager(entryPoint);
 	    uint256 actualNonce = NM.getNonce(srcAddr, nonceKey);
 
 	    if (srcNonce + 1 != actualNonce) {

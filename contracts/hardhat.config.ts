@@ -29,13 +29,13 @@ const config: HardhatUserConfig & {
   sourcify: {
     enabled: false,
   },
-  networks: {
-    boba_sepolia: {
-      url: process.env.RPC_URL,
-      accounts: [privateKey],
-      allowUnlimitedContractSize: true,
-    },
-  },
+ // networks: {
+ //   boba_sepolia: {
+ //     url: process.env.RPC_URL,
+ //     accounts: [privateKey],
+ //     allowUnlimitedContractSize: true,
+ //   },
+ // },
   etherscan: {
     apiKey: {
       boba_sepolia: "boba",
