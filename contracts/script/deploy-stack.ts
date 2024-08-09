@@ -114,7 +114,6 @@ async function main() {
     // save relevant envs to frontend
     console.log('Saving relevant env variables to frontend. The Boba sepolia config will be used if some variables are missing.')
     updateEnvVariable("VITE_ENTRY_POINT", process.env.ENTRYPOINT ?? '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789', '../../frontend/.env');
-    updateEnvVariable("VITE_PRIVATE_KEY", PRIVATE_KEY!, '../../frontend/.env');
     updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, '../../frontend/.env');
     updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', '../../frontend/.env');
 

@@ -9,7 +9,6 @@ declare global {
     readonly env: ImportMetaEnv;
   }
   interface ImportMetaEnv {
-    readonly VITE_PRIVATE_KEY: string;
     readonly VITE_CLIENT_ADDR: string;
     readonly VITE_SMART_CONTRACT: string;
     readonly VITE_ENTRY_POINT: string;
