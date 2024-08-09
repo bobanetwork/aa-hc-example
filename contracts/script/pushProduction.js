@@ -7,12 +7,13 @@ const PRIVATE_KEY = args[1];
 const HC_HELPER_ADDR = args[2];
 const HYBRID_ACCOUNT = args[3];
 const TOKEN_PRICE_ACCOUNT_ADDR = args[4];
-const BACKEND_URL = args[5];
+const BACKEND_URL = args[5] ?? 'https://aa-hc-example.onrender.com'; // use public backend by default
 
 console.log('HCH = ', HC_HELPER_ADDR)
 console.log('HA = ', HYBRID_ACCOUNT);
 console.log('TTP = ', TOKEN_PRICE_ACCOUNT_ADDR);
 console.log('BE = ', BACKEND_URL)
+console.log('RPC_URL = ', RPC_URL)
 
 const signer = new ethers.Wallet(PRIVATE_KEY, new ethers.JsonRpcProvider(RPC_URL));
 

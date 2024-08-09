@@ -5,6 +5,7 @@ import { Readable } from "stream";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import { getLocalIpAddress } from "./utils";
+import {execPromise} from './utils'
 
 dotenv.config();
 
@@ -37,54 +38,6 @@ const ha1Owner = ethers.getAddress(
 const ha1Privkey =
   "0x7c0c629efc797f8c5f658919b7efbae01275470d59d03fdeb0fca1e6bd11d7fa";
 
-const execPromise = (
-  command: string,
-  inputs: string[] = [],
-  cwd: ProcessEnvOptions["cwd"] = undefined,
-  env?: NodeJS.ProcessEnv
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const [cmd, ...args] = command.split(" ");
-    const child = spawn(cmd, args, {
-      shell: true,
-      stdio: ["pipe", "pipe", "pipe"],
-      cwd,
-      env,
-    });
-
-    let stdout = "";
-    let stderr = "";
-
-    child.stdout.on("data", (data) => {
-      stdout += data.toString();
-      console.log(data.toString());
-    });
-
-    child.stderr.on("data", (data) => {
-      stderr += data.toString();
-      console.error(data.toString());
-    });
-
-    const stdinStream = new Readable({
-      read() {
-        inputs.forEach((input) => {
-          this.push(input + "\n");
-        });
-        this.push(null);
-      },
-    });
-
-    stdinStream.pipe(child.stdin);
-
-    child.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`Command failed with exit code ${code}`));
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-};
 
 const updateEnvVariable = (key: string, value: string, envPath: string) => {
   let envFile = fs.readFileSync(envPath, "utf8");

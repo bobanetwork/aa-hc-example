@@ -1,65 +1,9 @@
-import { exec, spawn } from "child_process";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { Readable } from "stream";
+import {execPromise, updateEnvVariable} from './utils'
 
 dotenv.config();
-
-const execPromise = (
-  command: string,
-  inputs: string[] = []
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const [cmd, ...args] = command.split(" ");
-    const child = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"] });
-
-    let stdout = "";
-    let stderr = "";
-
-    child.stdout.on("data", (data) => {
-      stdout += data.toString();
-      console.log(data.toString());
-    });
-
-    child.stderr.on("data", (data) => {
-      stderr += data.toString();
-      console.error(data.toString());
-    });
-
-    const stdinStream = new Readable({
-      read() {
-        inputs.forEach((input) => {
-          this.push(input + "\n");
-        });
-        this.push(null);
-      },
-    });
-
-    stdinStream.pipe(child.stdin);
-
-    child.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`Command failed with exit code ${code}`));
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-};
-
-const updateEnvVariable = (key: string, value: string) => {
-  const envPath = path.resolve(__dirname, "../.env");
-  let envFile = fs.readFileSync(envPath, "utf8");
-  const regex = new RegExp(`^${key}=.*`, "m");
-  if (regex.test(envFile)) {
-    envFile = envFile.replace(regex, `${key}=${value}`);
-  } else {
-    envFile += `\n${key}=${value}`;
-  }
-  fs.writeFileSync(envPath, envFile);
-  dotenv.config();
-};
 
 const readHybridAccountAddress = () => {
   const jsonPath = path.resolve(
@@ -111,8 +55,13 @@ async function main() {
     console.log("Deploying TokenPrice contract...");
     deleteIgnitionDeployments();
     const ignitionOutput = await execPromise(
-      "npx hardhat ignition deploy ./ignition/modules/TokenPrice.ts --network boba_sepolia",
-      ["y"]
+        "npx hardhat ignition deploy ./ignition/modules/TokenPrice.ts --network boba_sepolia",
+        ["y"],
+        path.resolve(__dirname, "../"),
+        {
+          ...process.env,
+          HYBRID_ACCOUNT: hybridAccountAddress,
+        }
     );
 
     // Extract the TokenPrice contract address from output
@@ -140,11 +89,35 @@ async function main() {
 
     // Step 5: Run production push script
     console.log("Running production push script...");
+    const {HC_HELPER_ADDR, PRIVATE_KEY, RPC_URL, BACKEND_URL} = process.env
+    console.log('HCH = ', HC_HELPER_ADDR)
+    console.log('HA = ', hybridAccountAddress);
+    console.log('TTP = ', tokenPriceAddress);
+    console.log('BE = ', BACKEND_URL)
+    console.log('RPC_URL = ', RPC_URL)
+    console.log('-------------------')
+
+    if (!BACKEND_URL) {
+      console.warn('BACKEND_URL not defined. Using default public endpoint https://aa-hc-example.onrender.com')
+    }
+    if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress) {
+      throw Error("Configuration missing")
+    }
+
     await execPromise(
-      `node script/pushProduction.js ${process.env.RPC_URL} ${process.env.PRIVATE_KEY} ${process.env.HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${process.env.BACKEND_URL}`
+      `node script/pushProduction.js ${RPC_URL} ${PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${BACKEND_URL}`
     );
 
     console.log("Deployment process completed successfully!");
+
+
+    // save relevant envs to frontend
+    console.log('Saving relevant env variables to frontend. The Boba sepolia config will be used if some variables are missing.')
+    updateEnvVariable("VITE_ENTRY_POINT", process.env.ENTRYPOINT ?? '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789', '../../frontend/.env');
+    updateEnvVariable("VITE_PRIVATE_KEY", PRIVATE_KEY!, '../../frontend/.env');
+    updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, '../../frontend/.env');
+    updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', '../../frontend/.env');
+
   } catch (error) {
     console.error("An error occurred during the deployment process:", error);
   }
