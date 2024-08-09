@@ -1,5 +1,8 @@
 
 # Get started
+
+Clone this repo with `git clone --recurse-submodules -j8 git@github.com:bobanetwork/aa-hc-example.git`
+
 ## Sepolia
 
 | Name             | Address                                          | Explainer                           |
