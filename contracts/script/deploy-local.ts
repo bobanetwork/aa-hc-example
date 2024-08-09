@@ -46,6 +46,7 @@ const execPromise = (
   return new Promise((resolve, reject) => {
     const [cmd, ...args] = command.split(" ");
     const child = spawn(cmd, args, {
+      shell: true,
       stdio: ["pipe", "pipe", "pipe"],
       cwd,
       env,
