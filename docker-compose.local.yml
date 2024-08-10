@@ -1,24 +1,6 @@
 version: "3.8"
 
 services:
-  snap:
-    ports:
-      - "8000:8000"
-      - "8080:8080"
-    environment:
-      - NODE_ENV=development
-    command: yarn start
-  # Nginx served static DApp
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    env_file:
-      - ./frontend/.env
-    ports:
-      - "8081:80"
-    restart: unless-stopped
-
   # Backend that is being called by your smart contract through Hybrid Compute
   offchain-service:
     build:
@@ -35,46 +17,30 @@ services:
       retries: 3
       start_period: 10s
 
-  bundler:
-    image: bobanetwork/rundler-hc #bobanetwork/bundler
-    env_file: .env
-    command: /usr/local/bin/rundler rpc
-    depends_on:
-      - geth
-    healthcheck:
-      test: curl --fail http://localhost:3000/health || exit 1
-      interval: 1s
-      timeout: 1s
-      retries: 60
-      start_period: 10s
+  # Nginx served static DApp
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NETWORK=local # boba-sepolia | local
+    image: bobanetwork/aa-hc-example-frontend
     ports:
-      - "3000:3000"
-      - "8080:8080"
+      - "8000:80"
+    restart: unless-stopped
 
-  geth:
-    image: bobanetwork/geth:latest
+  snap-account-abstraction-keyring:
+    build:
+      context: ./snap-account-abstraction-keyring
+      dockerfile: Dockerfile
+      args:
+        - NETWORK=local # boba-sepolia | local
+    image: bobanetwork/snap-account-abstraction-keyring
     ports:
-      - "8545:8545"
-      - "8546:8546"
-    command:
-      - --miner.gaslimit=12000000
-      - --http
-      - --http.api=personal,eth,net,web3,debug
-      - --http.vhosts=*
-      - --http.addr=0.0.0.0
-      - --ws
-      - --ws.api=personal,eth,net,web3,debug
-      - --ws.addr=0.0.0.0
-      - --ignore-legacy-receipts
-      - --allow-insecure-unlock
-      - --rpc.allow-unprotected-txs
-      - --dev
-      - --verbosity=2
-      - --nodiscover
-      - --maxpeers=0
-      - --mine
-      - --miner.threads=1
-      - --networkid=1337
+      - "8080:8080"
+      - "8001:8000"
+    restart: unless-stopped
+
 
 networks:
   default:

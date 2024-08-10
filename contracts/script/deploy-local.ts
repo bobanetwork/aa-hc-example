@@ -238,6 +238,7 @@ async function main() {
     console.log("Backend ENV vars set...");
 
     // Contract env vars
+    const ENTRYPOINT = contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? ""
     const contractsEnvPath = path.resolve(__dirname, "../.env");
     updateEnvVariable(
       "HYBRID_ACCOUNT",
@@ -246,7 +247,7 @@ async function main() {
     );
     updateEnvVariable(
       "ENTRY_POINT",
-      contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? "",
+      ENTRYPOINT,
       contractsEnvPath
     );
     updateEnvVariable(
@@ -267,6 +268,12 @@ async function main() {
     );
 
     console.log("Contracts ENV vars set...");
+
+    const snapEnv = '../../snap-account-abstraction-keyring/packages/snap/.env-local'
+    updateEnvVariable("LOCAL_ENTRYPOINT", ENTRYPOINT, snapEnv);
+    updateEnvVariable("LOCAL_SIMPLE_ACCOUNT_FACTORY", contracts?.find((c) => c.contractName === "SimpleAccountFactory")?.address ?? "", snapEnv)
+    updateEnvVariable("LOCAL_BOBAPAYMASTER", contracts?.find((c) => c.contractName === "TokenPaymaster")?.address ?? "", snapEnv)
+    updateEnvVariable("VERIFYING_PAYMASTER_ADDRESS", contracts?.find((c) => c.contractName === "VerifyingPaymaster")?.address ?? "", snapEnv)
 
     await execPromise(
       "docker compose up -d",
