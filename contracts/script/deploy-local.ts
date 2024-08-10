@@ -4,7 +4,7 @@ import * as path from "path";
 import { Readable } from "stream";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
-import { getLocalIpAddress } from "./utils";
+import {DEFAULT_SNAP_VERSION, getLocalIpAddress} from "./utils";
 import {execPromise} from './utils'
 
 dotenv.config();
@@ -191,23 +191,26 @@ async function main() {
     console.log("TokenPrice Contract deployed to: ", tokenPriceAddress);
 
     // Frontend env vars
-    const frontendEnvPath = path.resolve(__dirname, "../../frontend/.env");
-    updateEnvVariable("VITE_PRIVATE_KEY", deployKey, frontendEnvPath);
-    // updateEnvVariable("VITE_CLIENT_ADDR", ) // not needed i think
+    const frontendEnvPath = path.resolve(__dirname, "../../frontend/.env-local");
     updateEnvVariable(
       "VITE_SMART_CONTRACT",
       tokenPriceAddress,
       frontendEnvPath
     );
     updateEnvVariable(
-      "VITE_ENTRY_POINT",
-      contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? "",
-      frontendEnvPath
-    );
-    updateEnvVariable(
       "VITE_RPC_PROVIDER",
       "http://localhost:9545",
       frontendEnvPath
+    );
+    updateEnvVariable(
+        "VITE_SNAP_ORIGIN",
+        "local:http://localhost:8080",
+        frontendEnvPath
+    );
+    updateEnvVariable(
+        "VITE_SNAP_VERSION",
+        DEFAULT_SNAP_VERSION,
+        frontendEnvPath
     );
 
     console.log("Frontend ENV vars set...");
