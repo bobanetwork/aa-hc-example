@@ -9,8 +9,6 @@ services:
       args:
         - NETWORK=boba-sepolia # boba-sepolia | local
     image: bobanetwork/aa-hc-example-frontend
-    env_file:
-      - frontend/.env-boba-sepolia
     ports:
       - "8000:80"
     restart: unless-stopped

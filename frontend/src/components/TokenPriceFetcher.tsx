@@ -54,10 +54,6 @@ const FormComponent = () => {
                     value: "0",
                     // Contains data such as which function and what arguments.
                     data: txData,
-                    overrides: {
-                        nonce: "2",
-
-                    }
                 },
                 account: state.selectedAcount.id,
                 scope: `eip155:${state.chain}`,
