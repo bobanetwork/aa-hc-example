@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@metamask/keyring-api':
         specifier: ^8.0.0
-        version: 8.1.0(@metamask/providers@17.1.2)(webextension-polyfill@0.12.0)
+        version: 8.1.0(@metamask/providers@17.1.2(webextension-polyfill@0.12.0))(webextension-polyfill@0.12.0)
       '@radix-ui/react-label':
         specifier: ^2.1.0
-        version: 2.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+        version: 2.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.1.0(@types/react@18.3.3)(react@18.3.1)
@@ -61,7 +61,7 @@ importers:
         version: 1.0.2
       web3:
         specifier: ^4.10.0
-        version: 4.11.1(typescript@5.5.4)
+        version: 4.11.1(typescript@5.5.4)(zod@3.23.8)
     devDependencies:
       '@types/node':
         specifier: ^20.14.2
@@ -74,13 +74,19 @@ importers:
         version: 18.3.0
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.2.0
-        version: 7.18.0(@typescript-eslint/parser@7.18.0)(eslint@8.57.0)(typescript@5.5.4)
+        version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
       '@typescript-eslint/parser':
         specifier: ^7.2.0
         version: 7.18.0(eslint@8.57.0)(typescript@5.5.4)
       '@vitejs/plugin-react':
         specifier: ^4.2.1
-        version: 4.3.1(vite@5.3.5)
+        version: 4.3.1(vite@5.3.5(@types/node@20.14.14))
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      dotenv-cli:
+        specifier: ^7.4.2
+        version: 7.4.2
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -911,6 +917,11 @@ packages:
     engines: {node: '>=0.8'}
     hasBin: true
 
+  cross-env@7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+
   cross-fetch@4.0.0:
     resolution: {integrity: sha512-e4a5N8lVvuLgAWgnCrLr2PP0YyDOTHa9H/Rj54dirp61qXnNq46m82bRhNqIA5VccJtWBvPTFRV3TtvHUKPB1g==}
 
@@ -962,6 +973,14 @@ packages:
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
+
+  dotenv-cli@7.4.2:
+    resolution: {integrity: sha512-SbUj8l61zIbzyhIbg0FwPJq6+wjbzdn9oEtozQpZ6kW2ihCcapKVZj49oCT3oPM+mgQm+itgvUQcG5szxVrZTA==}
+    hasBin: true
+
+  dotenv-expand@10.0.0:
+    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
 
   dotenv@16.4.5:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
@@ -1378,6 +1397,9 @@ packages:
   minimatch@9.0.5:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
     engines: {node: '>=16 || 14 >=14.17'}
+
+  minimist@1.2.8:
+    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
   minipass@7.1.2:
     resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
@@ -2253,7 +2275,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@metamask/keyring-api@8.1.0(@metamask/providers@17.1.2)(webextension-polyfill@0.12.0)':
+  '@metamask/keyring-api@8.1.0(@metamask/providers@17.1.2(webextension-polyfill@0.12.0))(webextension-polyfill@0.12.0)':
     dependencies:
       '@metamask/providers': 17.1.2(webextension-polyfill@0.12.0)
       '@metamask/snaps-sdk': 6.2.1(webextension-polyfill@0.12.0)
@@ -2360,30 +2382,34 @@ snapshots:
 
   '@radix-ui/react-compose-refs@1.1.0(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
-      '@types/react': 18.3.3
       react: 18.3.1
-
-  '@radix-ui/react-label@2.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)':
-    dependencies:
-      '@radix-ui/react-primitive': 2.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+    optionalDependencies:
       '@types/react': 18.3.3
-      '@types/react-dom': 18.3.0
+
+  '@radix-ui/react-label@2.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
 
-  '@radix-ui/react-primitive@2.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)':
+  '@radix-ui/react-primitive@2.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-slot': 1.1.0(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
-      '@types/react-dom': 18.3.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
 
   '@radix-ui/react-slot@1.1.0(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.0(@types/react@18.3.3)(react@18.3.1)
-      '@types/react': 18.3.3
       react: 18.3.1
+    optionalDependencies:
+      '@types/react': 18.3.3
 
   '@rollup/rollup-android-arm-eabi@4.20.0':
     optional: true
@@ -2498,7 +2524,7 @@ snapshots:
     dependencies:
       '@types/node': 20.14.14
 
-  '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0)(eslint@8.57.0)(typescript@5.5.4)':
+  '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)':
     dependencies:
       '@eslint-community/regexpp': 4.11.0
       '@typescript-eslint/parser': 7.18.0(eslint@8.57.0)(typescript@5.5.4)
@@ -2511,6 +2537,7 @@ snapshots:
       ignore: 5.3.1
       natural-compare: 1.4.0
       ts-api-utils: 1.3.0(typescript@5.5.4)
+    optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - supports-color
@@ -2523,6 +2550,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 7.18.0
       debug: 4.3.6
       eslint: 8.57.0
+    optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - supports-color
@@ -2539,6 +2567,7 @@ snapshots:
       debug: 4.3.6
       eslint: 8.57.0
       ts-api-utils: 1.3.0(typescript@5.5.4)
+    optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - supports-color
@@ -2555,6 +2584,7 @@ snapshots:
       minimatch: 9.0.5
       semver: 7.6.3
       ts-api-utils: 1.3.0(typescript@5.5.4)
+    optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
       - supports-color
@@ -2577,7 +2607,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitejs/plugin-react@4.3.1(vite@5.3.5)':
+  '@vitejs/plugin-react@4.3.1(vite@5.3.5(@types/node@20.14.14))':
     dependencies:
       '@babel/core': 7.25.2
       '@babel/plugin-transform-react-jsx-self': 7.24.7(@babel/core@7.25.2)
@@ -2588,9 +2618,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  abitype@0.7.1(typescript@5.5.4):
+  abitype@0.7.1(typescript@5.5.4)(zod@3.23.8):
     dependencies:
       typescript: 5.5.4
+    optionalDependencies:
+      zod: 3.23.8
 
   acorn-jsx@5.3.2(acorn@8.12.1):
     dependencies:
@@ -2753,6 +2785,10 @@ snapshots:
 
   crc-32@1.2.2: {}
 
+  cross-env@7.0.3:
+    dependencies:
+      cross-spawn: 7.0.3
+
   cross-fetch@4.0.0:
     dependencies:
       node-fetch: 2.7.0
@@ -2796,6 +2832,15 @@ snapshots:
   doctrine@3.0.0:
     dependencies:
       esutils: 2.0.3
+
+  dotenv-cli@7.4.2:
+    dependencies:
+      cross-spawn: 7.0.3
+      dotenv: 16.4.5
+      dotenv-expand: 10.0.0
+      minimist: 1.2.8
+
+  dotenv-expand@10.0.0: {}
 
   dotenv@16.4.5: {}
 
@@ -3233,6 +3278,8 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.1
 
+  minimist@1.2.8: {}
+
   minipass@7.1.2: {}
 
   ms@2.1.2: {}
@@ -3330,8 +3377,9 @@ snapshots:
   postcss-load-config@4.0.2(postcss@8.4.41):
     dependencies:
       lilconfig: 3.1.2
-      postcss: 8.4.41
       yaml: 2.5.0
+    optionalDependencies:
+      postcss: 8.4.41
 
   postcss-nested@6.2.0(postcss@8.4.41):
     dependencies:
@@ -3599,11 +3647,11 @@ snapshots:
 
   vite@5.3.5(@types/node@20.14.14):
     dependencies:
-      '@types/node': 20.14.14
       esbuild: 0.21.5
       postcss: 8.4.41
       rollup: 4.20.0
     optionalDependencies:
+      '@types/node': 20.14.14
       fsevents: 2.3.3
 
   web3-core@4.5.0:
@@ -3627,9 +3675,9 @@ snapshots:
     dependencies:
       web3-types: 1.7.0
 
-  web3-eth-abi@4.2.3(typescript@5.5.4):
+  web3-eth-abi@4.2.3(typescript@5.5.4)(zod@3.23.8):
     dependencies:
-      abitype: 0.7.1(typescript@5.5.4)
+      abitype: 0.7.1(typescript@5.5.4)(zod@3.23.8)
       web3-errors: 1.2.1
       web3-types: 1.7.0
       web3-utils: 4.3.1
@@ -3648,13 +3696,13 @@ snapshots:
       web3-utils: 4.3.1
       web3-validator: 2.0.6
 
-  web3-eth-contract@4.6.0(typescript@5.5.4):
+  web3-eth-contract@4.6.0(typescript@5.5.4)(zod@3.23.8):
     dependencies:
       '@ethereumjs/rlp': 5.0.2
       web3-core: 4.5.0
       web3-errors: 1.2.1
-      web3-eth: 4.8.2(typescript@5.5.4)
-      web3-eth-abi: 4.2.3(typescript@5.5.4)
+      web3-eth: 4.8.2(typescript@5.5.4)(zod@3.23.8)
+      web3-eth-abi: 4.2.3(typescript@5.5.4)(zod@3.23.8)
       web3-types: 1.7.0
       web3-utils: 4.3.1
       web3-validator: 2.0.6
@@ -3665,13 +3713,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  web3-eth-ens@4.4.0(typescript@5.5.4):
+  web3-eth-ens@4.4.0(typescript@5.5.4)(zod@3.23.8):
     dependencies:
       '@adraffy/ens-normalize': 1.10.1
       web3-core: 4.5.0
       web3-errors: 1.2.1
-      web3-eth: 4.8.2(typescript@5.5.4)
-      web3-eth-contract: 4.6.0(typescript@5.5.4)
+      web3-eth: 4.8.2(typescript@5.5.4)(zod@3.23.8)
+      web3-eth-contract: 4.6.0(typescript@5.5.4)(zod@3.23.8)
       web3-net: 4.1.0
       web3-types: 1.7.0
       web3-utils: 4.3.1
@@ -3690,10 +3738,10 @@ snapshots:
       web3-utils: 4.3.1
       web3-validator: 2.0.6
 
-  web3-eth-personal@4.0.8(typescript@5.5.4):
+  web3-eth-personal@4.0.8(typescript@5.5.4)(zod@3.23.8):
     dependencies:
       web3-core: 4.5.0
-      web3-eth: 4.8.2(typescript@5.5.4)
+      web3-eth: 4.8.2(typescript@5.5.4)(zod@3.23.8)
       web3-rpc-methods: 1.3.0
       web3-types: 1.7.0
       web3-utils: 4.3.1
@@ -3705,12 +3753,12 @@ snapshots:
       - utf-8-validate
       - zod
 
-  web3-eth@4.8.2(typescript@5.5.4):
+  web3-eth@4.8.2(typescript@5.5.4)(zod@3.23.8):
     dependencies:
       setimmediate: 1.0.5
       web3-core: 4.5.0
       web3-errors: 1.2.1
-      web3-eth-abi: 4.2.3(typescript@5.5.4)
+      web3-eth-abi: 4.2.3(typescript@5.5.4)(zod@3.23.8)
       web3-eth-accounts: 4.1.3
       web3-net: 4.1.0
       web3-providers-ws: 4.0.8
@@ -3805,17 +3853,17 @@ snapshots:
       web3-types: 1.7.0
       zod: 3.23.8
 
-  web3@4.11.1(typescript@5.5.4):
+  web3@4.11.1(typescript@5.5.4)(zod@3.23.8):
     dependencies:
       web3-core: 4.5.0
       web3-errors: 1.2.1
-      web3-eth: 4.8.2(typescript@5.5.4)
-      web3-eth-abi: 4.2.3(typescript@5.5.4)
+      web3-eth: 4.8.2(typescript@5.5.4)(zod@3.23.8)
+      web3-eth-abi: 4.2.3(typescript@5.5.4)(zod@3.23.8)
       web3-eth-accounts: 4.1.3
-      web3-eth-contract: 4.6.0(typescript@5.5.4)
-      web3-eth-ens: 4.4.0(typescript@5.5.4)
+      web3-eth-contract: 4.6.0(typescript@5.5.4)(zod@3.23.8)
+      web3-eth-ens: 4.4.0(typescript@5.5.4)(zod@3.23.8)
       web3-eth-iban: 4.0.7
-      web3-eth-personal: 4.0.8(typescript@5.5.4)
+      web3-eth-personal: 4.0.8(typescript@5.5.4)(zod@3.23.8)
       web3-net: 4.1.0
       web3-providers-http: 4.1.0
       web3-providers-ws: 4.0.8

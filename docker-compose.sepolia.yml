@@ -6,11 +6,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NETWORK=boba-sepolia # boba-sepolia | local
     image: bobanetwork/aa-hc-example-frontend
     env_file:
-      - ./frontend/.env-sepolia
+      - frontend/.env-boba-sepolia
     ports:
-      - "8081:80"
+      - "8000:80"
     restart: unless-stopped
 
 networks:

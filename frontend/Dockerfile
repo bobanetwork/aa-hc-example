@@ -1,6 +1,8 @@
 # Stage 1: Build the application
 FROM node:20-alpine AS build
 
+ARG NETWORK
+
 # Set working directory
 WORKDIR /app
 
@@ -13,6 +15,10 @@ RUN npm i
 # Copy the rest of the application code
 COPY . .
 
+# Copy the correct .env file based on the NETWORK argument
+COPY .env-${NETWORK} .env
+# VITE needs env-vars at build time
+
 # Build the application
 RUN npm run build
 
@@ -21,9 +27,6 @@ FROM nginx:alpine
 
 # Copy the built assets from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copy a custom nginx configuration if needed
-# COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80

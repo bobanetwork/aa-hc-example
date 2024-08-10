@@ -113,7 +113,7 @@ async function main() {
 
     // save relevant envs to frontend
     console.log('Saving relevant env variables to frontend. The Boba sepolia config will be used if some variables are missing.')
-    const frontendEnvPath = '../../frontend/.env-sepolia'
+    const frontendEnvPath = '../../frontend/.env-boba-sepolia'
     updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
     updateEnvVariable("VITE_SNAP_ORIGIN", 'npm:@bobanetwork/snap-account-abstraction-keyring-hc', frontendEnvPath);
     updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);

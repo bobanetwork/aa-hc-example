@@ -15,8 +15,7 @@ import {connectSnap, getSnap} from "@/lib/snap.ts";
 const FormComponent = () => {
     const [state] = useContext(MetaMaskContext);
     const [contractAddress, setContractAddress] = useState(YOUR_CONTRACT);
-    const [tokenSymbol, setTokenSymbol] = useState("");
-    const [inputSymbol, setInputSymbol] = useState("ETH");
+    const [tokenSymbol, setTokenSymbol] = useState("ETH");
     const [tokenPrice, setTokenPrice] = useState("");
     const {abi: contractAbi} = useContractAbi("TokenPrice");
     const [txResponse, setTxResponse] = useState<any>(null);
@@ -35,7 +34,6 @@ const FormComponent = () => {
             setTokenPrice("");
             setTxResponse("");
             setError("");
-            setTokenSymbol(inputSymbol);
 
             // Prepare the function selector and encoded parameters for the smart contract interaction.
             // This specifies which function to call on the contract and with what arguments
@@ -128,8 +126,8 @@ const FormComponent = () => {
                     <div className="relative mt-2 rounded-md shadow-sm w-full">
                         <input
                             type="text"
-                            value={inputSymbol}
-                            onChange={(e) => setInputSymbol(e.target.value)}
+                            value={tokenSymbol}
+                            onChange={(e) => setTokenSymbol(e.target.value)}
                             name="input token symbol"
                             className="block w-full bg-teal-200 rounded-md border-0 py-1.5 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             placeholder="ETH"
