@@ -8,6 +8,6 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:80"
+      - "8081:80"
     restart: unless-stopped
 

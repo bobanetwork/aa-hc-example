@@ -1,6 +1,5 @@
 node_modules
 .env
-.env-sepolia
 broadcast/
 contracts/broadcast
 cache_forge/

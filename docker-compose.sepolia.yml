@@ -6,27 +6,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: bobanetwork/aa-hc-example-frontend
     env_file:
       - ./frontend/.env-sepolia
     ports:
       - "8081:80"
     restart: unless-stopped
-    
-  # Backend that is being called by your smart contract through Hybrid Compute
-  offchain-service:
-    build:
-      context: ./backend/offchain
-      dockerfile: ../Dockerfile
-    ports:
-      - "${OC_LISTEN_PORT:-1234}:${OC_LISTEN_PORT:-1234}"
-    env_file: ./backend/.env
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${OC_LISTEN_PORT:-1234}/hc" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
 networks:
   default:

@@ -13,6 +13,8 @@ const Navbar = () => {
       await connectSnap();
       const installedSnap = await getSnap();
 
+      console.warn("Installed snap", installedSnap)
+
       dispatch({
         type: MetamaskActions.SetInstalled,
         payload: installedSnap,

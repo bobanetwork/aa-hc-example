@@ -9,6 +9,8 @@ import {CopyIcon} from "./CopyIcon";
 import {YOUR_CONTRACT} from "@/config/snap";
 import {useContractAbi} from "@/hooks/useContractAbi";
 import {Loader2} from "lucide-react";
+import type {EthBaseTransaction, EthBaseUserOperation} from '@metamask/keyring-api';
+import {connectSnap, getSnap} from "@/lib/snap.ts";
 
 const FormComponent = () => {
     const [state] = useContext(MetaMaskContext);
@@ -54,6 +56,10 @@ const FormComponent = () => {
                     value: "0",
                     // Contains data such as which function and what arguments.
                     data: txData,
+                    overrides: {
+                        nonce: "2",
+
+                    }
                 },
                 account: state.selectedAcount.id,
                 scope: `eip155:${state.chain}`,

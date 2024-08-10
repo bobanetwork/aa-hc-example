@@ -11,3 +11,6 @@
 [submodule "boba"]
 	path = boba
 	url = https://github.com/bobanetwork/boba.git
+[submodule "snap-account-abstraction-keyring"]
+	path = snap-account-abstraction-keyring
+	url = https://github.com/bobanetwork/snap-account-abstraction-keyring.git
