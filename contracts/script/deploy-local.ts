@@ -4,8 +4,9 @@ import * as path from "path";
 import { Readable } from "stream";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
-import {DEFAULT_SNAP_VERSION, getLocalIpAddress} from "./utils";
+import {DEFAULT_SNAP_VERSION, getLocalIpAddress, isPortInUse} from "./utils";
 import {execPromise} from './utils'
+import {SimpleAccountFactory__factory} from "../typechain-types";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ const ha1Privkey =
 
 
 const updateEnvVariable = (key: string, value: string, envPath: string) => {
+  console.log(`Updating ${key} = ${value}`)
   let envFile = fs.readFileSync(envPath, "utf8");
   const regex = new RegExp(`^${key}=.*`, "m");
   if (regex.test(envFile)) {
@@ -105,22 +107,33 @@ const deleteIgnitionDeployments = () => {
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
 async function main() {
   try {
-     await execPromise(
-       "pnpm install",
-       [],
-       path.resolve(__dirname, "../../boba")
-     );
-     await execPromise(
-       "make devnet-hardhat-up",
-       [],
-       path.resolve(__dirname, "../../boba")
-     );
+    if (!isPortInUse(8545) && !isPortInUse(9545)) {
+       await execPromise(
+         "pnpm install",
+         [],
+         path.resolve(__dirname, "../../boba")
+       );
 
+       await execPromise(
+         "make devnet-hardhat-up",
+         [],
+         path.resolve(__dirname, "../../boba")
+       );
+    } else {
+      console.log("Boba Chain already running, skipping")
+    }
     const fundL2Vars = {
       ...process.env,
       PRIVATE_KEY: deployKey,
     };
-     await execPromise("node fundL2.js", undefined, undefined, fundL2Vars);
+
+     await execPromise(
+         "node fundL2.js",
+         undefined,
+         path.resolve(__dirname, "../script/"),
+         fundL2Vars
+     );
+
     console.log("Funding L2 done...");
 
     const baseDeployVars = {
@@ -132,13 +145,20 @@ async function main() {
       BACKEND_URL: process.env.BACKEND_URL,
     };
 
-    await execPromise(
-      "forge script --json --broadcast --silent --rpc-url=http://127.0.0.1:9545 deploy.s.sol",
-      undefined,
-      undefined,
-      baseDeployVars
-    );
+    console.log('vars are: ', baseDeployVars)
+    try {
+      await execPromise(
+        "forge script --json --broadcast --rpc-url http://127.0.0.1:9545 deploy.s.sol",
+        undefined,
+          path.resolve(__dirname, "../script/"),
+          baseDeployVars
+      );
+    }catch (e) {
+      console.log('error is: ', e);
+    }
+
     const contracts = parseLocalDeployAddresses();
+    const entrypoint = contracts?.find((c) => c.contractName === "EntryPoint")?.address
     const envVars = {
       HC_HELPER_ADDR: contracts?.find((c) => c.contractName === "HCHelper")
         ?.address,
@@ -146,8 +166,7 @@ async function main() {
         ?.address,
       HC_SYS_OWNER: ha0Owner,
       HC_SYS_PRIVKEY: ha0Privkey,
-      ENTRY_POINTS: contracts?.find((c) => c.contractName === "EntryPoint")
-        ?.address,
+      ENTRY_POINTS: entrypoint,
       BUILDER_PRIVKEY: builderPrivkey,
       NODE_HTTP: `http://${getLocalIpAddress()}:9545`,
       CHAIN_ID: "901",
@@ -160,7 +179,6 @@ async function main() {
       { ...process.env, ...envVars }
     );
 
-    //
     deleteIgnitionDeployments();
     console.log(
       "HA ADDRESS: ",
@@ -180,11 +198,11 @@ async function main() {
     );
 
     const tokenPriceMatch = ignitionOutput.match(
-      /TokenPrice#TokenPrice - (0x[a-fA-F0-9]{40})/
+        /TokenPrice#TokenPrice - (0x[a-fA-F0-9]{40})/
     );
     if (!tokenPriceMatch) {
       throw new Error(
-        "Failed to extract TokenPrice address from Ignition output"
+          "Failed to extract TokenPrice address from Ignition output"
       );
     }
     const tokenPriceAddress = tokenPriceMatch[1];
@@ -193,14 +211,14 @@ async function main() {
     // Frontend env vars
     const frontendEnvPath = path.resolve(__dirname, "../../frontend/.env-local");
     updateEnvVariable(
-      "VITE_SMART_CONTRACT",
-      tokenPriceAddress,
-      frontendEnvPath
+        "VITE_SMART_CONTRACT",
+        tokenPriceAddress,
+        frontendEnvPath
     );
     updateEnvVariable(
-      "VITE_RPC_PROVIDER",
-      "http://localhost:9545",
-      frontendEnvPath
+        "VITE_RPC_PROVIDER",
+        "http://localhost:9545",
+        frontendEnvPath
     );
     updateEnvVariable(
         "VITE_SNAP_ORIGIN",
@@ -218,21 +236,26 @@ async function main() {
     // Backend env vars
     const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
     updateEnvVariable(
-      "OC_HYBRID_ACCOUNT",
-      contracts?.find((c) => c.contractName === "HybridAccount")?.address ?? "",
-      backendEnvPath
+        "OC_HYBRID_ACCOUNT",
+        contracts?.find((c) => c.contractName === "HybridAccount")?.address ?? "",
+        backendEnvPath
     );
+
+    if (!entrypoint) {
+      throw Error("Entrypoint not defined!")
+    }
+
     updateEnvVariable(
-      "ENTRY_POINTS",
-      contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? "",
-      backendEnvPath
+        "ENTRY_POINTS",
+        entrypoint,
+        backendEnvPath
     );
     updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
     updateEnvVariable("OC_PRIVKEY", deployKey, backendEnvPath);
     updateEnvVariable(
-      "HC_HELPER_ADDR",
-      contracts?.find((c) => c.contractName === "HCHelper")?.address ?? "",
-      backendEnvPath
+        "HC_HELPER_ADDR",
+        contracts?.find((c) => c.contractName === "HCHelper")?.address ?? "",
+        backendEnvPath
     );
 
     console.log("Backend ENV vars set...");
@@ -241,55 +264,76 @@ async function main() {
     const ENTRYPOINT = contracts?.find((c) => c.contractName === "EntryPoint")?.address ?? ""
     const contractsEnvPath = path.resolve(__dirname, "../.env");
     updateEnvVariable(
-      "HYBRID_ACCOUNT",
-      contracts?.find((c) => c.contractName === "HybridAccount")?.address ?? "",
-      contractsEnvPath
+        "HYBRID_ACCOUNT",
+        contracts?.find((c) => c.contractName === "HybridAccount")?.address ?? "",
+        contractsEnvPath
     );
     updateEnvVariable(
-      "ENTRY_POINT",
-      ENTRYPOINT,
-      contractsEnvPath
+        "ENTRY_POINT",
+        ENTRYPOINT,
+        contractsEnvPath
     );
     updateEnvVariable(
-      "TOKEN_PRICE_CONTRACT",
-      tokenPriceAddress,
-      contractsEnvPath
+        "TOKEN_PRICE_CONTRACT",
+        tokenPriceAddress,
+        contractsEnvPath
     );
     updateEnvVariable(
-      "HC_HELPER_ADDR",
-      contracts?.find((c) => c.contractName === "HCHelper")?.address ?? "",
-      contractsEnvPath
+        "HC_HELPER_ADDR",
+        contracts?.find((c) => c.contractName === "HCHelper")?.address ?? "",
+        contractsEnvPath
     );
     updateEnvVariable("PRIVATE_KEY", deployKey, contractsEnvPath);
     updateEnvVariable(
-      "CLIENT_ADDR",
-      contracts?.find((c) => c.contractName === "SimpleAccount")?.address ?? "",
-      contractsEnvPath
+        "CLIENT_ADDR",
+        contracts?.find((c) => c.contractName === "SimpleAccount")?.address ?? "",
+        contractsEnvPath
     );
 
-    console.log("Contracts ENV vars set...");
+    /** @DEV Snap */
+    const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env-local'
+    const l2provider = new ethers.JsonRpcProvider('http://localhost:9545');
+    const SimpleAccountFactory = new SimpleAccountFactory__factory(new ethers.Wallet(deployKey, l2provider));
+    const simpleAccountFactoryAddress = await SimpleAccountFactory.deploy(entrypoint!);
+    console.log('SimpleAccountFactory: ', simpleAccountFactoryAddress.target.toString());
 
-    const snapEnv = '../../snap-account-abstraction-keyring/packages/snap/.env-local'
-    updateEnvVariable("LOCAL_ENTRYPOINT", ENTRYPOINT, snapEnv);
-    updateEnvVariable("LOCAL_SIMPLE_ACCOUNT_FACTORY", contracts?.find((c) => c.contractName === "SimpleAccountFactory")?.address ?? "", snapEnv)
-    updateEnvVariable("LOCAL_BOBAPAYMASTER", contracts?.find((c) => c.contractName === "TokenPaymaster")?.address ?? "", snapEnv)
-    updateEnvVariable("VERIFYING_PAYMASTER_ADDRESS", contracts?.find((c) => c.contractName === "VerifyingPaymaster")?.address ?? "", snapEnv)
+    const bobaVerifyingPaymaster = contracts?.find((c) => c.contractName === "VerifyingPaymaster")?.address;
+    console.log('Deployed SimpleAccountFactory', simpleAccountFactoryAddress.target);
+    let content = fs.readFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', 'utf8');
+    content = content.replace(/entryPoint: '0x0'/, `entryPoint: '${ENTRYPOINT}'`);
+    content = content.replace(/simpleAccountFactory: '0x0'/, `simpleAccountFactory: '${simpleAccountFactoryAddress.target}'`);
+    content = content.replace(/bobaPaymaster: '0x0'/, `bobaPaymaster: '0x0}'`);
 
+    // Update the AA-config
+    fs.writeFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', content, 'utf8');
+
+    // Update LOCAL_ENTRYPOINT
+    updateEnvVariable(
+        "LOCAL_ENTRYPOINT",
+        ENTRYPOINT,
+        snapEnv
+    );
+
+    // Update Account Factory
+    updateEnvVariable(
+        "LOCAL_SIMPLE_ACCOUNT_FACTORY",
+        simpleAccountFactoryAddress.target.toString(),
+        snapEnv
+    );
+
+    // Update Account Factory
+    updateEnvVariable(
+        "VERIFYING_PAYMASTER_ADDRESS",
+        bobaVerifyingPaymaster?.toString() ?? '0x0',
+        snapEnv
+    );
+
+    /** @DEV bootstrap frontend, backend and snap */
     await execPromise(
-      "docker compose up -d",
-      [],
-      path.resolve(__dirname, "../../backend")
+        "docker-compose -f docker-compose.local.yml up",
+        [],
+        path.resolve(__dirname, "../../")
     );
-
-    console.log("Backend container started...");
-
-    await execPromise(
-      "docker compose up -d",
-      [],
-      path.resolve(__dirname, "../../frontend")
-    );
-
-    console.log("Frontend container started...");
   } catch (error) {
     console.error(error);
   }
