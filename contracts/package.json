@@ -5,7 +5,8 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test && jest",
-    "deploy": "ts-node script/deploy-stack.ts"
+    "deploy": "ts-node script/deploy-stack.ts",
+    "deploy-local": "ts-node script/deploy-local.ts"
   },
   "license": "MIT",
   "devDependencies": {

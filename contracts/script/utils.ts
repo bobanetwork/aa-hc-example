@@ -1,5 +1,5 @@
 import * as os from "os";
-import { ProcessEnvOptions, spawn } from "child_process";
+import {execSync, ProcessEnvOptions, spawn} from "child_process";
 import { Readable } from "stream";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
@@ -37,6 +37,15 @@ export const updateEnvVariable = (key: string, value: string, customEnvPath?: st
   fs.writeFileSync(envPath, envFile);
   dotenv.config();
 };
+
+export const isPortInUse = (port: number) => {
+  try {
+    execSync(`nc -z localhost ${port}`);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 export const execPromise = (
     command: string,
@@ -79,7 +88,8 @@ export const execPromise = (
 
     child.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error(`Command failed with exit code ${code}`));
+        console.log(stdout)
+        reject(new Error(`${command} Command failed with exit code ${code}`));
       } else {
         resolve(stdout);
       }
