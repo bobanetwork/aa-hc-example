@@ -6,7 +6,7 @@ import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import {DEFAULT_SNAP_VERSION, getLocalIpAddress, isPortInUse} from "./utils";
 import {execPromise} from './utils'
-import {SimpleAccountFactory__factory} from "../typechain-types";
+import {SimpleAccountFactory__factory, TokenPaymaster__factory, VerifyingPaymaster__factory} from "../typechain-types";
 
 dotenv.config();
 
@@ -293,16 +293,35 @@ async function main() {
     /** @DEV Snap */
     const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env-local'
     const l2provider = new ethers.JsonRpcProvider('http://localhost:9545');
-    const SimpleAccountFactory = new SimpleAccountFactory__factory(new ethers.Wallet(deployKey, l2provider));
-    const simpleAccountFactoryAddress = await SimpleAccountFactory.deploy(entrypoint!);
-    console.log('SimpleAccountFactory: ', simpleAccountFactoryAddress.target.toString());
 
-    const bobaVerifyingPaymaster = contracts?.find((c) => c.contractName === "VerifyingPaymaster")?.address;
-    console.log('Deployed SimpleAccountFactory', simpleAccountFactoryAddress.target);
+    /** @DEV deploy simple account factory */
+    const wallet = new ethers.Wallet(deployKey, l2provider);
+    const SimpleAccountFactory = new SimpleAccountFactory__factory(wallet);
+    const simpleAccountFactoryContract = await SimpleAccountFactory.deploy(entrypoint!);
+    await simpleAccountFactoryContract.waitForDeployment();
+    console.log('SimpleAccountFactory: ', simpleAccountFactoryContract.target)
+
+     /** @DEV deploy verifying paymaster */
+    const VerifyingPaymasterFactory = new VerifyingPaymaster__factory(wallet);
+    const verifyingPaymasterContract = await VerifyingPaymasterFactory.deploy(entrypoint, wallet.address);
+    await verifyingPaymasterContract.waitForDeployment();
+    console.log('Verifying paymaster: ', verifyingPaymasterContract.target)
+
+    /** @DEV deploy the token paymaster */
+    const TokenPaymasterFactory = new TokenPaymaster__factory(wallet);
+    const tokenPaymasterContract = await TokenPaymasterFactory.deploy(
+        simpleAccountFactoryContract.target, entrypoint, wallet.address);
+    await tokenPaymasterContract.waitForDeployment();
+    console.log('Verifying paymaster: ', tokenPaymasterContract.target)
+
+
     let content = fs.readFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', 'utf8');
-    content = content.replace(/entryPoint: '0x0'/, `entryPoint: '${ENTRYPOINT}'`);
-    content = content.replace(/simpleAccountFactory: '0x0'/, `simpleAccountFactory: '${simpleAccountFactoryAddress.target}'`);
-    content = content.replace(/bobaPaymaster: '0x0'/, `bobaPaymaster: '0x0}'`);
+
+    const localConfigRegex = /(\[CHAIN_IDS\.LOCAL\]:\s*{[\s\S]*?entryPoint:\s*')([^']*)(\'[\s\S]*?simpleAccountFactory:\s*')([^']*)(\'[\s\S]*?bobaPaymaster:\s*')([^']*)(\'[\s\S]*?})/;
+
+    content = content.replace(localConfigRegex, (match, before1, oldEntryPoint, middle1, oldSimpleAccountFactory, middle2, oldBobaPaymaster, after) => {
+      return `${before1}${ENTRYPOINT}${middle1}${simpleAccountFactoryContract.target}${middle2}${tokenPaymasterContract.target}${after}`;
+    });
 
     // Update the AA-config
     fs.writeFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', content, 'utf8');
@@ -317,14 +336,21 @@ async function main() {
     // Update Account Factory
     updateEnvVariable(
         "LOCAL_SIMPLE_ACCOUNT_FACTORY",
-        simpleAccountFactoryAddress.target.toString(),
+        simpleAccountFactoryContract.target.toString(),
         snapEnv
     );
 
     // Update Account Factory
     updateEnvVariable(
         "VERIFYING_PAYMASTER_ADDRESS",
-        bobaVerifyingPaymaster?.toString() ?? '0x0',
+        verifyingPaymasterContract?.target.toString(),
+        snapEnv
+    );
+
+    // Update Account Factory
+    updateEnvVariable(
+        "LOCAL_BOBAPAYMASTER",
+        tokenPaymasterContract?.target.toString(),
         snapEnv
     );
 
