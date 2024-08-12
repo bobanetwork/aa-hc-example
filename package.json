@@ -5,17 +5,25 @@
   "scripts": {
     "start:local": "cd contracts && npx ts-node ./script/deploy-local.ts && cd ..",
     "start:sepolia": "cd contracts && npx ts-node ./script/deploy-sepolia.ts && cd ..",
-    "test": "cd contracts && npx pnpm test && cd ../backend && npx pnpm test && cd .."
+    "test": "pnpm test -r"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bobanetwork/aa-hc-example.git"
   },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "contracts"
+  ],
   "keywords": [
     "aa",
     "hc",
     "boba"
   ],
+  "engines": {
+    "node": "^18.18 || >=20"
+  },
   "author": "Boba Foundation",
   "license": "MIT",
   "bugs": {

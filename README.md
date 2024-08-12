@@ -61,3 +61,4 @@ When you follow the steps above your application will use the already deployed b
 # Testing
 Whenever you make changes and push to `main` on your Github repository relevant tests are being run by Github actions to make sure everything works as expected.
 
+If you want to run tests locally, execute `pnpm test`.

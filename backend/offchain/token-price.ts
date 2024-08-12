@@ -9,10 +9,6 @@ import {
 } from "./utils";
 
 const web3 = new Web3();
-const {COINRANKING_API_KEY, OC_HYBRID_ACCOUNT, HC_HELPER_ADDR, ENTRYPOINTS, OC_PRIVKEY, CHAIN_ID} = process.env
-if (!COINRANKING_API_KEY || !OC_HYBRID_ACCOUNT || !HC_HELPER_ADDR || !ENTRYPOINTS || !CHAIN_ID || !OC_PRIVKEY) {
-  throw new Error('[Offchain API] Environment variables not properly setup!')
-}
 
 export async function offchainTokenPrice(params: OffchainParameter) {
   const parsedParams = parseOffchainParameter(params);
@@ -55,7 +51,7 @@ export async function offchainTokenPrice(params: OffchainParameter) {
 export async function getTokenPrice(tokenSymbol: string): Promise<number> {
   const headers = {
     accept: "application/json",
-    "x-access-token": COINRANKING_API_KEY,
+    "x-access-token": process.env.COINRANKING_API_KEY,
   };
 
   const coinListResponse = await axios.get(
@@ -97,6 +93,9 @@ export function generateResponse(
   errorCode: number,
   respPayload: string
 ) {
+  if (!process.env.HC_HELPER_ADDR) {
+    throw new Error("HC_HELPER_ADDR not defined!");
+  }
   const encodedResponse = web3.eth.abi.encodeParameters(
     ["address", "uint256", "uint32", "bytes"],
     [req.srcAddr, req.srcNonce, errorCode, respPayload]
@@ -113,7 +112,7 @@ export function generateResponse(
   const executeCallData = web3.eth.abi.encodeParameters(
     ["address", "uint256", "bytes"],
     [
-      web3.utils.toChecksumAddress(HC_HELPER_ADDR),
+      web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR),
       0,
       putResponseEncoded,
     ]
@@ -139,7 +138,7 @@ export function generateResponse(
       "bytes32",
     ],
     [
-      OC_HYBRID_ACCOUNT,
+      process.env.OC_HYBRID_ACCOUNT,
       req.opNonce,
       web3.utils.keccak256("0x"),
       web3.utils.keccak256(executeEncoded),
@@ -157,15 +156,15 @@ export function generateResponse(
       ["bytes32", "address", "uint256"],
       [
         web3.utils.keccak256(finalEncodedParameters),
-        ENTRYPOINTS,
-        CHAIN_ID,
+        process.env.ENTRY_POINTS,
+        process.env.CHAIN_ID,
       ]
     )
   );
 
   // Retrieve account from private key
   const account = web3.eth.accounts.privateKeyToAccount(
-    OC_PRIVKEY ?? ""
+    process.env.OC_PRIVKEY ?? ""
   );
 
   // Sign the final hash
