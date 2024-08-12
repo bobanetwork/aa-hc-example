@@ -290,6 +290,11 @@ async function main() {
         contractsEnvPath
     );
 
+    const snapSiteEnvFolder = '../snap-account-abstraction-keyring/packages/site/'
+    updateEnvVariable('USE_LOCAL_NETWORK', "true", `${snapSiteEnvFolder}/.env`)
+    updateEnvVariable('USE_LOCAL_NETWORK', "true", `${snapSiteEnvFolder}/.env.development`)
+    updateEnvVariable('USE_LOCAL_NETWORK', "true", `${snapSiteEnvFolder}/.env.development.hc`)
+
     /** @DEV Snap */
     const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env-local'
     const l2provider = new ethers.JsonRpcProvider('http://localhost:9545');
