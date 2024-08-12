@@ -1,13 +1,5 @@
 # Developer Documentation
 
-### Checklist
-
-- [ ] Illustrated Overview
-- [x] Basic implementation
-- [x] General explanation
-- [ ] Complete mermaid diagram
-
-
 ## Introduction
 
 Welcome to the developer documentation for implementing a basic example with our system and API. This guide will walk
@@ -15,12 +7,6 @@ you through the necessary steps to get started and provide you with the informat
 our system into your project. [BOBA Gitbook](https://github.com/bobanetwork/boba/tree/develop/.gitbook)
 
 ## Overview
-
-TODO: extend and correct/complete mermaid diagram
-```mermaid
-graph LR
-A[Bundler] -- method --> B[Offchain Handler] -- update --> D[Smart Contract]
-```
 
 ### About Hybrid Compute
 

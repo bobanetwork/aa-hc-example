@@ -5,7 +5,7 @@
   "scripts": {
     "start:local": "cd contracts && npx ts-node ./script/deploy-local.ts && cd ..",
     "start:sepolia": "cd contracts && npx ts-node ./script/deploy-sepolia.ts && cd ..",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cd contracts && npx pnpm test && cd ../backend && npx pnpm test && cd .."
   },
   "repository": {
     "type": "git",

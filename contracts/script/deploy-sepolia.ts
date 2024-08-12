@@ -124,6 +124,13 @@ async function main() {
     updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development`)
     updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development.hc`)
 
+    /** @DEV bootstrap frontend */
+    await execPromise(
+        "docker-compose -f docker-compose.sepolia.yml up",
+        [],
+        path.resolve(__dirname, "../../")
+    );
+
   } catch (error) {
     console.error("An error occurred during the deployment process:", error);
   }

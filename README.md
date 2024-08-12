@@ -1,6 +1,13 @@
+# What is this?
+This is a (hopefully) easy to use example of how you can use [Hybrid Compute](https://docs.boba.network/developer/features/aa-basics/hybrid-compute) with [Account Abstraction](https://docs.boba.network/developer/features/aa-basics) to build powerful Web3 Apps!
+
+This "Hello World" example allows you to fetch the current price of any cryptocurrency from an off-chain API such as CoinRanking into your smart contract within 1 single, atomic transaction! 
+
+You can run this repo in 2 ways: 
+- On our official testnet "Boba Sepolia"
+- or spin up the local stack end-to-end (including the local chain, the bundler for Account Abstraction, the snap, etc.)
 
 # Get started
-
 Clone this repo with `git clone --recurse-submodules -j8 git@github.com:bobanetwork/aa-hc-example.git`
 
 ## Installation
@@ -9,21 +16,37 @@ You will need a handful of tools to run the full stack (local):
 - `forge` [[Download]](https://book.getfoundry.sh/getting-started/installation)
 - `npm` | `yarn` or `pnpm` [[Download]](https://nodejs.org/en/download/package-manager)
 - `golang` [[Download]](https://go.dev/doc/install)
+- `Metamask Flask` (Development build of Metamask) [[Download]](https://chromewebstore.google.com/detail/metamask-flask-developmen/ljfoeinjpaedjfecbmggjgodbgkmjkjk)
 
 To run the stack on Boba Sepolia you can skip `cargo` and `golang` which is only required to run the local stack.
 
 ## Local
 All contracts and services are deployed and environment variables are substituted across all services automatically to ensure a convenient developer experience. 
 
-1. Copy `/contracts/.env-example` and name it `.env`. All necessary variables are pre-filled except of `PRIVATE_KEY`. 
-2. Add your own private key, that contains some ETH on Boba Sepolia in order to deploy the contracts on testnet. You can obtain some SepETH on Sepolia (L1) from any [faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia) and bridge them to L2 through our [Gateway](https://gateway.boba.network/).
-3. Run `pnpm start:local` to spin the local stack up. Make sure you have [Docker](https://www.docker.com/products/docker-desktop/) running.
+1. Make sure you have the dependencies as outlined above installed and Docker running.
+2. Run `pnpm start:local` to spin the local stack up. Make sure you have [Docker](https://www.docker.com/products/docker-desktop/) running.
+3. Head over to [localhost:8001](http://localhost:8001) to create your Smart Wallet.
+4. Once you created your account, try it out by using the "Transfer Funds" section. Make sure you funded your new "Snap Account" with some `ETH` on Boba Sepolia.
+5. Congrats you sent your first `UserOp` on Boba Sepolia using Account Abstraction! This is the moment your smart account gets deployed on-chain (on the first UserOp).
+6. Navigate now to [localhost:8000](http://localhost:8000) to interact with your local DApp which utilizes Hybrid Compute via Account Abstraction to fetch off-chain data to your smart contract! In our example we fetch the current price of a cryptocurrency asset.
+
 
 Please note, that the local stack actually spins up the Boba L2 locally, the Bundler ("Rundler") along with other local services. This might take a while to startup. 
 
 ## Sepolia
 
-Run `pnpm start:sepolia` to spin up the reduced local stack to use the existing infrastructure on Boba Sepolia. 
+1. Copy `/contracts/.env-example` and name it `.env`. All necessary variables are pre-filled except of `PRIVATE_KEY`.
+2. Add your own private key, that contains some ETH on Boba Sepolia in order to deploy the contracts on testnet. You can obtain some SepETH on Sepolia (L1) from any [faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia) and bridge them to L2 through our [Gateway](https://gateway.boba.network/).
+3. Run `pnpm start:sepolia` to spin up the reduced local stack to use the existing infrastructure on Boba Sepolia. 
+4. Head over to [hc-wallet.sepolia.boba.network](https://hc-wallet.sepolia.boba.network/) to create your Smart Wallet.
+5. Once you created your account, try it out by using the "Transfer Funds" section. Make sure you funded your new "Snap Account" with some `ETH` on Boba Sepolia.
+6. Congrats you sent your first `UserOp` on Boba Sepolia using Account Abstraction! If you navigate to the [Block-Explorer](https://testnet.bobascan.com/) you should see your contract wallet.
+7. Navigate now to [localhost:8000](http://localhost:8000) to interact with your local DApp which utilizes Hybrid Compute via Account Abstraction to fetch off-chain data to your smart contract! In our example we fetch the current price of a cryptocurrency asset.
+
+When you follow the steps above your application will use the already deployed backend below for simplification. If you want to deploy your own backend instead follow these steps: 
+1. Deploy the backend to your cloud of your choosing [[here is more documentation on that](./backend/README.md)]. We've provided you with a [Dockerfile](./backend/Dockerfile) and [Docker Compose](./backend/docker-compose.yml) to make this as easy as possible.
+2. Once your backend is live, change the `BACKEND_URL` in your [.env](./contracts/.env) (if the file doesn't exist, you skipped the steps above) within your `contracts folder`. 
+3. Rerun the script `pnpm start:sepolia` and try it out as described above.
 
 | Name             | Address                                          | Explainer                           |
 |------------------|--------------------------------------------------|-------------------------------------|
@@ -34,12 +57,7 @@ Run `pnpm start:sepolia` to spin up the reduced local stack to use the existing 
 | RPC_URL          | https://gateway.tenderly.co/public/boba-sepolia	 |                                     |
 | -> More RPC URls | https://chainlist.org/chain/28882	               |                                     |
 
-### Setup and Deployment
-> **Important:** Ensure you are inside the `contracts` folder before proceeding. Edit the `.env` file located in the `contracts` folder and execute the command from within this directory.
 
-To setup everything we need to deploy the `Hybrid Account` and the `TokenPrice` contract. Then we need to call `PermitCaller()` on the `Hybrid Account` and `RegisterUrl()`+`AddCredit()` on the `HCHelper`. To do so, you just need to set the environment variable `PRIVATE_KEY` inside the .env file and execute following command:
-``` bash
-yarn run deploy
-```
+# Testing
+Whenever you make changes and push to `main` on your Github repository relevant tests are being run by Github actions to make sure everything works as expected.
 
-For more documentation about Hybrid Account please visit the [docs](https://docs.boba.network/developer/features/aa-basics/hybrid-compute).
