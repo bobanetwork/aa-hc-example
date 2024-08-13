@@ -9,8 +9,6 @@ import {CopyIcon} from "./CopyIcon";
 import {YOUR_CONTRACT} from "@/config/snap";
 import {useContractAbi} from "@/hooks/useContractAbi";
 import {Loader2} from "lucide-react";
-import type {EthBaseTransaction, EthBaseUserOperation} from '@metamask/keyring-api';
-import {connectSnap, getSnap} from "@/lib/snap.ts";
 
 const FormComponent = () => {
     const [state] = useContext(MetaMaskContext);
@@ -27,7 +25,8 @@ const FormComponent = () => {
 
     const onSubmit = async () => {
         try {
-            if (!state.selectedAcount || Number(state.chain) !== 28882) {
+            if (!state.selectedAcount || !state.selectedAcount.id) {
+                console.error("Account not connected or invalid snap")
                 return;
             }
             setIsLoading(true);
@@ -37,22 +36,14 @@ const FormComponent = () => {
 
             // Prepare the function selector and encoded parameters for the smart contract interaction.
             // This specifies which function to call on the contract and with what arguments
-            const funcSelector = FunctionFragment.getSelector("fetchPrice", [
-                "string",
-            ]);
-
-            // Here, we encode the tokenSymbol as a string.
+            const funcSelector = FunctionFragment.getSelector("fetchPrice", ["string"]);
             const encodedParams = abiCoder.encode(["string"], [tokenSymbol]);
-
-            // Convert the concatenated data to a hex-string.
             const txData = hexlify(concat([funcSelector, encodedParams]));
 
             const transactionDetails = {
                 payload: {
-                    // The contract we want to call.
                     to: import.meta.env.VITE_SMART_CONTRACT,
                     value: "0",
-                    // Contains data such as which function and what arguments.
                     data: txData,
                 },
                 account: state.selectedAcount.id,
@@ -67,7 +58,7 @@ const FormComponent = () => {
                     request: {
                         method: "eth_sendUserOpBoba",
                         params: [transactionDetails],
-                        id: state.selectedAcount.id,
+                        id: state.selectedAcount?.id,
                     },
                 },
             });
@@ -145,7 +136,7 @@ const FormComponent = () => {
                                 Processing...
                             </>
                         ) : (
-                            "Submit"
+                            "Submit 12"
                         )}
                     </Button>
                 </div>
