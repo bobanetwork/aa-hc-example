@@ -50,9 +50,9 @@ When you follow the steps above your application will use the already deployed b
 
 | Name             | Address                                          | Explainer                           |
 |------------------|--------------------------------------------------|-------------------------------------|
-| BACKEND          | https://aa-hc-example.onrender.com       |                                     |
+| BACKEND          | https://aa-hc-example.onrender.com/hc       |                                     |
 | FRONTEND         | https://aa-hc-example-fe.onrender.com     |                                     |
-| HC_HELPER_ADDR   | 0x587a06089ed54101dd6d9A8ecDe1d146f97Af6B8       | HC Helper is system-wide available  |
+| HC_HELPER_ADDR   | 0x1c64EC0A5E2C58295c3208a63209A2A719dF68D8       | HC Helper is system-wide available  |
 | TOKEN_PRICE_ADDR | 0xcad49c0381c1B0779A318c2326Db43A6073adC1e | 
 | RPC_URL          | https://gateway.tenderly.co/public/boba-sepolia	 |                                     |
 | -> More RPC URls | https://chainlist.org/chain/28882	               |                                     |

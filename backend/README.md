@@ -17,7 +17,7 @@ Of course you can use whichever cloud provider you like. But for demo purposes w
 
 Our demo server will spin down with inactivity or due to exceeding the free monthly limit since we are using the free version. In this case your smart contract call will fail. 
 
-The demo server should still be available here: https://aa-hc-example.onrender.com
+The demo server should still be available here: https://aa-hc-example.onrender.com/hc
 
 If you want to setup your own server on Render, just follow these steps: 
 1. Create account on [render.com](https://render.com)

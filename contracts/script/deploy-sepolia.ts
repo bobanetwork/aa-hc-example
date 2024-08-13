@@ -7,7 +7,7 @@ dotenv.config();
 
 const DEFAULT_BOBA_SEPOLIA = {
   RPC_URL: 'https://sepolia.boba.network',
-  HC_HELPER_ADDR: '0x587a06089ed54101dd6d9A8ecDe1d146f97Af6B8',
+  HC_HELPER_ADDR: '0x1c64EC0A5E2C58295c3208a63209A2A719dF68D8',
 }
 
 const readHybridAccountAddress = () => {
@@ -104,7 +104,7 @@ async function main() {
     console.log('-------------------')
 
     if (!BACKEND_URL) {
-      console.warn('BACKEND_URL not defined. Using default public endpoint https://aa-hc-example.onrender.com')
+      console.warn('BACKEND_URL not defined. Using default public endpoint https://aa-hc-example.onrender.com/hc')
     }
     if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress || !PRIVATE_KEY) {
       throw Error("Configuration missing")
@@ -122,6 +122,12 @@ async function main() {
     const frontendEnvPath = '../../frontend/.env-boba-sepolia'
     updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
     updateEnvVariable("VITE_SNAP_ORIGIN", 'npm:@bobanetwork/snap-account-abstraction-keyring-hc', frontendEnvPath);
+    updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);
+    updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPath);
+
+    const frontendEnvPathSnapLocal = '../../frontend/.env-boba-sepolia-snaplocal'
+    updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
+    updateEnvVariable("VITE_SNAP_ORIGIN", 'local:http://localhost:8080', frontendEnvPath);
     updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);
     updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPath);
 

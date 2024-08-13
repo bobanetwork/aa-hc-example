@@ -14,7 +14,7 @@ describe("RPC Server", () => {
     process.env.OC_LISTEN_PORT = "1234";
     process.env.COINRANKING_API_KEY = "fake-api-key";
     process.env.OC_HYBRID_ACCOUNT =
-      "0xd0ca3C1ECa49635259f6c577A09634053Ab79577";
+      "0x734ab78da8f5ad3290b6abf784d0bea6bd480be1";
     process.env.ENTRY_POINTS = "0x43536f912f87490fa70d0AB6D58f8B9CD250394A";
     process.env.CHAIN_ID = "901";
     process.env.OC_PRIVKEY =

@@ -25,7 +25,7 @@ Our demo frontend will spin down with inactivity since we are using the free ver
 The demo frontend should be live here (free, so might have some delay on cold starts):
 https://aa-hc-example-fe.onrender.com
 
-Also the backend is hosted as free version on Render. So make sure to open https://aa-hc-example.onrender.com/ in Browser once to warm up the server. Otherwise the user operation might fail due to timeout.
+Also the backend is hosted as free version on Render. So make sure to open https://aa-hc-example.onrender.com/hc/ in Browser once to warm up the server. Otherwise the user operation might fail due to timeout.
 
 If you want to setup your own server on Render, just follow these steps:
 1. Create account on [render.com](https://render.com)
