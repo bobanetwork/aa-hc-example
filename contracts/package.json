@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "build": "forge build",
-    "test": "forge test && jest",
-    "deploy": "ts-node script/deploy-sepolia.ts",
-    "deploy-local": "ts-node script/deploy-local.ts"
+    "test": "forge test && npx hardhat test",
+    "deploy": "npx ts-node script/deploy-sepolia.ts",
+    "deploy-local": "npx ts-node script/deploy-local.ts"
   },
   "license": "MIT",
   "devDependencies": {

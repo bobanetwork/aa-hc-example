@@ -1,7 +1,5 @@
-import { exec, ProcessEnvOptions, spawn } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
-import { Readable } from "stream";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import {DEFAULT_SNAP_VERSION, getLocalIpAddress, isPortInUse} from "./utils";
@@ -22,11 +20,6 @@ const bundlerAddr = ethers.getAddress(
 const builderPrivkey =
   "0xf91be07ef5a01328015cae4f2e5aefe3c4577a90abb8e2e913fe071b0e3732ed";
 
-const clientOwner = ethers.getAddress(
-  "0x77Fe14A710E33De68855b0eA93Ed8128025328a9"
-);
-const clientPrivkey =
-  "0x541b3e3b20b8bb0e5bae310b2d4db4c8b7912ba09750e6ff161b7e67a26a9bf7";
 const ha0Owner = ethers.getAddress(
   "0x2A9099A58E0830A4Ab418c2a19710022466F1ce7"
 );
@@ -36,8 +29,6 @@ const ha0Privkey =
 const ha1Owner = ethers.getAddress(
   "0xE073fC0ff8122389F6e693DD94CcDc5AF637448e"
 );
-const ha1Privkey =
-  "0x7c0c629efc797f8c5f658919b7efbae01275470d59d03fdeb0fca1e6bd11d7fa";
 
 
 const updateEnvVariable = (key: string, value: string, envPath: string) => {
@@ -69,22 +60,6 @@ const parseLocalDeployAddresses = () => {
         address: transaction.contractAddress ?? "",
       }));
 
-    // const hybridAccount = jsonData.transactions
-    //   .map((transaction: any) => {
-    //     if (
-    //       transaction.contractName === "HybridAccountFactory" &&
-    //       transaction.function === "createAccount(address,uint256)"
-    //     ) {
-    //       return {
-    //         contractName: "HybridAccount",
-    //         address: transaction.additionalContracts[0].address,
-    //       };
-    //     }
-    //   })
-    //   .filter((ha: any) => ha); // filter out undefined values
-
-    // contracts.push(...hybridAccount);
-
     console.log("Parsed JSON data:", contracts);
     return contracts;
   } catch (err) {
@@ -104,7 +79,6 @@ const deleteIgnitionDeployments = () => {
   }
 };
 
-// TODO: fix .env file loading. Currently .env needs to be in /script directory
 async function main() {
   try {
     if (!isPortInUse(8545) && !isPortInUse(9545)) {

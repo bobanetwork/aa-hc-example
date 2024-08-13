@@ -1,14 +1,15 @@
 version: "3.8"
 
 services:
-  # Backend that is being called by your smart contract through Hybrid Compute
   offchain-service:
     build:
-      context: ./backend/offchain
-      dockerfile: ../Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "${OC_LISTEN_PORT:-1234}:${OC_LISTEN_PORT:-1234}"
     env_file: ./backend/.env
+    volumes:
+      - ./backend/.env:/app/.env
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${OC_LISTEN_PORT:-1234}/hc"]
@@ -16,31 +17,42 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    depends_on:
+      - deploy-service
 
-  # Nginx served static DApp
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - NETWORK=local # boba-sepolia | local
+        - NETWORK=local
     image: bobanetwork/aa-hc-example-frontend
+    volumes:
+      - ./frontend/.env-local:/app/frontend/.env-local
     ports:
       - "8000:80"
     restart: unless-stopped
+    depends_on:
+      - deploy-service
 
   snap-account-abstraction-keyring:
     build:
       context: ./snap-account-abstraction-keyring
       dockerfile: Dockerfile
       args:
-        - NETWORK=local # boba-sepolia | local
+        - NETWORK=local
     image: bobanetwork/snap-account-abstraction-keyring
     ports:
       - "8080:8080"
       - "8001:8000"
+    volumes:
+      - ./snap-account-abstraction-keyring/packages/site/.env:/app/snap-account-abstraction-keyring/packages/site/.env
+      - ./snap-account-abstraction-keyring/packages/site/.env.development:/app/snap-account-abstraction-keyring/packages/site/.env.development
+      - ./snap-account-abstraction-keyring/packages/site/.env.development.hc:/app/snap-account-abstraction-keyring/packages/site/.env.development.hc
+      - ./snap-account-abstraction-keyring/packages/snap/.env-local:/app/snap-account-abstraction-keyring/packages/snap/.env-local
     restart: unless-stopped
-
+    depends_on:
+      - deploy-service
 
 networks:
   default:

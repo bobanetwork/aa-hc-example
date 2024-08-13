@@ -43,6 +43,7 @@ export const isPortInUse = (port: number) => {
     execSync(`nc -z localhost ${port}`);
     return true;
   } catch (error) {
+    console.warn("[Warn] Could not check if port in use.")
     return false;
   }
 }
