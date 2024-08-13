@@ -9,9 +9,7 @@ on:
 jobs:
   test:
     name: Forge and Hardhat Tests
-    runs-on:
-      group: ubuntu-runners
-      labels: ubuntu-latest-m
+    runs-on: ubuntu-latest
     environment: tests
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +59,7 @@ jobs:
         working-directory: ./contracts
 
       - name: Start local environment
+        timeout-minutes: 60
         run: |
           pnpm start:local 2>&1 | tee local_env.log
         continue-on-error: true
