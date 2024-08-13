@@ -27,14 +27,43 @@ jobs:
         with:
           version: 8
 
-      - name: Install dependencies
+      - name: Install Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install Rust and Cargo
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Make
+        run: sudo apt-get install -y make
+
+      - name: Install dependencies (root)
+        run: pnpm install
+
+      - name: Install dependencies (contracts)
         run: pnpm install
         working-directory: ./contracts
 
       - name: Run Forge tests
         run: forge test -vvv
         working-directory: ./contracts
-       
+
+      - name: Start local environment
+        run: |
+          pnpm start:local &
+          echo $! > .pidfile
+          while ! nc -z localhost 8545; do   
+            sleep 5
+          done
+
       - name: Run Hardhat tests
         run: npx hardhat test
         working-directory: ./contracts
@@ -43,3 +72,6 @@ jobs:
           RPC_URL: ${{ vars.RPC_URL}}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
+      - name: Stop local environment
+        if: always()
+        run: kill $(cat .pidfile)
