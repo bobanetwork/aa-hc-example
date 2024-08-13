@@ -80,7 +80,6 @@ async function main() {
             "type": "function"
         }
     ]
-    const ttPABI=[{"type":"constructor","inputs":[{"name":"_helperAddr","type":"address","internalType":"address payable"}],"stateMutability":"nonpayable"},{"type":"function","name":"fetchPrice","inputs":[{"name":"token","type":"string","internalType":"string"}],"outputs":[],"stateMutability":"nonpayable"},{"type":"function","name":"tokenPrices","inputs":[{"name":"","type":"string","internalType":"string"}],"outputs":[{"name":"price","type":"string","internalType":"string"},{"name":"timestamp","type":"uint256","internalType":"uint256"}],"stateMutability":"view"}]
 
     const hybridAccountContract = new ethers.Contract(HYBRID_ACCOUNT, hybridAccountABI, signer);
     const hcHelperContract = new ethers.Contract(HC_HELPER_ADDR, hcHelperABI, signer);
@@ -111,7 +110,7 @@ async function main() {
         await permitCaller(TOKEN_PRICE_ACCOUNT_ADDR);
         console.log('DONE')
     } catch (e) {
-        console.log('failed registerURL: ', e);
+        console.log('[Ignore on testnet] failed permitCaller: ', e);
     }
 
     try {
@@ -119,7 +118,7 @@ async function main() {
         await registerUrl(HYBRID_ACCOUNT, BACKEND_URL);
         console.log('DONE')
     } catch (e) {
-        console.log('failed registerURL: ', e);
+        console.log('[Ignore on testnet] failed registerURL: ', e);
     }
 
     try {
@@ -127,7 +126,7 @@ async function main() {
         await addCredit(HYBRID_ACCOUNT, 100);
         console.log('DONE')
     } catch (e) {
-        console.log('failed addCredit: ', e);
+        console.log('[Ignore on testnet] failed addCredit: ', e);
     }
 }
 

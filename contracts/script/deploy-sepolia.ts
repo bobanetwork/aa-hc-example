@@ -126,10 +126,10 @@ async function main() {
     updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPath);
 
     const frontendEnvPathSnapLocal = '../../frontend/.env-boba-sepolia-snaplocal'
-    updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
-    updateEnvVariable("VITE_SNAP_ORIGIN", 'local:http://localhost:8080', frontendEnvPath);
-    updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);
-    updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPath);
+    updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPathSnapLocal);
+    updateEnvVariable("VITE_SNAP_ORIGIN", 'local:http://localhost:8080', frontendEnvPathSnapLocal);
+    updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPathSnapLocal);
+    updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPathSnapLocal);
 
     const snapSiteEnvFolder = '../../snap-account-abstraction-keyring/packages/site/'
     updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env`)
