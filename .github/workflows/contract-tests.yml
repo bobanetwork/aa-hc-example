@@ -58,20 +58,36 @@ jobs:
 
       - name: Start local environment
         run: |
-          pnpm start:local &
-          echo $! > .pidfile
-          while ! nc -z localhost 8545; do   
+          pnpm start:local > local_env.log 2>&1 &
+          PID=$!
+          echo $PID > .pidfile
+          
+          # Wait for up to 2 minutes
+          TIMEOUT=120
+          while [ $TIMEOUT -gt 0 ]; do
+            if grep -q "Local environment is ready" local_env.log; then
+              echo "Local environment is ready"
+              exit 0
+            fi
             sleep 5
+            TIMEOUT=$((TIMEOUT - 5))
           done
+          
+          echo "Timed out waiting for local environment to start"
+          cat local_env.log
+          exit 1
 
       - name: Run Hardhat tests
         run: npx hardhat test
         working-directory: ./contracts
         env:
           TOKEN_PRICE_CONTRACT: ${{ vars.TOKEN_PRICE_CONTRACT }}
-          RPC_URL: ${{ vars.RPC_URL}}
+          RPC_URL: ${{ vars.RPC_URL }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
       - name: Stop local environment
         if: always()
-        run: kill $(cat .pidfile)
+        run: |
+          if [ -f .pidfile ]; then
+            kill $(cat .pidfile) || true
+          fi
