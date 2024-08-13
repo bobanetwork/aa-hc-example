@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Full-stack example for Account Abstraction Hybrid Compute",
   "scripts": {
-    "start:local": "cd contracts && npx ts-node ./script/deploy-local.ts && cd ..",
-    "start:sepolia": "cd contracts && npx ts-node ./script/deploy-sepolia.ts && cd ..",
+    "start:local": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-local.ts && cd ..",
+    "start:sepolia": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-sepolia.ts && cd ..",
     "test": "pnpm test -r"
   },
   "repository": {

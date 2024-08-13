@@ -5,6 +5,7 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test && npx hardhat test",
+    "compile": "npx hardhat compile",
     "deploy": "npx ts-node script/deploy-sepolia.ts",
     "deploy-local": "npx ts-node script/deploy-local.ts"
   },
