@@ -2,10 +2,9 @@
 pragma solidity 0.8.19;
 
 import "./samples/HybridAccount.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenPrice is ERC20, Ownable {
+contract TokenPrice is Ownable {
     mapping(string => TokenPriceStruct) public tokenPrices;
     HybridAccount public HA;
 
@@ -19,7 +18,7 @@ contract TokenPrice is ERC20, Ownable {
 
     constructor(
         address payable _demoAddr
-    ) ERC20("TokenPrice Token", "TPT") Ownable() {
+    ) Ownable() {
         address payable demoAddr = payable(_demoAddr);
         HA = HybridAccount(demoAddr);
     }
