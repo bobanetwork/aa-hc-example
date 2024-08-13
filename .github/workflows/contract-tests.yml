@@ -60,7 +60,7 @@ jobs:
 
       - name: Start local environment
         run: |
-          timeout 1200 pnpm start:local 2>&1 | tee local_env.log
+          timeout 5000 pnpm start:local 2>&1 | tee local_env.log
         continue-on-error: true
         id: start_local
         env:
