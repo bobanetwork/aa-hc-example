@@ -51,7 +51,7 @@ export const isPortInUse = (port: number) => {
 export const execPromise = (
     command: string,
     inputs: string[] = [],
-    cwd: ProcessEnvOptions["cwd"] = undefined,
+    cwd: any = undefined,
     env?: NodeJS.ProcessEnv
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -67,13 +67,15 @@ export const execPromise = (
     let stderr = "";
 
     child.stdout.on("data", (data) => {
-      stdout += data.toString();
-      console.log(data.toString());
+      const output = data.toString();
+      stdout += output;
+      console.log(output);
     });
 
     child.stderr.on("data", (data) => {
-      stderr += data.toString();
-      console.error(data.toString());
+      const output = data.toString();
+      stderr += output;
+      console.error(output);
     });
 
     const stdinStream = new Readable({
@@ -87,13 +89,25 @@ export const execPromise = (
 
     stdinStream.pipe(child.stdin);
 
-    child.on("close", (code) => {
+    child.on("close", (code, e) => {
       if (code !== 0) {
-        console.log(stdout)
-        reject(new Error(`${command} Command failed with exit code ${code}`));
+        console.error(`${command} Command failed with exit code ${code} ${e}`);
+        reject(new Error(`${command} Command failed with exit code ${code} ${e}`));
       } else {
         resolve(stdout);
       }
     });
   });
+};
+
+export const deleteIgnitionDeployments = () => {
+  const deploymentsPath = path.resolve(__dirname, "../ignition/deployments");
+  if (fs.existsSync(deploymentsPath)) {
+    fs.rmSync(deploymentsPath, { recursive: true, force: true });
+    console.log("Ignition deployments folder deleted.");
+  } else {
+    console.log(
+        "Ignition deployments folder does not exist. Skipping deletion."
+    );
+  }
 };

@@ -21,7 +21,6 @@ contract DeployExample is Script {
     EntryPoint public entrypoint;
     HCHelper public hcHelper;
     HybridAccount public hybridAccount;
-    TokenPrice public tokenPrice;
     SimpleAccount public simpleAccount;
     SimpleAccountFactory public saf;
 
@@ -52,7 +51,6 @@ contract DeployExample is Script {
             IEntryPoint(entrypoint),
             address(hcHelper)
         );
-        tokenPrice = new TokenPrice(payable(hybridAccount));
         saf = new SimpleAccountFactory(entrypoint);
         simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
     }
@@ -62,19 +60,19 @@ contract DeployExample is Script {
             hcHelper.initialize(deployerAddress, address(hybridAccount));
             hcHelper.SetPrice(0);
         }
+        (bool suc, ) = address(entrypoint).call{value: 1 ether}("");
+        require(suc, "Failed to send 1 ETH to entrypoint");
+        uint256 minBalance = 0.01 ether;
         (uint112 bal, , , , ) = entrypoint.deposits(address(hybridAccount));
-        if (bal < 0.01 ether) {
-            entrypoint.depositTo{value: 0.01 ether - bal}(
-                address(address(hybridAccount))
-            );
+        if (bal < minBalance) {
+            uint256 amountToDeposit = minBalance - bal;
+            entrypoint.depositTo{value: amountToDeposit}(deployerAddress);
         }
-
         // register url, add credit
         hcHelper.RegisterUrl(address(hybridAccount), backendURL);
         hcHelper.AddCredit(address(hybridAccount), 100);
         // permit caller
         hybridAccount.initialize(deployerAddress);
-        hybridAccount.PermitCaller(address(tokenPrice), true);
         // fund the bundler
         (bool success, ) = bundlerAddress.call{value: 1 ether}("");
         require(success, "ETH transfer failed");
@@ -84,7 +82,6 @@ contract DeployExample is Script {
         console.log("ENTRY_POINTS=", address(entrypoint));
         console.log("HC_HELPER_ADDR=", address(hcHelper));
         console.log("OC_HYBRID_ACCOUNT=", address(hybridAccount));
-        console.log("TEST_TOKEN_PRICE=", address(tokenPrice));
         console.log("SIMPLE_ACCOUNT=", address(simpleAccount));
         console.log("CLIENT_PRIVKEY=", deployerPrivateKey);
         console.log("HC_SYS_OWNER", address(deployerAddress));
