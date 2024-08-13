@@ -330,7 +330,7 @@ async function main() {
 
     /** @DEV bootstrap frontend, backend and snap */
     await execPromise(
-        "docker-compose -f docker-compose.local.yml up",
+        "docker-compose -f docker-compose.local.yml up --build",
         [],
         path.resolve(__dirname, "../../")
     );

@@ -5,6 +5,11 @@ import {DEFAULT_SNAP_VERSION, execPromise, updateEnvVariable} from './utils'
 
 dotenv.config();
 
+const DEFAULT_BOBA_SEPOLIA = {
+  RPC_URL: 'https://sepolia.boba.network',
+  HC_HELPER_ADDR: '0x587a06089ed54101dd6d9A8ecDe1d146f97Af6B8',
+}
+
 const readHybridAccountAddress = () => {
   const jsonPath = path.resolve(
     __dirname,
@@ -41,7 +46,7 @@ async function main() {
     // Step 2: Deploy Hybrid Account
     console.log("Deploying Hybrid Account...");
     const forgeOutput = await execPromise(
-      `forge script script/deploy-hybrid-account.s.sol:DeployExample --rpc-url ${process.env.RPC_URL} --broadcast`
+      `forge script script/deploy-hybrid-account.s.sol:DeployExample --rpc-url ${DEFAULT_BOBA_SEPOLIA.RPC_URL} --broadcast`
     );
     console.log("forgeoutput: ", forgeOutput);
 
@@ -89,7 +94,8 @@ async function main() {
 
     // Step 5: Run production push script
     console.log("Running production push script...");
-    const {HC_HELPER_ADDR, PRIVATE_KEY, RPC_URL, BACKEND_URL} = process.env
+    const {PRIVATE_KEY, BACKEND_URL} = process.env
+    const {HC_HELPER_ADDR, RPC_URL} = DEFAULT_BOBA_SEPOLIA
     console.log('HCH = ', HC_HELPER_ADDR)
     console.log('HA = ', hybridAccountAddress);
     console.log('TTP = ', tokenPriceAddress);
@@ -100,7 +106,7 @@ async function main() {
     if (!BACKEND_URL) {
       console.warn('BACKEND_URL not defined. Using default public endpoint https://aa-hc-example.onrender.com')
     }
-    if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress) {
+    if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress || !PRIVATE_KEY) {
       throw Error("Configuration missing")
     }
 
@@ -124,9 +130,32 @@ async function main() {
     updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development`)
     updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development.hc`)
 
+    // Backend env vars
+    const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
+    updateEnvVariable(
+        "OC_HYBRID_ACCOUNT",
+        hybridAccountAddress,
+        backendEnvPath
+    );
+
+    updateEnvVariable(
+        "ENTRY_POINTS",
+        '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789', // @dev Official Boba Sepolia Entrypoint: https://docs.boba.network/developer/features/aa-basics/contract-addresses
+        backendEnvPath
+    );
+    updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
+    updateEnvVariable("OC_PRIVKEY", PRIVATE_KEY!, backendEnvPath);
+    updateEnvVariable(
+        "HC_HELPER_ADDR",
+        HC_HELPER_ADDR,
+        backendEnvPath
+    );
+
+    console.log("Backend ENV vars set...");
+
     /** @DEV bootstrap frontend */
     await execPromise(
-        "docker-compose -f docker-compose.sepolia.yml up",
+        "docker-compose -f docker-compose.sepolia.yml up --build",
         [],
         path.resolve(__dirname, "../../")
     );
