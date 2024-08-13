@@ -9,7 +9,9 @@ on:
 jobs:
   test:
     name: Forge and Hardhat Tests
-    runs-on: ubuntu-latest
+    runs-on:
+      group: ubuntu-runners
+      labels: ubuntu-20.04-16core
     environment: tests
     steps:
       - uses: actions/checkout@v4
