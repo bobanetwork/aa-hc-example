@@ -111,7 +111,7 @@ async function main() {
 
     console.log("Funding L2 done...");
 
-    const BACKEND_URL = process.env.BACKEND_URL ?? 'http://locahost:1234'
+    const BACKEND_URL = process.env.BACKEND_URL ?? `http://${getLocalIpAddress()}:1234`
     if (!process.env.BACKEND_URL) {
       console.warn('[deploy-local.ts] No BACKEND_URL defined. Might be expected for default deployments and CI. Using localhost.')
     }

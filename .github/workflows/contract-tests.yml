@@ -59,7 +59,7 @@ jobs:
         working-directory: ./contracts
 
       - name: Start local environment
-        timeout-minutes: 120
+        timeout-minutes: 60
         run: |
           pnpm start:local 2>&1 | tee local_env.log
         continue-on-error: true
