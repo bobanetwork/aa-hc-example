@@ -13,6 +13,8 @@ jobs:
     environment: tests
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -62,7 +64,7 @@ jobs:
         continue-on-error: true
         id: start_local
         env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }} # needed for hardhat.config to compile
 
       - name: Check start local environment status
         if: steps.start_local.outcome == 'failure'
