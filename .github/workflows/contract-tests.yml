@@ -59,8 +59,9 @@ jobs:
         working-directory: ./contracts
 
       - name: Start local environment
+        # timeout 5000
         run: |
-          timeout 5000 pnpm start:local 2>&1 | tee local_env.log
+          pnpm start:local 2>&1 | tee local_env.log
         continue-on-error: true
         id: start_local
         env:
