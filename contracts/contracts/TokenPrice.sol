@@ -17,10 +17,9 @@ contract TokenPrice is Ownable {
     }
 
     constructor(
-        address payable _demoAddr
+        address _hybridAccount
     ) Ownable() {
-        address payable demoAddr = payable(_demoAddr);
-        HA = HybridAccount(demoAddr);
+        HA = HybridAccount(payable(_hybridAccount));
     }
 
     function fetchPrice(string calldata token) public {
