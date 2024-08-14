@@ -65,8 +65,8 @@ contract DeployExample is Script {
         tokenPaymaster = new TokenPaymaster(address(haf), "sym", IEntryPoint(entrypoint));
 
         entrypoint.depositTo{value: 0.1 ether}(address(hybridAccount)); // only needed for HA
-        entrypoint.depositTo{value: 0.1 ether}(address(verifyingPaymaster));
-        entrypoint.depositTo{value: 0.1 ether}(address(tokenPaymaster));
+        verifyingPaymaster.deposit{value: 0.1 ether}();
+        tokenPaymaster.deposit{value: 0.1 ether}();
         console.log(address(hybridAccount));
 
         simpleAccount = saf.createAccount(deployerAddress, block.number);

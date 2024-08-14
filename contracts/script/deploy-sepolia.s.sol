@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "../contracts/samples/HybridAccount.sol";
+import "../contracts/samples/TokenPaymaster.sol";
 import "../contracts/core/HCHelper.sol";
-import {HybridAccountFactory} from "../contracts/samples/HybridAccountFactory.sol";
+import "../contracts/samples/HybridAccountFactory.sol";
+import "../contracts/TokenPrice.sol";
 
 contract DeployExample is Script {
     // Configs
@@ -20,10 +22,13 @@ contract DeployExample is Script {
     // Contracts
     HybridAccount public hybridAccount;
     HCHelper public hcHelper;
-    address public entrypoint = address(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
+    TokenPrice public tokenPrice;
+    TokenPaymaster public tokenPaymaster;
 
     function run() public {
         deployerAddress = vm.addr(deployerPrivateKey);
+
+        tokenPaymaster = TokenPaymaster(address(0x8223388f7aF211d84289783ed97ffC5Fefa14256));
 
         vm.startBroadcast(deployerPrivateKey);
 
@@ -35,8 +40,12 @@ contract DeployExample is Script {
         // Deploy using HybridAccountFactory, salt = block.number to force redeploy HybridAccount if already existing from this wallet
         hybridAccount = HybridAccountFactory(haFactory).createAccount(deployerAddress, block.number);
         IEntryPoint(entrypoint).depositTo{value: 0.001 ether}(address(hybridAccount));
+        tokenPaymaster.deposit{value: 0.001 ether}();
+
         console.log(address(hybridAccount));
 
+        // deploy your own contract
+        tokenPrice = new TokenPrice(address(hybridAccount));
 
         // register url, add credit
         // only owner - reach out to Boba foundation: hcHelper.RegisterUrl(address(hybridAccount), backendURL);

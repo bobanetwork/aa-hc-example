@@ -45,11 +45,11 @@ const FormComponent = () => {
                     to: import.meta.env.VITE_SMART_CONTRACT,
                     value: "0",
                     data: txData,
-                overrides: {
+                /*overrides: {
                         callGasLimitReq: 11_000_000_000_000,
                         maxFeePerGasReq: 11_000_000_000_000,
                         maxPriorityFeePerGasReq: 11_000_000_000_000,
-                    },
+                    },*/
                 },
                 account: state.selectedAcount.id,
                 scope: `eip155:${state.chain}`,

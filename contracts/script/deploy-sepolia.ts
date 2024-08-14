@@ -28,7 +28,7 @@ async function main() {
         // Step 2: Deploy Hybrid Account
         console.log("Deploying Hybrid Account...");
         const forgeOutput = await execPromise(
-            `forge script script/deploy-hybrid-account.s.sol:DeployExample --rpc-url ${RPC_URL} --broadcast`
+            `forge script script/deploy-sepolia.s.sol:DeployExample --rpc-url ${RPC_URL} --broadcast`
         );
         console.log("forgeoutput: ", forgeOutput);
 
