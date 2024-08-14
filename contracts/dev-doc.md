@@ -502,15 +502,17 @@ TC = loadContract(w3, "TestCounter", path_prefix + "test/TestCounter.sol")
 
 Here "path_prefix" indicates where the contract is located.
 
-After loading the contract, we can deploy it as follows:
+After loading the contract, we can deploy it as follows with Foundry (or hardhat if you prefer that)
 
 ```solidity
-epAddr = deploy2("EntryPoint", EP.constructor(), 0)
-hhAddr = deploy2("HCHelper", HH.constructor(epAddr, boba_addr, 0), 0)
-saAddr = deploy2("SimpleAccount", SA.constructor(epAddr), 0)
-ha0Addr = deploy2("HybridAccount.0", HA.constructor(epAddr, hhAddr), 0)
-ha1Addr = deploy2("HybridAccount.1", HA.constructor(epAddr, hhAddr), 1)
-tcAddr = deploy2("TestCounter", TC.constructor(ha1Addr), 0)
+epAddr = new EntryPoint();
+hhAddr = new HCHelper(epAddr, boba_addr);
+saf = new SimpleAccountFactory(epAddr);
+haf = new HybridAccountFactory(epAddr, hhAddr);
+saAddr = saf.createAccount(deployerAddress, 0);
+ha0Addr = haf.createAccount(deployerAddress, 0);
+ha1Addr = haf.createAccount(deployerAddress, 1);
+tcAddr = new TestCounter(ha1Addr)
 ```
 
 The constructor of our smart contract takes an address as an argument. Therefore, we pass the address of
