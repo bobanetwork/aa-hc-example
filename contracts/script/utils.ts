@@ -20,7 +20,6 @@ export const getLocalIpAddress = () => {
   throw new Error("No Local IP-Address found");
 };
 
-
 export const updateEnvVariable = (key: string, value: string, customEnvPath?: string) => {
   const envPath = path.resolve(__dirname, customEnvPath ?? "../.env")
   if (!fs.existsSync(envPath)) {
@@ -100,14 +99,56 @@ export const execPromise = (
   });
 };
 
-export const deleteIgnitionDeployments = () => {
-  const deploymentsPath = path.resolve(__dirname, "../ignition/deployments");
-  if (fs.existsSync(deploymentsPath)) {
-    fs.rmSync(deploymentsPath, { recursive: true, force: true });
-    console.log("Ignition deployments folder deleted.");
-  } else {
-    console.log(
-        "Ignition deployments folder does not exist. Skipping deletion."
-    );
+export const readHybridAccountAddress = (latestBroadcast: string) => {
+  const jsonPath = path.resolve(
+      __dirname,
+      latestBroadcast
+  );
+  const jsonContent = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+  const transaction = jsonContent.transactions.find(
+      (tx: any) => tx.transactionType === "CALL" && tx.function === "createAccount(address,uint256)"
+  );
+  if (!transaction) {
+    throw new Error("HybridAccount Creation transaction not found in the JSON file");
+  }
+  const create2Tx = transaction.additionalContracts.find((t: any) => {
+    return t.transactionType === "CREATE2";
+  })
+  if (!create2Tx) {
+    throw new Error('Could not find Create2 tx within outer account creation tx: ' + JSON.stringify(transaction))
+  }
+  return create2Tx.address;
+};
+
+export type DeployedContracts = { contractName: string; address: string }[]
+export const parseDeployAddresses = (latestBroadcast: string): DeployedContracts => {
+  const jsonPath = path.resolve(
+      __dirname,
+      latestBroadcast
+  );
+
+  try {
+    const data = fs.readFileSync(jsonPath, "utf8");
+    const jsonData = JSON.parse(data);
+
+    const contracts: DeployedContracts =
+        jsonData.transactions.map((transaction: any) => ({
+          contractName: transaction.contractName ?? "",
+          address: transaction.contractAddress ?? "",
+        }));
+
+    console.log("Parsed JSON data:", contracts);
+    return contracts;
+  } catch (err) {
+    console.error("Error reading or parsing the file:", err);
+    throw new Error('[parseDeployAddresses]: Could not read or parse deployed contract broadcast json.')
   }
 };
+
+export const getContractFromDeployAddresses = (contracts: DeployedContracts, contractName: string): string => {
+  const addr = contracts?.find((c) => c.contractName === contractName)?.address
+  if (!addr) {
+    throw new Error('[getContractFromDeployAddresses]: Could not find contract - '+contractName)
+  }
+  return addr;
+}

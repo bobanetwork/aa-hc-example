@@ -2,15 +2,14 @@ import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
 import {ethers} from "ethers";
-import {DEFAULT_SNAP_VERSION, deleteIgnitionDeployments, getLocalIpAddress, isPortInUse} from "./utils";
-import {execPromise} from './utils'
 import {
-    HybridAccount__factory,
-    HybridAccountFactory__factory,
-    SimpleAccountFactory__factory,
-    TokenPaymaster__factory,
-    VerifyingPaymaster__factory
-} from "../typechain-types";
+    DEFAULT_SNAP_VERSION, getContractFromDeployAddresses,
+    getLocalIpAddress,
+    isPortInUse,
+    parseDeployAddresses
+} from "./utils";
+import {execPromise} from './utils'
+import {readHybridAccountAddress} from "./utils";
 
 dotenv.config();
 
@@ -44,51 +43,6 @@ const updateEnvVariable = (key: string, value: string, envPath: string) => {
     }
     fs.writeFileSync(envPath, envFile);
     dotenv.config();
-};
-
-const latestBroadcast = "../broadcast/deploy.s.sol/901/run-latest.json"
-const readHybridAccountAddress = () => {
-    const jsonPath = path.resolve(
-        __dirname,
-        latestBroadcast
-    );
-    const jsonContent = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-    const transaction = jsonContent.transactions.find(
-        (tx: any) => tx.transactionType === "CALL" && tx.function === "createAccount(address,uint256)"
-    );
-    if (!transaction) {
-        throw new Error("HybridAccount Creation transaction not found in the JSON file");
-    }
-    const create2Tx = transaction.additionalContracts.find((t: any) => {
-        return t.transactionType === "CREATE2";
-    })
-    if (!create2Tx) {
-        throw new Error('Could not find Create2 tx within outer account creation tx: ' + JSON.stringify(transaction))
-    }
-    return create2Tx.address;
-};
-
-const parseLocalDeployAddresses = () => {
-    const jsonPath = path.resolve(
-        __dirname,
-        latestBroadcast
-    );
-
-    try {
-        const data = fs.readFileSync(jsonPath, "utf8");
-        const jsonData = JSON.parse(data);
-
-        const contracts: { contractName: string; address: string }[] =
-            jsonData.transactions.map((transaction: any) => ({
-                contractName: transaction.contractName ?? "",
-                address: transaction.contractAddress ?? "",
-            }));
-
-        console.log("Parsed JSON data:", contracts);
-        return contracts;
-    } catch (err) {
-        console.error("Error reading or parsing the file:", err);
-    }
 };
 
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
@@ -143,14 +97,15 @@ async function main() {
             baseDeployVars
         );
 
-        const contracts = parseLocalDeployAddresses();
-        const hcHelperAddr = contracts?.find((c) => c.contractName === "HCHelper")?.address;
-        const haFactory = contracts?.find((c) => c.contractName === "HybridAccountFactory")?.address;
-        const saFactory = contracts?.find((c) => c.contractName === "SimpleAccountFactory")?.address;
-        const tokenPriceAddress = contracts?.find((c) => c.contractName === "TokenPrice")?.address;
-        const tokenPaymasterAddress = contracts?.find((c) => c.contractName === "TokenPaymaster")?.address;
-        const verifyingPaymasterContract = contracts?.find((c) => c.contractName === "VerifyingPaymaster")?.address;
-        const hybridAccountAddr = readHybridAccountAddress();
+        const latestBroadcast = "../broadcast/deploy.s.sol/901/run-latest.json"
+        const contracts = parseDeployAddresses(latestBroadcast);
+        const hcHelperAddr = getContractFromDeployAddresses(contracts, "HCHelper");
+        const haFactory = getContractFromDeployAddresses(contracts, "HybridAccountFactory");
+        const saFactory = getContractFromDeployAddresses(contracts, "SimpleAccountFactory");
+        const tokenPriceAddress = getContractFromDeployAddresses(contracts, "TokenPrice");
+        const tokenPaymasterAddress = getContractFromDeployAddresses(contracts, "TokenPaymaster");
+        const verifyingPaymasterContract = getContractFromDeployAddresses(contracts, "VerifyingPaymaster");
+        const hybridAccountAddr = readHybridAccountAddress(latestBroadcast);
 
         if (!hcHelperAddr || !hybridAccountAddr || !haFactory || !tokenPriceAddress || !tokenPaymasterAddress || !verifyingPaymasterContract || !saFactory) {
             throw Error("Some contracts are not defined!");
