@@ -113,12 +113,16 @@ async function main() {
         console.log('[Ignore on testnet] failed permitCaller: ', e);
     }
 
-    try {
-        console.log('Registering URL...')
-        await registerUrl(HYBRID_ACCOUNT, BACKEND_URL);
-        console.log('DONE')
-    } catch (e) {
-        console.log('[Ignore on testnet] failed registerURL: ', e);
+    if (RPC_URL.includes('localhost')) {
+        try {
+            console.log('Registering URL... (is expected to fail on testnet since you are not owner)')
+            await registerUrl(HYBRID_ACCOUNT, BACKEND_URL);
+            console.log('DONE')
+        } catch (e) {
+            console.log('[Ignore on testnet] failed registerURL: ', e);
+        }
+    } else {
+        console.log('NOT REGISTERING URL, since you are not deploying locally. Reach out to Boba Foundation to get your backend url registered on your HybridAccount.')
     }
 
     try {

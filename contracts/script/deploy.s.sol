@@ -6,9 +6,9 @@ import "../contracts/core/EntryPoint.sol";
 import "../contracts/core/HCHelper.sol";
 import "../contracts/samples/HybridAccountFactory.sol";
 import "../contracts/samples/SimpleAccountFactory.sol";
+import "../contracts/samples/TokenPaymaster.sol";
 import "../contracts/TokenPrice.sol";
-//import "openzeppelin-contracts/contracts/mocks/InitializableMock.sol";
-// forge script scripts/deploy.s.sol:DeployExample --rpc-url http://localhost:9545 --broadcast
+import "../contracts/samples/VerifyingPaymaster.sol";
 
 contract DeployExample is Script {
     // Configs
@@ -21,8 +21,12 @@ contract DeployExample is Script {
     EntryPoint public entrypoint;
     HCHelper public hcHelper;
     HybridAccount public hybridAccount;
+    VerifyingPaymaster public verifyingPaymaster;
+    TokenPaymaster public tokenPaymaster;
+    TokenPrice public tokenPrice;
     SimpleAccount public simpleAccount;
     SimpleAccountFactory public saf;
+    HybridAccountFactory public haf;
 
     function run() public {
         // Prepare and start Broadcast
@@ -47,12 +51,25 @@ contract DeployExample is Script {
             address(entrypoint),
             address(0x4200000000000000000000000000000000000023)
         );
-        hybridAccount = new HybridAccount(
-            IEntryPoint(entrypoint),
-            address(hcHelper)
-        );
+
         saf = new SimpleAccountFactory(entrypoint);
-        simpleAccount = new SimpleAccount(IEntryPoint(entrypoint));
+        haf = new HybridAccountFactory(entrypoint, address(hcHelper));
+
+        // use block number to always deploy fresh HA & SA
+        hybridAccount = haf.createAccount(deployerAddress, block.number);
+
+        tokenPrice = new TokenPrice(hybridAccount);
+        hybridAccount.PermitCaller(address(tokenPrice), true);
+
+        verifyingPaymaster = new VerifyingPaymaster(entrypoint, address(deployerAddress));
+        tokenPaymaster = new TokenPaymaster(haf, entrypoint, deployerAddress);
+
+        entrypoint.depositTo{value: 0.1 ether}(address(hybridAccount)); // only needed for HA
+        entrypoint.depositTo{value: 0.1 ether}(address(verifyingPaymaster));
+        entrypoint.depositTo{value: 0.1 ether}(address(tokenPaymaster));
+        console.log(address(hybridAccount));
+
+        simpleAccount = saf.createAccount(deployerAddress, block.number);
     }
 
     function configureContracts() public {
@@ -83,6 +100,8 @@ contract DeployExample is Script {
         console.log("HC_HELPER_ADDR=", address(hcHelper));
         console.log("OC_HYBRID_ACCOUNT=", address(hybridAccount));
         console.log("SIMPLE_ACCOUNT=", address(simpleAccount));
+        console.log("HA_FACTORY=", address(haf));
+        console.log("SA_FACTORY=", address(saf));
         console.log("CLIENT_PRIVKEY=", deployerPrivateKey);
         console.log("HC_SYS_OWNER", address(deployerAddress));
     }

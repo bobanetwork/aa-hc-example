@@ -8,6 +8,7 @@ dotenv.config();
 const DEFAULT_BOBA_SEPOLIA = {
   RPC_URL: 'https://sepolia.boba.network',
   HC_HELPER_ADDR: '0x1c64EC0A5E2C58295c3208a63209A2A719dF68D8',
+  ENTRYPOINT_ADDR: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789',
 }
 
 const readHybridAccountAddress = () => {
@@ -17,12 +18,18 @@ const readHybridAccountAddress = () => {
   );
   const jsonContent = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
   const transaction = jsonContent.transactions.find(
-    (tx: any) => tx.transactionType === "CREATE"
+    (tx: any) => tx.transactionType === "CALL" && tx.function === "createAccount(address,uint256)"
   );
   if (!transaction) {
-    throw new Error("CREATE transaction not found in the JSON file");
+    throw new Error("HybridAccount Creation transaction not found in the JSON file");
   }
-  return transaction.contractAddress;
+  const create2Tx = transaction.additionalContracts.find((t:any) => {
+    return t.transactionType === "CREATE2";
+  })
+  if (!create2Tx) {
+    throw new Error('Could not find Create2 tx within outer account creation tx: '+JSON.stringify(transaction))
+  }
+  return create2Tx.address;
 };
 
 const deleteIgnitionDeployments = () => {
@@ -39,6 +46,8 @@ const deleteIgnitionDeployments = () => {
 
 async function main() {
   try {
+    const {HC_HELPER_ADDR, RPC_URL, ENTRYPOINT_ADDR} = DEFAULT_BOBA_SEPOLIA
+
     // Step 1: Compile Hardhat project
     console.log("Compiling Hardhat project...");
     await execPromise("npx hardhat compile");
@@ -46,11 +55,15 @@ async function main() {
     // Step 2: Deploy Hybrid Account
     console.log("Deploying Hybrid Account...");
     const forgeOutput = await execPromise(
-      `forge script script/deploy-hybrid-account.s.sol:DeployExample --rpc-url ${DEFAULT_BOBA_SEPOLIA.RPC_URL} --broadcast`
+      `forge script script/deploy-hybrid-account.s.sol:DeployExample --rpc-url ${RPC_URL} --broadcast`
     );
     console.log("forgeoutput: ", forgeOutput);
 
     const hybridAccountAddress = readHybridAccountAddress();
+    console.log("Verifying HybridAccount contract...");
+    await execPromise(
+        `cast call --rpc-url=${RPC_URL} ${hybridAccountAddress} "getDeposit()"`
+    );
 
     // Update HYBRID_ACCOUNT in .env
     updateEnvVariable("HYBRID_ACCOUNT", hybridAccountAddress);
@@ -86,16 +99,17 @@ async function main() {
 
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
+
+    const {PRIVATE_KEY, BACKEND_URL} = process.env
     // Step 4: Verify contract
     console.log("Verifying TokenPrice contract...");
     await execPromise(
       `npx hardhat verify --network boba_sepolia ${tokenPriceAddress} ${hybridAccountAddress}`
     );
 
+
     // Step 5: Run production push script
     console.log("Running production push script...");
-    const {PRIVATE_KEY, BACKEND_URL} = process.env
-    const {HC_HELPER_ADDR, RPC_URL} = DEFAULT_BOBA_SEPOLIA
     console.log('HCH = ', HC_HELPER_ADDR)
     console.log('HA = ', hybridAccountAddress);
     console.log('TTP = ', tokenPriceAddress);
@@ -103,15 +117,19 @@ async function main() {
     console.log('RPC_URL = ', RPC_URL)
     console.log('-------------------')
 
+    const finalBackendUrl = BACKEND_URL ?? "https://aa-hc-example.onrender.com/hc"
+    updateEnvVariable("BACKEND_URL", finalBackendUrl)
+    updateEnvVariable("ENTRY_POINT", ENTRYPOINT_ADDR)
+
     if (!BACKEND_URL) {
       console.warn('BACKEND_URL not defined. Using default public endpoint https://aa-hc-example.onrender.com/hc')
     }
-    if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress || !PRIVATE_KEY) {
+    if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress || !PRIVATE_KEY || !RPC_URL) {
       throw Error("Configuration missing")
     }
 
     await execPromise(
-      `node script/pushProduction.js ${RPC_URL} ${PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${BACKEND_URL}`
+      `node script/pushProduction.js ${RPC_URL} ${PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${finalBackendUrl}`
     );
 
     console.log("Deployment process completed successfully!");
@@ -146,7 +164,7 @@ async function main() {
 
     updateEnvVariable(
         "ENTRY_POINTS",
-        '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789', // @dev Official Boba Sepolia Entrypoint: https://docs.boba.network/developer/features/aa-basics/contract-addresses
+        ENTRYPOINT_ADDR, // @dev Official Boba Sepolia Entrypoint: https://docs.boba.network/developer/features/aa-basics/contract-addresses
         backendEnvPath
     );
     updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
