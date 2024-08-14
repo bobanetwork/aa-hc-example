@@ -58,11 +58,11 @@ contract DeployExample is Script {
         // use block number to always deploy fresh HA & SA
         hybridAccount = haf.createAccount(deployerAddress, block.number);
 
-        tokenPrice = new TokenPrice(hybridAccount);
+        tokenPrice = new TokenPrice(payable(hybridAccount));
         hybridAccount.PermitCaller(address(tokenPrice), true);
 
         verifyingPaymaster = new VerifyingPaymaster(entrypoint, address(deployerAddress));
-        tokenPaymaster = new TokenPaymaster(haf, entrypoint, deployerAddress);
+        tokenPaymaster = new TokenPaymaster(address(haf), "sym", IEntryPoint(entrypoint));
 
         entrypoint.depositTo{value: 0.1 ether}(address(hybridAccount)); // only needed for HA
         entrypoint.depositTo{value: 0.1 ether}(address(verifyingPaymaster));

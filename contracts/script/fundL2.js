@@ -24,6 +24,7 @@ async function main() {
             };
             const response = await walletL1.sendTransaction(tx);
             await response.wait();
+            console.log("Funding L2 done...");
         } catch (e) {
             console.error("Error: ", e);
         }
