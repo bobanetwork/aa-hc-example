@@ -61,7 +61,7 @@ const FormComponent = () => {
                 params: {
                     snapId: defaultSnapOrigin,
                     request: {
-                        method: "eth_sendUserOpBobaPM",
+                        method: "eth_sendUserOpBoba",
                         params: [transactionDetails],
                         id: state.selectedAcount?.id,
                     },
@@ -141,7 +141,7 @@ const FormComponent = () => {
                                 Processing...
                             </>
                         ) : (
-                            "Submit 12"
+                            "Submit"
                         )}
                     </Button>
                 </div>

@@ -87,12 +87,15 @@ contract DeployExample is Script {
         }
         // register url, add credit
         hcHelper.RegisterUrl(address(hybridAccount), backendURL);
-        hcHelper.AddCredit(address(hybridAccount), 100);
+        hcHelper.AddCredit(address(hybridAccount), 1_000_000);
         // permit caller
         hybridAccount.initialize(deployerAddress);
         // fund the bundler
         (bool success, ) = bundlerAddress.call{value: 1 ether}("");
         require(success, "ETH transfer failed");
+
+        entrypoint.depositTo{value: 0.1 ether}(address(tokenPaymaster));
+        entrypoint.depositTo{value: 0.1 ether}(address(verifyingPaymaster));
     }
 
     function logContracts() public view {

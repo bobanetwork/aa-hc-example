@@ -9,6 +9,7 @@ const port = process.env.OC_LISTEN_PORT;
 app.use(express.json());
 
 app.post("/hc", async (req: Request, res: Response) => {
+  console.log('--> reached')
   const { method, params } = req.body;
 
   if (!method || !params) {
