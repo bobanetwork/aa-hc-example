@@ -17,6 +17,7 @@ const FormComponent = () => {
     const [tokenPrice, setTokenPrice] = useState("");
     const {abi: contractAbi} = useContractAbi("TokenPrice");
     const [txResponse, setTxResponse] = useState<any>(null);
+    const [usePaymaster, setUsePaymaster] = useState(false)
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<any>(null);
@@ -45,11 +46,12 @@ const FormComponent = () => {
                     to: import.meta.env.VITE_SMART_CONTRACT,
                     value: "0",
                     data: txData,
-                /*overrides: {
-                        callGasLimitReq: 11_000_000_000_000,
-                        maxFeePerGasReq: 11_000_000_000_000,
-                        maxPriorityFeePerGasReq: 11_000_000_000_000,
-                    },*/
+                    /*overrides: {
+                        preVerificationGasReqMultiplier: 2,
+                        /*callGasLimitReq: 1_000_000_000_000,
+                            maxFeePerGasReq: 11_000_000_000_000,
+                            maxPriorityFeePerGasReq: 11_000_000_000_000,*
+                        },*/
                 },
                 account: state.selectedAcount.id,
                 scope: `eip155:${state.chain}`,
@@ -61,7 +63,7 @@ const FormComponent = () => {
                 params: {
                     snapId: defaultSnapOrigin,
                     request: {
-                        method: "eth_sendUserOpBoba",
+                        method: `eth_sendUserOpBoba${usePaymaster ? 'PM' : ''}`,
                         params: [transactionDetails],
                         id: state.selectedAcount?.id,
                     },
@@ -95,6 +97,10 @@ const FormComponent = () => {
         }
     };
 
+    const handleChangePaymaster = () => {
+        setUsePaymaster(!usePaymaster)
+    }
+
     return (
         <div className="flex flex-col w-6/12 rounded-md shadow-sm border m-auto my-2 p-5">
             <div className="flex gap-1 items-stretch justify-around w-full mb-4">
@@ -125,6 +131,12 @@ const FormComponent = () => {
                             placeholder="ETH"
                         />
                     </div>
+                    <label className="block text-sm font-medium leading-6 text-teal-900">Use paymaster</label>
+                    <div className="relative mt-2 rounded-md shadow-sm w-full">
+                        <input type="checkbox"
+                               checked={usePaymaster}
+                               onChange={handleChangePaymaster}/>
+                    </div>
                 </div>
             </div>
             <div className="flex gap-1 items-stretch justify-around w-full">
@@ -141,7 +153,7 @@ const FormComponent = () => {
                                 Processing...
                             </>
                         ) : (
-                            "Submit"
+                            "Fetch price via HybridCompute"
                         )}
                     </Button>
                 </div>

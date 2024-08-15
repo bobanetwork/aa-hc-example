@@ -29,6 +29,7 @@ contract DeployExample is Script {
         deployerAddress = vm.addr(deployerPrivateKey);
 
         tokenPaymaster = TokenPaymaster(address(0x8223388f7aF211d84289783ed97ffC5Fefa14256));
+        console.log(address(tokenPaymaster.entryPoint()));
 
         vm.startBroadcast(deployerPrivateKey);
 
@@ -39,8 +40,9 @@ contract DeployExample is Script {
 
         // Deploy using HybridAccountFactory, salt = block.number to force redeploy HybridAccount if already existing from this wallet
         hybridAccount = HybridAccountFactory(haFactory).createAccount(deployerAddress, block.number);
-        IEntryPoint(entrypoint).depositTo{value: 0.001 ether}(address(hybridAccount));
-        tokenPaymaster.deposit{value: 0.001 ether}();
+        IEntryPoint(entrypoint).depositTo{value: 0.01 ether}(address(hybridAccount));
+        IEntryPoint(entrypoint).depositTo{value: 0.01 ether}(address(tokenPaymaster)); // might be redundant
+        tokenPaymaster.deposit{value: 0.01 ether}();
 
         console.log(address(hybridAccount));
 
@@ -50,8 +52,9 @@ contract DeployExample is Script {
         // register url, add credit
         // only owner - reach out to Boba foundation: hcHelper.RegisterUrl(address(hybridAccount), backendURL);
         hcHelper.AddCredit(address(hybridAccount), 100);
+        hybridAccount.PermitCaller(address(tokenPrice), true);
         // permit caller
-        // not needed most likely: hybridAccount.initialize(deployerAddress);
+        hybridAccount.initialize(deployerAddress);
         vm.stopBroadcast();
     }
 }

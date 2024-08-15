@@ -164,7 +164,7 @@ export function generateResponse(
 
   // Retrieve account from private key
   const account = web3.eth.accounts.privateKeyToAccount(
-    process.env.OC_PRIVKEY ?? ""
+    process.env.OC_PRIVKEY!
   );
 
   // Sign the final hash
