@@ -44,3 +44,19 @@ Your DApp should be ready!
 - React Ts
 - [Shadcn UI](https://ui.shadcn.com/docs) 
 - [Tailwind Css](https://tailwindcss.com/docs/installation)
+
+
+## Errors
+### Wrong HybridAccount on backend
+If you receive an error like: 
+
+```execution reverted (could not decode reason; invalid data length)```
+
+Then you most likely have the wrong HybridAccount configured on your off-chain server. But keep in mind, that this is a generic error and could basically mean anything. 
+
+
+### Backend not reachable
+An error like `Failed to fetch` indicates that your backend/offchain rpc server didn't respond in a timely manner. 
+
+Since we host our backend on the free tier on Render.com right now, you might need to wake the server up by opening this url in the browser:
+https://aa-hc-example.onrender.com/ (might take around 1 minute to load)
