@@ -7,7 +7,7 @@ orbs:
 jobs:
   test:
     docker:
-      - image: cimg/base:stable
+      - image: ubuntu:22.04
     steps:
       - checkout
       - run:
@@ -16,17 +16,9 @@ jobs:
       - run:
           name: Install Foundry
           command: |
-            FOUNDRY_DIR="$HOME/.foundry"
-            mkdir -p $FOUNDRY_DIR
-            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/forge -o $FOUNDRY_DIR/forge
-            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/cast -o $FOUNDRY_DIR/cast
-            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/anvil -o $FOUNDRY_DIR/anvil
-            chmod +x $FOUNDRY_DIR/forge $FOUNDRY_DIR/cast $FOUNDRY_DIR/anvil
-            echo 'export PATH="$HOME/.foundry:$PATH"' >> $BASH_ENV
-            source $BASH_ENV
-            forge --version
-            cast --version
-            anvil --version
+            curl -L https://foundry.paradigm.xyz | bash
+            export PATH="$PATH:/root/.foundry/bin"
+            foundryup
       - node/install:
           node-version: '18.x'
       - run:
