@@ -169,7 +169,7 @@ export function generateResponse(
             ["bytes32", "address", "uint256"],
             [
                 ethers.keccak256(finalEncodedParameters),
-                EntryPointAddr,
+                addHexPrefix(EntryPointAddr),
                 HC_CHAIN,
             ]
         )
