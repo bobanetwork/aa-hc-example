@@ -19,6 +19,7 @@ server.addMethod('getprice(string)', async ({ tokenAddress }) => {
 
 app.post('/hc', (req, res) => {
   const jsonRPCRequest = req.body;
+  console.log("Received jsonRPCRequest: ", JSON.stringify(jsonRPCRequest))
 
   server.receive(jsonRPCRequest).then((jsonRPCResponse) => {
     if (jsonRPCResponse) {
