@@ -1,42 +1,40 @@
 // @ts-ignore
 import express, { Request, Response } from "express";
 import { offchainTokenPrice } from "./token-price";
-import { selector } from "./utils";
+import {JSONRPCServer} from "json-rpc-2.0";
+import bodyParser from 'body-parser'
 
+const server = new JSONRPCServer();
 const app = express();
 const port = process.env.OC_LISTEN_PORT;
 
-app.use(express.json());
+app.use(bodyParser.json());
 
-app.post("/hc", async (req: Request, res: Response) => {
-  console.log('--> reached')
-  const { method, params } = req.body;
-
-  if (!method || !params) {
-    return res.status(400).json({ error: "Invalid request" });
-  }
-
-  try {
-    const result = await handleRpcMethod(method, params);
-    console.log("FINAL RESULT RETURNING", result);
-    return res.json({ result });
-  } catch (error: any) {
-    return res.status(400).json({ error: error.message });
-  }
+// Add method to the JSON-RPC server
+server.addMethod('getprice(string)', async ({ tokenAddress }) => {
+  const result = await offchainTokenPrice(tokenAddress);
+  console.log("Price result:", result);
+  return result;
 });
 
-async function handleRpcMethod(method: string, params: any): Promise<unknown> {
-  switch (method) {
-    // Since the targeting method-name is converted by the calling smart-contract,
-    // we need to convert it here aswell.
-    case selector("getprice(string)"):
-      const res = await offchainTokenPrice(params);
-      console.log("inside handleRpcMethod: ", res);
-      return res;
-    default:
-      throw new Error("Offchain RPC: Method not found");
-  }
-}
+app.post('/hc', (req, res) => {
+  const jsonRPCRequest = req.body;
+
+  server.receive(jsonRPCRequest).then((jsonRPCResponse) => {
+    if (jsonRPCResponse) {
+      res.json(jsonRPCResponse);
+    } else {
+      res.sendStatus(204);
+    }
+  });
+});
+
+// Global error handler
+// @ts-ignore
+app.use((err, req, res, next) => {
+  console.error('RPC Error:', err);
+  res.status(400).json({ error: err.message });
+});
 
 if (!process.env.JEST_WORKER_ID) {
   app.listen(port, () => {
