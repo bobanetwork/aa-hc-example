@@ -4,7 +4,7 @@ FROM node:18 AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+COPY ./offchain/package*.json ./
 
 # Install dependencies
 RUN npm i
