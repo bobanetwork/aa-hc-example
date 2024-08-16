@@ -55,7 +55,7 @@ async function main() {
 
             // TODO: maybe also delete /lib folder for foundry
 
-            await execPromise("apt remove make golang-go && apt autoremove", []);
+            await execPromise("sudo apt remove make golang-go && sudo apt autoremove", []);
             console.log("Deleted make and golang as not needed anymore.")
         }
 
@@ -131,7 +131,7 @@ async function main() {
             await execPromise(`find ${path.resolve(__dirname, "../../rundler-hc")} -name \"node_modules\" -type d -prune -exec rm -rf {} +`, []);
             console.log("Deleted node_modules within rundler repo.")
 
-            await execPromise("apt remove rustc cargo && apt autoremove", []);
+            await execPromise("sudo apt remove rustc cargo && sudo apt autoremove", []);
             console.log("Deleted Rust and Cargo as not needed anymore.")
         }
 
