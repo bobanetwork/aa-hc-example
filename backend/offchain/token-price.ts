@@ -147,15 +147,15 @@ export function generateResponse(
             'bytes32',
         ],
         [
-            HybridAcctAddr,
+            addHexPrefix(HybridAcctAddr),
             req.oo_nonce,
             ethers.keccak256('0x'), // initCode
-            ethers.keccak256(addHexPrefix(executeEncoded)),
-            addHexPrefix(callGas.toString(16)),
-            '0x10000', // verificationGasLimit
-            '0x10000', // preVerificationGas
-            '0x0', // maxFeePerGas
-            '0x0', // maxPriorityFeePerGas
+            ethers.keccak256(executeEncoded),
+            callGas,
+            0x10000, // verificationGasLimit
+            0x10000, // preVerificationGas
+            0, // maxFeePerGas
+            0, // maxPriorityFeePerGas
             ethers.keccak256('0x'), // paymasterAndData
         ]
     );
