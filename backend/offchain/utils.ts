@@ -1,20 +1,6 @@
 import { ethers } from "ethers";
 
 /**
- * Generates a selector for a given function name.
- *
- * This function takes a function name as input and returns the first 8
- * characters of the keccak256 hash of the function name. This selector
- * is used by the calling smart-contract to identify the targeting function.
- *
- * @param {string} name - The name of the function for which to generate the selector.
- * @returns {string} - The first 8 characters of the keccak256 hash of the function name, representing the function selector.
- */
-export const selector = (name: string): string => {
-  return ethers.id(name).slice(0, 10);
-};
-
-/**
  * Parse arguments to object.
  */
 export function parseOffchainParameter(

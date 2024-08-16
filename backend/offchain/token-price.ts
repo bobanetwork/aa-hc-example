@@ -6,7 +6,7 @@ dotenv.config();
 
 // Environment variable checks
 if (!process.env.CHAIN_ID || !process.env.ENTRY_POINTS || !process.env.HC_HELPER_ADDR ||
-    !process.env.OC_HYBRID_ACCOUNT || !process.env.OC_OWNER || !process.env.OC_PRIVKEY ||
+    !process.env.OC_HYBRID_ACCOUNT || !process.env.OC_PRIVKEY ||
     !process.env.COINRANKING_API_KEY) {
   console.error('Missing envs: ', process.env.CHAIN_ID, "/", process.env.ENTRY_POINTS, "/", process.env.HC_HELPER_ADDR, "/", process.env.OC_HYBRID_ACCOUNT,
       "/", process.env.OC_OWNER, "/", process.env.OC_PRIVKEY, "/", process.env.COINRANKING_API_KEY)
@@ -21,16 +21,14 @@ if (HC_CHAIN === 0) {
 const EP_ADDR = process.env.ENTRY_POINTS;
 const HH_ADDR = process.env.HC_HELPER_ADDR;
 const HA_ADDR = process.env.OC_HYBRID_ACCOUNT;
-const HA_OWNER = process.env.OC_OWNER;
 
-if (EP_ADDR.length !== 42 || HH_ADDR.length !== 42 || HA_ADDR.length !== 42 || HA_OWNER.length !== 42) {
+if (EP_ADDR.length !== 42 || HH_ADDR.length !== 42 || HA_ADDR.length !== 42) {
   throw new Error("Invalid address length");
 }
 
 const EntryPointAddr = getAddress(EP_ADDR);
 const HelperAddr = getAddress(HH_ADDR);
 const HybridAcctAddr = getAddress(HA_ADDR);
-const hc1_addr = getAddress(HA_OWNER);
 const hc1_key = process.env.OC_PRIVKEY;
 
 if (hc1_key.length !== 66) {
