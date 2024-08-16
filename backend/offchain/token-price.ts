@@ -49,7 +49,7 @@ export async function offchainTokenPrice(params: OffchainParameter) {
     return generateResponse(request, 0, encodedTokenPrice);
   } catch (error: any) {
     console.log("received error: ", error);
-    return generateResponse(request, 1, error.message); //ethers.toUtf8Bytes(error.message));
+    return generateResponse(request, 1, ethers.toUtf8Bytes(error.message).toString());
   }
 }
 
@@ -83,6 +83,9 @@ export function generateResponse(
     errorCode: number,
     respPayload: string
 ) {
+  if (!respPayload.startsWith('0x')) {
+    respPayload = `0x${respPayload}`
+  }
   const encodedResponse = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "uint256", "uint32", "bytes"],
       [req.src_addr, req.src_nonce, errorCode, respPayload]
