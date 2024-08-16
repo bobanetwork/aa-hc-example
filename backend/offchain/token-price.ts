@@ -122,7 +122,7 @@ export function generateResponse(
     console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(executeCallData).length, callGas);
 
     console.log("FINAL VALUES: ", HybridAcctAddr,
-        addHexPrefix(req.oo_nonce.toString()),
+        Number(req.oo_nonce),
         ethers.keccak256('0x'), // initCode
         ethers.keccak256(addHexPrefix(executeEncoded)),
         addHexPrefix(callGas.toString(16)),
@@ -148,7 +148,7 @@ export function generateResponse(
         ],
         [
             addHexPrefix(HybridAcctAddr),
-            req.oo_nonce,
+            Number(req.oo_nonce),
             ethers.keccak256('0x'), // initCode
             ethers.keccak256(executeEncoded),
             callGas,
