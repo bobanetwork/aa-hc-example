@@ -3,8 +3,7 @@ import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 import "dotenv/config";
 import { getTokenPrice, generateResponse } from "../offchain/token-price";
-import { parseRequest } from "../common/utils";
-import { OffchainParameterParsed } from "../offchain/utils";
+import {OffchainParameter, OffchainParameterParsed, parseRequest} from "../offchain/utils";
 
 jest.mock("../common/utils", () => ({
   ...jest.requireActual("../common/utils"),
@@ -91,20 +90,20 @@ describe("generateResponse", () => {
     process.env.HC_HELPER_ADDR = "0x351B40044aa4D5A3Eb69Cb36d6895897EA8Aa844";
   });
 
-  const req = {
-    ooNonce: "0x632e348e9de85c51ec6bd68ec9e9a4a24a9181290000000000000000",
+  const req: OffchainParameter = {
+    oo_nonce: "0x632e348e9de85c51ec6bd68ec9e9a4a24a9181290000000000000000",
     payload:
         "000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000034554480000000000000000000000000000000000000000000000000000000000",
     sk: "1afe5cc1cca7a55302e789218daf82b4555b50a42cb41a8476c124a8d05f2eb7",
-    srcAddr: "632e348e9de85c51ec6bd68ec9e9a4a24a918129",
-    srcNonce:
+    src_addr: "632e348e9de85c51ec6bd68ec9e9a4a24a918129",
+    src_nonce:
         "0000000000000000000000000000000000000000000004b00000000000000000",
     ver: "0.2",
   };
 
   it("should generate a successful response", () => {
     const respPayload = ethers.AbiCoder.defaultAbiCoder().encode(["string"], ["30000"]);
-    const parsedReq = parseRequest(req as OffchainParameterParsed);
+    const parsedReq = parseRequest(req);
     const response = generateResponse(parsedReq, 0, respPayload);
 
     expect(response?.success).toBe(true);
@@ -114,7 +113,7 @@ describe("generateResponse", () => {
 
   it("should generate an error response", () => {
     const errorRespPayload = ethers.AbiCoder.defaultAbiCoder().encode(["string"], ["Error occurred"]);
-    const parsedReq = parseRequest(req as OffchainParameterParsed);
+    const parsedReq = parseRequest(req);
     const response = generateResponse(parsedReq, 1, errorRespPayload);
 
     expect(response?.success).toBe(false);

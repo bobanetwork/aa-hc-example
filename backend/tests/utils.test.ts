@@ -1,18 +1,12 @@
 import { ethers } from "ethers";
-import {
-  decodeAbi,
-  parseOffchainParameter,
-  parseRequest,
-  selector,
-} from "../common/utils";
 import "dotenv/config";
-import { OffchainParameter } from "../offchain/utils";
+import {getSelector, OffchainParameter, parseRequest} from "../offchain/utils";
 
 describe("Utils Functions", () => {
   it("should correctly calculate the selector", () => {
     const name = "getprice";
-    const expected = ethers.id(name).slice(0, 10);
-    expect(selector(name)).toBe(expected);
+    const expected = ethers.id(name).slice(2, 10);
+    expect(getSelector(name, ["string"])).toBe(expected);
   });
 
   it("should correctly parse offchain parameters", () => {
@@ -24,7 +18,7 @@ describe("Utils Functions", () => {
       src_nonce: "0x1111",
       ver: "0.2",
     };
-    const parsed = parseOffchainParameter(params);
+    const parsed = parseRequest(params);
     expect(parsed).toEqual({
       ooNonce: "0x1234",
       payload: "0x5678",
@@ -36,13 +30,13 @@ describe("Utils Functions", () => {
   });
 
   it("should correctly parse request", () => {
-    const parsedParams = {
-      ooNonce: "0x17a581d0f878b31216e82805f1f8c078fb5d4da0000000000000000",
+    const parsedParams: OffchainParameter = {
+      oo_nonce: "0x17a581d0f878b31216e82805f1f8c078fb5d4da0000000000000000",
       payload:
           "000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000034554480000000000000000000000000000000000000000000000000000000000",
       sk: "76e2c074d436bac1cf246c55e408088fd19fb8c7034eeee8efb7215217f8e728",
-      srcAddr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
-      srcNonce:
+      src_addr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
+      src_nonce:
           "0000000000000000000000000000000000000000000004b00000000000000000",
       ver: "0.2",
     };
@@ -64,3 +58,10 @@ describe("Utils Functions", () => {
     expect(decoded).toEqual(["test"]);
   });
 });
+
+function decodeAbi(
+    types: string[],
+    data: string
+): { [key: string]: unknown } {
+  return ethers.AbiCoder.defaultAbiCoder().decode(types, data);
+}

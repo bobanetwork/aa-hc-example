@@ -1,6 +1,7 @@
 import {ethers, getBigInt, getBytes, getAddress} from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
+import {getSelector, OffchainParameter, OffchainParameterParsed, parseRequest} from "./utils";
 
 dotenv.config();
 
@@ -35,44 +36,11 @@ if (hc1_key.length !== 66) {
   throw new Error("Invalid private key length");
 }
 
-interface OffchainParameter {
-  sk: string;
-  src_addr: string;
-  src_nonce: string;
-  oo_nonce: string;
-  payload: string;
-}
-
-function selector(name: string): string {
-  return ethers.id(name).slice(0, 10);
-}
-
-function parseOffchainParameter(params: OffchainParameter): OffchainParameter {
-  return {
-    sk: params.sk,
-    src_addr: params.src_addr,
-    src_nonce: params.src_nonce,
-    oo_nonce: params.oo_nonce,
-    payload: params.payload,
-  };
-}
-
-function parseRequest(req: OffchainParameter) {
-  return {
-    skey: getBytes(req.sk),
-    srcAddr: getAddress(req.src_addr),
-    srcNonce: getBigInt(req.src_nonce),
-    opNonce: getBigInt(req.oo_nonce),
-    reqBytes: getBytes(req.payload)
-  };
-}
-
 export async function offchainTokenPrice(params: OffchainParameter) {
-  const parsedParams = parseOffchainParameter(params);
-  const request = parseRequest(parsedParams);
+  const request = parseRequest(params);
 
   try {
-    const tokenSymbol = ethers.AbiCoder.defaultAbiCoder().decode(["string"], request.reqBytes)[0] as string;
+    const tokenSymbol = ethers.AbiCoder.defaultAbiCoder().decode(["string"], request.payload)[0] as string;
     const tokenPrice = (await getTokenPrice(tokenSymbol)).toString();
     console.log("token price: ", tokenPrice);
 
@@ -123,13 +91,13 @@ export function generateResponse(
       ["bytes32", "bytes"],
       [req.skey, encodedResponse]
   );
-  const putResponseEncoded = selector("PutResponse(bytes32,bytes)") + putResponseCallData.slice(2);
+  const putResponseEncoded = getSelector("PutResponse", ['bytes32', 'bytes']) + putResponseCallData.slice(2);
 
   const executeCallData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "uint256", "bytes"],
       [HelperAddr, 0, putResponseEncoded]
   );
-  const executeEncoded = selector("execute(address,uint256,bytes)") + executeCallData.slice(2);
+  const executeEncoded = getSelector("execute", ['address', 'uint256', 'bytes']) + executeCallData.slice(2);
 
   const callGas = BigInt(705) * BigInt(getBytes(respPayload).length) + BigInt(170000);
   console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(executeCallData).length, callGas);

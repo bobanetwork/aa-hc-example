@@ -131,11 +131,13 @@ const FormComponent = () => {
                             placeholder="ETH"
                         />
                     </div>
-                    <label className="block text-sm font-medium leading-6 text-teal-900">Use paymaster</label>
                     <div className="relative mt-2 rounded-md shadow-sm w-full">
                         <input type="checkbox"
                                checked={usePaymaster}
                                onChange={handleChangePaymaster}/>
+
+                        <label className="block text-sm font-medium leading-6 text-teal-900">Use paymaster</label>
+
                     </div>
                 </div>
             </div>

@@ -1,10 +1,10 @@
 import request from "supertest";
-import { selector } from "../common/utils";
 import { ethers } from "ethers";
 import "dotenv/config";
 import app from "../offchain/server";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
+import {getSelector} from "../offchain/utils";
 
 const mockAxios = new MockAdapter(axios);
 
@@ -60,7 +60,7 @@ describe("RPC Server", () => {
 
     const response = await request(app)
         .post("/hc")
-        .send({ method: selector("getprice(string)"), params });
+        .send({ method: getSelector("getprice", ["string"]), params });
 
     expect(response.status).toBe(200);
     expect(response.body.result).toBeDefined();
@@ -93,7 +93,7 @@ describe("RPC Server", () => {
 
     const response = await request(app)
         .post("/hc")
-        .send({ method: selector("getprice(string)"), params });
+        .send({ method: getSelector("getprice", ["string"]), params });
 
     expect(response.status).toBe(200);
     expect(response.body.result.success).toBe(false);
