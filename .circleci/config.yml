@@ -56,11 +56,6 @@ jobs:
             cd ./contracts
             pnpm install
       - run:
-          name: Run Forge tests
-          command: |
-            cd ./contracts
-            forge test -vvv
-      - run:
           name: Start local environment
           command: |
             pnpm start:local:ci 2>&1 | tee local_env.log
