@@ -20,8 +20,9 @@ export type OffchainParameterParsed = {
   payload: Uint8Array;
 };
 
+export const addHexPrefix = (value: string) => value.startsWith('0x') ? value : `0x${value}`;
+
 export const parseRequest = (params: OffchainParameter): OffchainParameterParsed => {
-  const addHexPrefix = (value: string) => value.startsWith('0x') ? value : `0x${value}`;
   return {
     ver: params.ver,
     sk: ethers.getBytes(addHexPrefix(params.sk)),

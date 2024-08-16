@@ -1,7 +1,7 @@
 import {ethers, getBigInt, getBytes, getAddress} from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
-import {getSelector, OffchainParameter, OffchainParameterParsed, parseRequest} from "./utils";
+import {addHexPrefix, getSelector, OffchainParameter, OffchainParameterParsed, parseRequest} from "./utils";
 
 dotenv.config();
 
@@ -49,8 +49,20 @@ export async function offchainTokenPrice(params: OffchainParameter) {
     return generateResponse(request, 0, encodedTokenPrice);
   } catch (error: any) {
     console.log("received error: ", error);
-    return generateResponse(request, 1, ethers.toUtf8Bytes(error.message).toString());
+    return generateResponse(request, 1, hexEncode(error.message));
   }
+}
+
+const hexEncode = (str: string) => {
+    let hex, i;
+
+    let result = "";
+    for (i=0; i<str.length; i++) {
+        hex = str.charCodeAt(i).toString(16);
+        result += ("000"+hex).slice(-4);
+    }
+
+    return `0x${result}`
 }
 
 export async function getTokenPrice(tokenSymbol: string): Promise<number> {
@@ -83,27 +95,31 @@ export function generateResponse(
     errorCode: number,
     respPayload: string
 ) {
-  if (!respPayload.startsWith('0x')) {
-    respPayload = `0x${respPayload}`
-  }
+    respPayload = addHexPrefix(respPayload)
+
   const encodedResponse = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "uint256", "uint32", "bytes"],
       [req.src_addr, req.src_nonce, errorCode, respPayload]
   );
+  console.log("EncodedResponse: ", encodedResponse)
   const putResponseCallData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["bytes32", "bytes"],
       [req.sk, encodedResponse]
   );
+  console.log("putResponseCallData", putResponseCallData)
   const putResponseEncoded = getSelector("PutResponse", ['bytes32', 'bytes']) + putResponseCallData.slice(2);
 
+  console.log("putResponseEncoded", putResponseEncoded)
   const executeCallData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "uint256", "bytes"],
       [HelperAddr, 0, putResponseEncoded]
   );
   const executeEncoded = getSelector("execute", ['address', 'uint256', 'bytes']) + executeCallData.slice(2);
+  console.log("executeCallData", executeCallData, executeEncoded)
 
+    console.log("RespPayload", respPayload)
   const callGas = BigInt(705) * BigInt(getBytes(respPayload).length) + BigInt(170000);
-  console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(executeCallData).length, callGas);
+  console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(addHexPrefix(executeCallData)).length, callGas);
 
   const finalEncodedParameters = ethers.AbiCoder.defaultAbiCoder().encode(
       [
@@ -144,7 +160,7 @@ export function generateResponse(
   );
 
   const wallet = new ethers.Wallet(hc1_key);
-  const signature = wallet.signMessageSync(getBytes(finalHash));
+  const signature = wallet.signMessageSync(getBytes(addHexPrefix(finalHash)));
 
   console.log(`Method returning success=${errorCode === 0} response=${respPayload} signature=${signature}`);
 
