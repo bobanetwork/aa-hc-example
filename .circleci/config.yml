@@ -18,7 +18,10 @@ jobs:
           command: |
             FOUNDRY_DIR="$HOME/.foundry"
             mkdir -p $FOUNDRY_DIR
-            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/foundry_nightly_linux_amd64.tar.gz | tar xzf - -C $FOUNDRY_DIR
+            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/forge -o $FOUNDRY_DIR/forge
+            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/cast -o $FOUNDRY_DIR/cast
+            curl -L https://github.com/foundry-rs/foundry/releases/latest/download/anvil -o $FOUNDRY_DIR/anvil
+            chmod +x $FOUNDRY_DIR/forge $FOUNDRY_DIR/cast $FOUNDRY_DIR/anvil
             echo 'export PATH="$HOME/.foundry:$PATH"' >> $BASH_ENV
             source $BASH_ENV
             forge --version
