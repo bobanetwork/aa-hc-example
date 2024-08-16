@@ -1,0 +1,86 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.0.2
+  go: circleci/go@1.7.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Checkout submodules
+          command: git submodule update --init --recursive
+      - run:
+          name: Install Foundry
+          command: |
+            curl -L https://foundry.paradigm.xyz | bash
+            export PATH="$PATH:/root/.foundry/bin"
+            foundryup
+      - node/install:
+          node-version: '18.x'
+      - run:
+          name: Install pnpm
+          command: |
+            curl -fsSL https://get.pnpm.io/install.sh | sh -
+            echo 'export PNPM_HOME="/root/.local/share/pnpm"' >> $BASH_ENV
+            echo 'export PATH="$PNPM_HOME:$PATH"' >> $BASH_ENV
+            source $BASH_ENV
+      - go/install:
+          version: '1.21'
+      - run:
+          name: Install Rust and Cargo
+          command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            source $HOME/.cargo/env
+      - run:
+          name: Install Python
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python3 python3-pip
+      - run:
+          name: Install Make
+          command: sudo apt-get install -y make
+      - run:
+          name: Install dependencies (root)
+          command: pnpm install
+      - run:
+          name: Install dependencies (contracts)
+          command: |
+            cd ./contracts
+            pnpm install
+      - run:
+          name: Run Forge tests
+          command: |
+            cd ./contracts
+            forge test -vvv
+      - run:
+          name: Start local environment
+          command: |
+            pnpm start:local:ci 2>&1 | tee local_env.log
+          no_output_timeout: 60m
+          environment:
+            PRIVATE_KEY: ${PRIVATE_KEY}
+            CONRANKING_API_KEY: ${CONRANKING_API_KEY}
+      - run:
+          name: Run Hardhat tests
+          command: |
+            cd ./contracts
+            npx hardhat test
+          environment:
+            TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
+            RPC_URL: ${RPC_URL}
+            PRIVATE_KEY: ${PRIVATE_KEY}
+      - run:
+          name: Display full logs
+          command: cat local_env.log
+          when: always
+
+workflows:
+  version: 2
+  test-workflow:
+    jobs:
+      - test:
+          context: test-env
