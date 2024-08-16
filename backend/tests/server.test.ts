@@ -60,6 +60,7 @@ describe("RPC Server", () => {
       .post("/hc")
       .send({ method: selector("getprice(string)"), params });
 
+    console.log("RESP: ", JSON.stringify(response))
     expect(response.status).toBe(200);
     expect(response.body.result).toBeDefined();
     expect(response.body.result.success).toBe(true);
