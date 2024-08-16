@@ -121,6 +121,18 @@ export function generateResponse(
   const callGas = BigInt(705) * BigInt(getBytes(respPayload).length) + BigInt(170000);
   console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(executeCallData).length, callGas);
 
+  console.log("FINAL VALUES: ", HybridAcctAddr,
+      addHexPrefix(req.oo_nonce.toString()),
+      ethers.keccak256('0x'), // initCode
+      ethers.keccak256(addHexPrefix(executeEncoded)),
+      callGas,
+      '0x10000', // verificationGasLimit
+      '0x10000', // preVerificationGas
+      '0x0', // maxFeePerGas
+      '0x0', // maxPriorityFeePerGas
+      ethers.keccak256('0x'), // paymasterAndData
+     )
+
   const finalEncodedParameters = ethers.AbiCoder.defaultAbiCoder().encode(
       [
         'address',
@@ -136,15 +148,15 @@ export function generateResponse(
       ],
       [
         HybridAcctAddr,
-        req.oo_nonce,
-        ethers.keccak256('0x'),
-        ethers.keccak256(executeEncoded),
+        addHexPrefix(req.oo_nonce.toString()),
+        ethers.keccak256('0x'), // initCode
+        ethers.keccak256(addHexPrefix(executeEncoded)),
         callGas,
-        0x10000,
-        0x10000,
-        0,
-        0,
-        ethers.keccak256('0x'),
+        '0x10000', // verificationGasLimit
+        '0x10000', // preVerificationGas
+        '0x0', // maxFeePerGas
+        '0x0', // maxPriorityFeePerGas
+        ethers.keccak256('0x'), // paymasterAndData
       ]
   );
 
