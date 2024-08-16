@@ -163,6 +163,7 @@ export function generateResponse(
     console.log("Creating final hash: ", ethers.keccak256(finalEncodedParameters),
         EntryPointAddr,
         HC_CHAIN)
+
     const finalHash = ethers.keccak256(
         ethers.AbiCoder.defaultAbiCoder().encode(
             ["bytes32", "address", "uint256"],
@@ -175,7 +176,7 @@ export function generateResponse(
     );
 
     const wallet = new ethers.Wallet(hc1_key);
-    const signature = wallet.signMessageSync(finalHash);
+    const signature = wallet.signingKey.sign(ethers.getBytes(finalHash)).serialized;
 
     console.log(`Method returning success=${errorCode === 0} response=${respPayload} signature=${signature}`);
 
