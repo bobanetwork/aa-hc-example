@@ -160,6 +160,9 @@ export function generateResponse(
         ]
     );
 
+    console.log("Creating final hash: ", ethers.keccak256(finalEncodedParameters),
+        EntryPointAddr,
+        HC_CHAIN)
     const finalHash = ethers.keccak256(
         ethers.AbiCoder.defaultAbiCoder().encode(
             ["bytes32", "address", "uint256"],
