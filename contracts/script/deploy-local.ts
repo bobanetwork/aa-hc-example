@@ -50,8 +50,10 @@ async function main() {
         }
 
         if (isCi) {
-            await execPromise("find ../../boba -name \"node_modules\" -type d -prune -exec rm -rf {} +", []);
+            await execPromise(`find ${path.resolve(__dirname, "../../boba")} -name \"node_modules\" -type d -prune -exec rm -rf {} +`, []);
             console.log("Deleted node_modules within boba repo.")
+
+            // TODO: maybe also delete /lib folder for foundry
 
             await execPromise("apt remove make golang-go && apt autoremove", []);
             console.log("Deleted make and golang as not needed anymore.")
@@ -126,7 +128,7 @@ async function main() {
         );
 
         if (isCi) {
-            await execPromise("find ../../rundler-hc -name \"node_modules\" -type d -prune -exec rm -rf {} +", []);
+            await execPromise(`find ${path.resolve(__dirname, "../../rundler-hc")} -name \"node_modules\" -type d -prune -exec rm -rf {} +`, []);
             console.log("Deleted node_modules within rundler repo.")
 
             await execPromise("apt remove rustc cargo && apt autoremove", []);
