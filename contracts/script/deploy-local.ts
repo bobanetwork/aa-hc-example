@@ -68,7 +68,7 @@ async function main() {
         const BACKEND_URL = process.env.BACKEND_URL ?? `http://${getLocalIpAddress()}:1234/rpc`
         if (!process.env.BACKEND_URL) {
             console.warn('[deploy-local.ts] No BACKEND_URL defined. Might be expected for default deployments and CI. Using localhost.')
-            throw Error("No BACKEND_URL defined!");
+            // NOTE: DO NOT THROW AN ERROR HERE, as we do use a default value above
         }
         const baseDeployVars = {
             ...process.env,
