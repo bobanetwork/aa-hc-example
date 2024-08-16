@@ -49,12 +49,12 @@ jobs:
           command: sudo apt-get install -y make
       - run:
           name: Install dependencies (root)
-          command: npm install
+          command: pnpm install
       - run:
           name: Install dependencies (contracts)
           command: |
             cd ./contracts
-            npm install
+            pnpm install
       - run:
           name: Run Forge tests
           command: |
@@ -63,7 +63,7 @@ jobs:
       - run:
           name: Start local environment
           command: |
-            npm run start:local:ci 2>&1 | tee local_env.log
+            pnpm start:local:ci 2>&1 | tee local_env.log
           no_output_timeout: 60m
           environment:
             PRIVATE_KEY: ${PRIVATE_KEY}
