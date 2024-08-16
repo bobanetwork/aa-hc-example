@@ -11,8 +11,14 @@ jobs:
     docker:
       - image: ubuntu:22.04
     shell: /bin/bash
+    resource_class: large
+    parallelism: 10
     steps:
       - checkout
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
           name: Install essential tools
           command: |
@@ -30,10 +36,14 @@ jobs:
       - run:
           name: Install pnpm
           command: |
-            curl -fsSL https://get.pnpm.io/install.sh | sh -
-            echo 'export PNPM_HOME="/root/.local/share/pnpm"' >> $BASH_ENV
-            echo 'export PATH="$PNPM_HOME:$PATH"' >> $BASH_ENV
-            source $BASH_ENV
+            corepack enable
+            corepack prepare pnpm@latest-9 --activate
+            pnpm config set store-dir .pnpm-store
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
       - run:
           name: Install Make
           command: sudo apt-get install -y make
