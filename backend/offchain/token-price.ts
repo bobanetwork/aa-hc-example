@@ -175,7 +175,7 @@ export function generateResponse(
     );
 
     const wallet = new ethers.Wallet(hc1_key);
-    const signature = wallet.signMessageSync(getBytes(addHexPrefix(finalHash)));
+    const signature = wallet.signMessageSync(finalHash);
 
     console.log(`Method returning success=${errorCode === 0} response=${respPayload} signature=${signature}`);
 
