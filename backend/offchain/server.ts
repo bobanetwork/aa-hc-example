@@ -12,7 +12,9 @@ const port = process.env.OC_LISTEN_PORT;
 app.use(bodyParser.json());
 
 // Add method to the JSON-RPC server
-server.addMethod(ethers.FunctionFragment.getSelector("getprice", ["string"]), async (params) => {
+const funcSelector = ethers.FunctionFragment.getSelector("getprice", ["string"])
+console.log("Adding method getprice: ", funcSelector)
+server.addMethod(funcSelector, async (params) => {
   const result = await offchainTokenPrice(params);
   console.log("Price result:", result);
   return result;
