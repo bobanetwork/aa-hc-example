@@ -26,7 +26,7 @@ jobs:
       working-directory: ./backend
       env:
         OC_LISTEN_PORT: ${{ vars.OC_LISTEN_PORT }}
-        CONRANKING_API_KEY: ${{ secrets.CONRANKING_API_KEY }}
+        COINRANKING_API_KEY: ${{ secrets.COINRANKING_API_KEY }}
         OC_HYBRID_ACCOUNT: ${{ vars.OC_HYBRID_ACCOUNT }}
         ENTRY_POINTS: ${{ vars.ENTRY_POINT }}
         CHAIN_ID: ${{ vars.CHAIN_ID }}
