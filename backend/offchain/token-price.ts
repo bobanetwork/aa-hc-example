@@ -110,16 +110,16 @@ export function generateResponse(
   const putResponseEncoded = getSelector("PutResponse", ['bytes32', 'bytes']) + putResponseCallData.slice(2);
 
   console.log("putResponseEncoded", putResponseEncoded)
-  const executeCallData = ethers.AbiCoder.defaultAbiCoder().encode(
+  const executeCallData = addHexPrefix(ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "uint256", "bytes"],
-      [HelperAddr, 0, putResponseEncoded]
-  );
+      [HelperAddr, 0, addHexPrefix(putResponseEncoded)]
+  ));
   const executeEncoded = getSelector("execute", ['address', 'uint256', 'bytes']) + executeCallData.slice(2);
-  console.log("executeCallData", executeCallData, executeEncoded)
+  console.log("executeCallData", executeCallData, addHexPrefix(executeEncoded))
 
     console.log("RespPayload", respPayload)
   const callGas = BigInt(705) * BigInt(getBytes(respPayload).length) + BigInt(170000);
-  console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(addHexPrefix(executeCallData)).length, callGas);
+  console.log("callGas calculation", getBytes(respPayload).length, 4 + getBytes(executeCallData).length, callGas);
 
   const finalEncodedParameters = ethers.AbiCoder.defaultAbiCoder().encode(
       [
