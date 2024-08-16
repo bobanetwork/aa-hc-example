@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.0.2
+  node: circleci/node@5.2.0
   go: circleci/go@1.7.1
 
 jobs:
@@ -24,8 +24,6 @@ jobs:
             curl -L https://foundry.paradigm.xyz | bash
             export PATH="$PATH:/root/.foundry/bin"
             foundryup
-      - node/install:
-          node-version: '18.x'
       - run:
           name: Install pnpm
           command: |
