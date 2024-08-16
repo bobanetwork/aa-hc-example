@@ -11,6 +11,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install essential tools
+          command: |
+            apt-get update
+            apt-get install -y curl git sudo
+      - run:
           name: Checkout submodules
           command: git submodule update --init --recursive
       - run:
