@@ -1,8 +1,5 @@
 import { ethers } from "ethers";
 
-/**
- * Parse arguments to object.
- */
 export function parseOffchainParameter(
     params: OffchainParameter
 ): OffchainParameterParsed {
@@ -16,22 +13,15 @@ export function parseOffchainParameter(
   };
 }
 
-/**
- * Parses offchain parameters and returns a structured request object.
- *
- * This function takes an object containing offchain parameters, parses them,
- * and returns an object with properly formatted values. It converts the secret
- * key to bytes, ensures the source address is in checksum format, and converts
- * nonces from hexadecimal to bigint format.
- *
- */
 export function parseRequest(params: OffchainParameterParsed) {
+  const addHexPrefix = (value: string) => value.startsWith('0x') ? value : `0x${value}`;
+
   return {
-    skey: ethers.getBytes(params.sk),
-    srcAddr: ethers.getAddress(params.srcAddr),
-    srcNonce: ethers.getBigInt("0x" + params.srcNonce),
-    opNonce: ethers.getBigInt(params.ooNonce),
-    reqBytes: params.payload,
+    skey: ethers.getBytes(addHexPrefix(params.sk)),
+    srcAddr: ethers.getAddress(addHexPrefix(params.srcAddr)),
+    srcNonce: ethers.getBigInt(addHexPrefix(params.srcNonce)),
+    opNonce: ethers.getBigInt(addHexPrefix(params.ooNonce)),
+    reqBytes: ethers.getBytes(addHexPrefix(params.payload)),
   } as const;
 }
 
