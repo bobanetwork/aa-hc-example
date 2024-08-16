@@ -8,6 +8,8 @@ dotenv.config();
 if (!process.env.CHAIN_ID || !process.env.ENTRY_POINTS || !process.env.HC_HELPER_ADDR ||
     !process.env.OC_HYBRID_ACCOUNT || !process.env.OC_OWNER || !process.env.OC_PRIVKEY ||
     !process.env.COINRANKING_API_KEY) {
+  console.error('Missing envs: ', process.env.CHAIN_ID, "/", process.env.ENTRY_POINTS, "/", process.env.HC_HELPER_ADDR, "/", process.env.OC_HYBRID_ACCOUNT,
+      "/", process.env.OC_OWNER, "/", process.env.OC_PRIVKEY, "/", process.env.COINRANKING_API_KEY)
   throw new Error("Missing required environment variables");
 }
 
