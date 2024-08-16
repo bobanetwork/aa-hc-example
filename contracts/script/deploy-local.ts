@@ -31,12 +31,27 @@ let aaConfigFile = fs.readFileSync('../snap-account-abstraction-keyring/packages
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
 async function main() {
     try {
+        const args = process.argv.slice(2);
+        const ciArg = args.find((arg) => arg.startsWith('--ci='));
+        // if true, then the script will regularly clean up idle data to keep storage low
+        const isCi: boolean = ciArg ? ciArg.split('=')[1].toLowerCase() === 'true' : false;
+
+
         if (!isPortInUse(8545) && !isPortInUse(9545)) {
             await execPromise("pnpm install", [], path.resolve(__dirname, "../../boba"));
             await execPromise("make devnet-hardhat-up", [], path.resolve(__dirname, "../../boba"));
         } else {
             console.log("Boba Chain already running, skipping")
         }
+
+        if (isCi) {
+            await execPromise("find ../../boba -name \"node_modules\" -type d -prune -exec rm -rf {} +", []);
+            console.log("Deleted node_modules within boba repo.")
+
+            await execPromise("apt remove make golang-go && apt autoremove", []);
+            console.log("Deleted make and golang as not needed anymore.")
+        }
+
         const fundL2Vars = {...process.env, PRIVATE_KEY: deployKey,};
 
         await execPromise("node fundL2.js", undefined, path.resolve(__dirname, "../script/"), fundL2Vars);
@@ -96,6 +111,14 @@ async function main() {
                 }}
         );
 
+        if (isCi) {
+            await execPromise("find ../../rundler-hc -name \"node_modules\" -type d -prune -exec rm -rf {} +", []);
+            console.log("Deleted node_modules within rundler repo.")
+
+            await execPromise("apt remove rustc cargo && apt autoremove", []);
+            console.log("Deleted Rust and Cargo as not needed anymore.")
+        }
+
         /** @DEV Frontend Environment */
         updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
         updateEnvVariable("VITE_RPC_PROVIDER", "http://localhost:9545", frontendEnvPath);
@@ -130,7 +153,7 @@ async function main() {
 
         /** @DEV bootstrap frontend, backend and snap */
         await execPromise(
-            "docker-compose -f docker-compose.local.yml up -d",
+            "docker-compose -f docker-compose.local.yml up -d --build",
             [],
             path.resolve(__dirname, "../../")
         );

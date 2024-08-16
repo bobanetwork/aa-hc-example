@@ -4,6 +4,7 @@
   "description": "Full-stack example for Account Abstraction Hybrid Compute",
   "scripts": {
     "start:local": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-local.ts && cd ..",
+    "start:local:ci": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-local.ts --ci=true && cd ..",
     "start:sepolia": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-sepolia.ts && cd ..",
     "test": "pnpm test -r"
   },
