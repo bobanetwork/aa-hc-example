@@ -148,7 +148,7 @@ export function generateResponse(
         ],
         [
             HybridAcctAddr,
-            addHexPrefix(req.oo_nonce.toString()),
+            req.oo_nonce,
             ethers.keccak256('0x'), // initCode
             ethers.keccak256(addHexPrefix(executeEncoded)),
             addHexPrefix(callGas.toString(16)),
