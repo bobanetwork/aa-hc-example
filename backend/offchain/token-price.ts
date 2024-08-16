@@ -79,17 +79,17 @@ export async function getTokenPrice(tokenSymbol: string): Promise<number> {
 }
 
 export function generateResponse(
-    req: any,
+    req: OffchainParameterParsed,
     errorCode: number,
     respPayload: string
 ) {
   const encodedResponse = ethers.AbiCoder.defaultAbiCoder().encode(
       ["address", "uint256", "uint32", "bytes"],
-      [req.srcAddr, req.srcNonce, errorCode, respPayload]
+      [req.src_addr, req.src_nonce, errorCode, respPayload]
   );
   const putResponseCallData = ethers.AbiCoder.defaultAbiCoder().encode(
       ["bytes32", "bytes"],
-      [req.skey, encodedResponse]
+      [req.sk, encodedResponse]
   );
   const putResponseEncoded = getSelector("PutResponse", ['bytes32', 'bytes']) + putResponseCallData.slice(2);
 
@@ -117,7 +117,7 @@ export function generateResponse(
       ],
       [
         HybridAcctAddr,
-        req.opNonce,
+        req.oo_nonce,
         ethers.keccak256('0x'),
         ethers.keccak256(executeEncoded),
         callGas,
