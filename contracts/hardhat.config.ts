@@ -11,6 +11,9 @@ if (!PRIVATE_KEY) {
     console.warn("[hardhat.config] No PRIVATE_KEY defined!")
 }
 const DUMMY_PRIVATE_KEY = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+
+console.log("Using private key: ", PRIVATE_KEY, DUMMY_PRIVATE_KEY)
+
 const config: HardhatUserConfig & {
     etherscan: { apiKey: any; customChains: any };
 } = {
