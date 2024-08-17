@@ -9,7 +9,7 @@ orbs:
 jobs:
   integration-tests:
     docker:
-      - image: cimg/base:stable
+      - image: ubuntu:22.04
     shell: /bin/bash
     resource_class: large
     parallelism: 10
