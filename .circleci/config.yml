@@ -25,8 +25,8 @@ jobs:
       - run:
           name: Install essential tools
           command: |
-            apt-get update
-            apt-get install -y curl git sudo
+            sudo apt-get update
+            sudo apt-get install -y curl git sudo
       - run:
           name: Checkout submodules
           command: git submodule update --init --recursive
