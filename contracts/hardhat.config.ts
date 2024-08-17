@@ -7,12 +7,13 @@ import "@nomicfoundation/hardhat-ignition-ethers";
 dotenv.config();
 
 const {PRIVATE_KEY} = process.env;
-if (!PRIVATE_KEY) {
-    console.warn("[hardhat.config] No PRIVATE_KEY defined!")
-}
 const DUMMY_PRIVATE_KEY = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
 
-console.log("Using private key: ", PRIVATE_KEY, DUMMY_PRIVATE_KEY)
+let privateKeyToUse: string = PRIVATE_KEY!
+if (!PRIVATE_KEY || PRIVATE_KEY.length !== DUMMY_PRIVATE_KEY.length) {
+    console.warn("[hardhat.config] No or invalid PRIVATE_KEY defined!")
+    privateKeyToUse = DUMMY_PRIVATE_KEY
+}
 
 const config: HardhatUserConfig & {
     etherscan: { apiKey: any; customChains: any };
@@ -32,11 +33,11 @@ const config: HardhatUserConfig & {
     networks: {
         boba_sepolia: {
             url: "https://sepolia.boba.network",
-            accounts: [PRIVATE_KEY ?? DUMMY_PRIVATE_KEY],
+            accounts: [privateKeyToUse],
         },
         boba_local: {
             url: "http://localhost:9545",
-            accounts: [PRIVATE_KEY ?? DUMMY_PRIVATE_KEY],
+            accounts: [privateKeyToUse],
         },
     },
     etherscan: {
