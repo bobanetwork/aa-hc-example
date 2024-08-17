@@ -128,8 +128,9 @@ export const generateResponse = async (
         selector("execute(address,uint256,bytes)") +
         executeCallData.slice(2);
 
-    const gasEstimate = 705 * web3.utils.hexToBytes(respPayload).length + 170000;
-    let callGasEstimate: number = (await web3.eth.estimateGas({
+    //const callGasEstimate = 705 * web3.utils.hexToBytes(respPayload).length + 170000;
+    const callGasEstimate = 705 * respPayload.length + 170_000;
+    /*let callGasEstimate: number = (await web3.eth.estimateGas({
         from: process.env.ENTRY_POINTS,
         to: req.srcAddr,
         data: executeEncoded,
@@ -139,7 +140,8 @@ export const generateResponse = async (
     if (gasEstimate > callGasEstimate) {
         callGasEstimate = gasEstimate; // override with higher value
     }
-    callGasEstimate = Math.floor(callGasEstimate * 1.1) // + 10% buffer
+    callGasEstimate = Math.floor(callGasEstimate * 1.2) // + x% buffer
+    */
     console.log("Final gas estimate: ", callGasEstimate)
 
     const finalEncodedParameters = web3.eth.abi.encodeParameters(
