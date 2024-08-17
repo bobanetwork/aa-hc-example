@@ -7,14 +7,18 @@ orbs:
   rust: circleci/rust@1.6.1
 
 jobs:
-  test:
+  integration-tests:
     docker:
-      - image: node:18
+      - image: ubuntu:22.04
     shell: /bin/bash
     resource_class: large
     parallelism: 10
     steps:
       - checkout
+      - go/install
+      - node/install
+      - python/install
+      - rust/install
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
