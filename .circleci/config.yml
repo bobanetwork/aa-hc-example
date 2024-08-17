@@ -17,7 +17,6 @@ jobs:
       - checkout
       - go/install
       - node/install
-      - python/install
       - rust/install
       - restore_cache:
           name: Restore pnpm Package Cache
