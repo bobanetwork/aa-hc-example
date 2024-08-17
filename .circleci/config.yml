@@ -15,6 +15,11 @@ jobs:
     parallelism: 10
     steps:
       - checkout
+      - run:
+          name: Install essential tools
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y curl git sudo
       - go/install
       - node/install
       - rust/install
@@ -22,11 +27,6 @@ jobs:
           name: Restore pnpm Package Cache
           keys:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - run:
-          name: Install essential tools
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y curl git sudo
       - run:
           name: Checkout submodules
           command: git submodule update --init --recursive
