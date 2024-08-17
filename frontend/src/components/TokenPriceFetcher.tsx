@@ -1,4 +1,4 @@
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {Button} from "./ui/button";
 import {defaultSnapOrigin} from "@/config";
 import {MetaMaskContext} from "@/context/MetamaskContext";
@@ -23,6 +23,27 @@ const FormComponent = () => {
     const [error, setError] = useState<any>(null);
 
     const abiCoder = new AbiCoder();
+    const provider = new ethers.JsonRpcProvider(
+        import.meta.env.VITE_RPC_PROVIDER
+    );
+
+    const contract = new ethers.Contract(
+        contractAddress,
+        contractAbi,
+        provider,
+    );
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            contract.tokenPrices(tokenSymbol).then(response => {
+                setTokenPrice(response[0] ?? response['0']);
+                console.log("fetched price: ", tokenPrice);
+            });
+        }, 5_000);
+
+        // Clear the interval on unmount
+        return () => clearInterval(intervalId);
+    }, [setTokenPrice, contract]);
 
     const onSubmit = async () => {
         try {
@@ -46,12 +67,6 @@ const FormComponent = () => {
                     to: import.meta.env.VITE_SMART_CONTRACT,
                     value: "0",
                     data: txData,
-                    /*overrides: {
-                        preVerificationGasReqMultiplier: 2,
-                        /*callGasLimitReq: 1_000_000_000_000,
-                            maxFeePerGasReq: 11_000_000_000_000,
-                            maxPriorityFeePerGasReq: 11_000_000_000_000,*
-                        },*/
                 },
                 account: state.selectedAcount.id,
                 scope: `eip155:${state.chain}`,
@@ -73,22 +88,6 @@ const FormComponent = () => {
             console.log("txResponse:", txResponse);
             setTxResponse(txResponse);
 
-            const provider = new ethers.JsonRpcProvider(
-                import.meta.env.VITE_RPC_PROVIDER
-            );
-
-            const contract = new ethers.Contract(
-                contractAddress,
-                contractAbi,
-                provider,
-            );
-
-            // Fetch token-price from the struct inside the smart-contract.
-            const price = await contract.tokenPrices(tokenSymbol);
-            const price2 = price[0] || price["0"]; // Assuming the first property is the price string
-
-            console.log("fetched price: ", price);
-            setTokenPrice(price2);
         } catch (error: any) {
             console.log(`error`, error);
             setError(error.message);
@@ -131,12 +130,12 @@ const FormComponent = () => {
                             placeholder="ETH"
                         />
                     </div>
-                    <label className="block text-sm font-medium leading-6 text-teal-900">Use paymaster</label>
+                    {/*<label className="block text-sm font-medium leading-6 text-teal-900">Use paymaster</label>
                     <div className="relative mt-2 rounded-md shadow-sm w-full">
                         <input type="checkbox"
                                checked={usePaymaster}
                                onChange={handleChangePaymaster}/>
-                    </div>
+                    </div>*/}
                 </div>
             </div>
             <div className="flex gap-1 items-stretch justify-around w-full">
@@ -156,6 +155,7 @@ const FormComponent = () => {
                             "Fetch price via HybridCompute"
                         )}
                     </Button>
+                    <small>If you receive the error "Failed to fetch" then wait a few minutes and try again. The offchain RPC server likely is in standby as it is being hosted on a free tier.</small>
                 </div>
             </div>
             {error && (

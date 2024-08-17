@@ -58,6 +58,23 @@ When you follow the steps above your application will use the already deployed b
 | -> More RPC URls | https://chainlist.org/chain/28882	               |                                     |
 
 
+This is what a successful transaction will look like: [0x30056b3ff720f4d824422bd077b88c4333e86fbe5522bcdba96cfc8fa2a69b52](https://testnet.bobascan.com/tx/0x30056b3ff720f4d824422bd077b88c4333e86fbe5522bcdba96cfc8fa2a69b52?chainid=28882)
+
+This is what it will look like on the frontend provided:
+![Successful userOp](./assets/successful_userop.png "Successful userOp")
+
+# How does it work?
+This example utilizes [Hybrid Compute 2.0](https://docs.boba.network/developer/features/aa-basics/hybrid-compute) based on [Account Abstraction](https://docs.boba.network/developer/features/aa-basics#what-is-account-abstraction).
+
+Here is a high level overview of what happens:
+![High level arch](./assets/HC-AA-SimplifiedFlow.drawio.png "Rough architecture")
+
+The actual API call happens when the gas estimation happens (click for full page view):
+[![Gas estimation flow](./assets/aa_hc_estimation.png "Gas estimation flow")](./assets/aa_hc_estimation.png)
+
+If the gas estimation was successful, then we can submit our user operation (click for full page view):
+[![Submit flow](./assets/aa_hc_submit.png "Submit flow")](./assets/aa_hc_submit.png)
+
 # Testing
 Whenever you make changes and push to `main` on your Github repository relevant tests are being run by Github actions to make sure everything works as expected.
 

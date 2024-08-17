@@ -39,6 +39,9 @@ If you want to setup your own server on Render, just follow these steps:
 
 Your DApp should be ready!
 
+A successful UserOp should result in a view like this: 
+![Successful userOp](../assets/successful_userop.png "Successful userOp")
+
 ## Stack 
 - Vite 
 - React Ts
