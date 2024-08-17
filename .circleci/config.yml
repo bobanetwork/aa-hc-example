@@ -1,0 +1,85 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.2.0
+  go: circleci/go@1.7.1
+  python: circleci/python@2.1.1
+  rust: circleci/rust@1.6.1
+
+jobs:
+  test:
+    docker:
+      - image: node:18
+    shell: /bin/bash
+    resource_class: large
+    parallelism: 10
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install essential tools
+          command: |
+            apt-get update
+            apt-get install -y curl git sudo
+      - run:
+          name: Checkout submodules
+          command: git submodule update --init --recursive
+      - run:
+          name: Install Foundry
+          command: |
+            curl -L https://foundry.paradigm.xyz | bash
+            export PATH="$PATH:/root/.foundry/bin"
+            foundryup
+      - run:
+          name: Install pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@latest-9 --activate
+            pnpm config set store-dir .pnpm-store
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
+      - run:
+          name: Install Make
+          command: sudo apt-get install -y make
+      - run:
+          name: Install dependencies (root)
+          command: pnpm install
+      - run:
+          name: Install dependencies (contracts)
+          command: |
+            cd ./contracts
+            pnpm install
+      - run:
+          name: Start local environment
+          command: |
+            pnpm start:local:ci 2>&1 | tee local_env.log
+          no_output_timeout: 60m
+          environment:
+            PRIVATE_KEY: ${PRIVATE_KEY}
+            CONRANKING_API_KEY: ${CONRANKING_API_KEY}
+      - run:
+          name: Run Hardhat tests
+          command: |
+            cd ./contracts
+            npx hardhat test
+          environment:
+            TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
+            RPC_URL: ${RPC_URL}
+            PRIVATE_KEY: ${PRIVATE_KEY}
+      - run:
+          name: Display full logs
+          command: cat local_env.log
+          when: always
+
+workflows:
+  version: 2
+  test-workflow:
+    jobs:
+      - test:
+          context: test-env
