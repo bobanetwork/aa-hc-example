@@ -10,7 +10,7 @@ const {PRIVATE_KEY} = process.env;
 if (!PRIVATE_KEY) {
   console.warn("[hardhat.config] No PRIVATE_KEY defined!")
 }
-
+const DUMMY_PRIVATE_KEY = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
 const config: HardhatUserConfig & {
   etherscan: { apiKey: any; customChains: any };
 } = {
@@ -29,11 +29,11 @@ const config: HardhatUserConfig & {
   networks: {
     boba_sepolia: {
       url: "https://sepolia.boba.network",
-      accounts: [PRIVATE_KEY ?? '0x0'],
+      accounts: [PRIVATE_KEY ?? DUMMY_PRIVATE_KEY],
     },
     boba_local: {
       url: "http://localhost:9545",
-      accounts: [PRIVATE_KEY ?? '0x0'],
+      accounts: [PRIVATE_KEY ?? DUMMY_PRIVATE_KEY],
     },
   },
   etherscan: {
