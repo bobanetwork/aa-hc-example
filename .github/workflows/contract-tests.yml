@@ -39,7 +39,3 @@ jobs:
       - name: Run Forge tests
         run: forge test -vvv
         working-directory: ./contracts
-
-      - name: Display full logs
-        if: always()
-        run: cat local_env.log
