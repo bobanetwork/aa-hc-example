@@ -128,20 +128,7 @@ export const generateResponse = async (
         selector("execute(address,uint256,bytes)") +
         executeCallData.slice(2);
 
-    //const callGasEstimate = 705 * web3.utils.hexToBytes(respPayload).length + 170000;
-    const callGasEstimate = 705 * respPayload.length + 170_000;
-    /*let callGasEstimate: number = (await web3.eth.estimateGas({
-        from: process.env.ENTRY_POINTS,
-        to: req.srcAddr,
-        data: executeEncoded,
-    }, undefined, { number: FMT_NUMBER.NUMBER } as DataFormat)) as number
-
-    console.log("Call gas estimate: ", callGasEstimate, gasEstimate)
-    if (gasEstimate > callGasEstimate) {
-        callGasEstimate = gasEstimate; // override with higher value
-    }
-    callGasEstimate = Math.floor(callGasEstimate * 1.2) // + x% buffer
-    */
+    const callGasEstimate = 705 * web3.utils.hexToBytes(respPayload).length + 170000; // needs to be calculated this way for correct signature
     console.log("Final gas estimate: ", callGasEstimate)
 
     const finalEncodedParameters = web3.eth.abi.encodeParameters(
