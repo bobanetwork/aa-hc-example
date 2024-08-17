@@ -135,11 +135,12 @@ export const generateResponse = async (
         data: executeEncoded,
     }, undefined, { number: FMT_NUMBER.NUMBER } as DataFormat)) as number
 
-    console.log("Call gas estimate: ", callGasEstimate)
+    console.log("Call gas estimate: ", callGasEstimate, gasEstimate)
     if (gasEstimate > callGasEstimate) {
         callGasEstimate = gasEstimate; // override with higher value
     }
-    callGasEstimate *= 1.1 // + 10% buffer
+    callGasEstimate = Math.floor(callGasEstimate * 1.1) // + 10% buffer
+    console.log("Final gas estimate: ", callGasEstimate)
 
     const finalEncodedParameters = web3.eth.abi.encodeParameters(
         [
