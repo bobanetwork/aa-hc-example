@@ -67,12 +67,17 @@ This is what it will look like on the frontend provided:
 This example utilizes [Hybrid Compute 2.0](https://docs.boba.network/developer/features/aa-basics/hybrid-compute) based on [Account Abstraction](https://docs.boba.network/developer/features/aa-basics#what-is-account-abstraction).
 
 Here is a high level overview of what happens:
+
 ![High level arch](./assets/HC-AA-SimplifiedFlow.drawio.png "Rough architecture")
 
+
 The actual API call happens when the gas estimation happens (click for full page view):
+
 [![Gas estimation flow](./assets/aa_hc_estimation.png "Gas estimation flow")](./assets/aa_hc_estimation.png)
 
+
 If the gas estimation was successful, then we can submit our user operation (click for full page view):
+
 [![Submit flow](./assets/aa_hc_submit.png "Submit flow")](./assets/aa_hc_submit.png)
 
 # Testing

@@ -33,7 +33,7 @@ describe("RPC Server", () => {
       sk: "76e2c074d436bac1cf246c55e408088fd19fb8c7034eeee8efb7215217f8e728",
       src_addr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
       src_nonce:
-        "0000000000000000000000000000000000000000000004b00000000000000000",
+          "0000000000000000000000000000000000000000000004b00000000000000000",
       ver: "0.2",
     };
 
@@ -50,61 +50,104 @@ describe("RPC Server", () => {
     };
 
     mockAxios
-      .onGet("https://api.coinranking.com/v2/coins")
-      .reply(200, coinListResponse);
+        .onGet("https://api.coinranking.com/v2/coins")
+        .reply(200, coinListResponse);
     mockAxios
-      .onGet("https://api.coinranking.com/v2/coin/bitcoin-uuid/price")
-      .reply(200, priceResponse);
+        .onGet("https://api.coinranking.com/v2/coin/bitcoin-uuid/price")
+        .reply(200, priceResponse);
+
+    const jsonRpcRequest = {
+      jsonrpc: "2.0",
+      id: 1,
+      method: selector("getprice(string)"),
+      params: params
+    };
 
     const response = await request(app)
-      .post("/hc")
-      .send({ method: selector("getprice(string)"), params });
+        .post("/hc")
+        .send(jsonRpcRequest);
 
-    console.log("RESP: ", JSON.stringify(response))
+    console.log("RESP: ", JSON.stringify(response.body));
     expect(response.status).toBe(200);
-    expect(response.body.result).toBeDefined();
-    expect(response.body.result.success).toBe(true);
-    expect(response.body.result.response).toBeDefined();
-    expect(response.body.result.signature).toBeDefined();
+    expect(response.body.jsonrpc).toBe("2.0");
+    expect(response.body.id).toBe(1);
+
+    if (response.body.error) {
+      console.error("Unexpected error:", response.body.error);
+      fail("Received an error response when expecting a successful one");
+    } else {
+      expect(response.body.result).toBeDefined();
+      expect(response.body.result.success).toBe(true);
+      expect(response.body.result.response).toBeDefined();
+      expect(response.body.result.signature).toBeDefined();
+    }
   });
 
-  it("should respond with error for invalid token symbol", async () => {
+  it("should respond with an error for invalid request", async () => {
+    const params = {
+      oo_nonce: "0x17a581d0f878b31216e82805f1f8c078fb5d4da0000000000000000",
+      payload: web3.eth.abi.encodeParameter("string", "BTC"),
+      sk: "76e2c074d436bac1cf246c55e408088fd19fb8c7034eeee8efb7215217f8e728",
+      src_addr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
+      src_nonce:
+          "0000000000000000000000000000000000000000000004b00000000000000000",
+      ver: "0.2",
+    };
+
+    const response = await request(app)
+        .post("/hc")
+        .send({ method: selector("getprice(string)"), params });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      jsonrpc: "2.0",
+      id: null,
+      error: {
+        code: -32600,
+        message: "Invalid Request"
+      }
+    });
+  });
+
+  it("should respond with an error for invalid token symbol", async () => {
     const params = {
       oo_nonce: "0x17a581d0f878b31216e82805f1f8c078fb5d4da0000000000000000",
       payload: web3.eth.abi.encodeParameter("string", "invalidSymbol"),
       sk: "76e2c074d436bac1cf246c55e408088fd19fb8c7034eeee8efb7215217f8e728",
       src_addr: "017a581d0f878b31216e82805f1f8c078fb5d4da",
       src_nonce:
-        "0000000000000000000000000000000000000000000004b00000000000000000",
+          "0000000000000000000000000000000000000000000004b00000000000000000",
       ver: "0.2",
     };
 
-    const coinListResponse = {
-      data: {
-        coins: [{ symbol: "BTC", uuid: "bitcoin-uuid", name: "Bitcoin" }],
-      },
-    };
-
-    mockAxios
-      .onGet("https://api.coinranking.com/v2/coins")
-      .reply(200, coinListResponse);
-
     const response = await request(app)
-      .post("/hc")
-      .send({ method: selector("getprice(string)"), params });
+        .post("/hc")
+        .send({ method: selector("getprice(string)"), params });
 
     expect(response.status).toBe(200);
-    expect(response.body.result.success).toBe(false);
-    expect(response.body.result.response).toBeDefined();
-    expect(response.body.result.signature).toBeDefined();
+    expect(response.body).toEqual({
+      jsonrpc: "2.0",
+      id: null,
+      error: {
+        code: -32600,
+        message: "Invalid Request"
+      }
+    });
   });
 
   it("should return error for invalid method", async () => {
     const response = await request(app)
-      .post("/hc")
-      .send({ method: "invalidMethod", params: {} });
+        .post("/hc")
+        .send({ method: "invalidMethod", params: {} });
 
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBeDefined();
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      jsonrpc: "2.0",
+      id: null,
+      error: {
+        code: -32600,
+        message: "Invalid Request"
+      }
+    });
   });
 });

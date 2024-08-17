@@ -1,4 +1,4 @@
-import Web3, {DataFormat, FMT_NUMBER} from "web3";
+import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
 import {
@@ -88,7 +88,7 @@ export async function getTokenPrice(tokenSymbol: string): Promise<number> {
  * @returns {object} - An object containing the success status, response payload, and signature.
  * @throws {Error}
  */
-export const generateResponse = async (
+export const generateResponse = (
     req: {
         readonly srcAddr: string;
         readonly reqBytes: string;
