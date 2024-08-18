@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.2.0
-  go: circleci/go@1.7.1
+  go: circleci/go@1.11.0
   python: circleci/python@2.1.1
   rust: circleci/rust@1.6.1
 
