@@ -64,9 +64,10 @@ jobs:
             sudo apt-get install -y nodejs
             sudo corepack enable
             corepack prepare pnpm@latest --activate
+            sudo corepack enable pnpm
             pnpm --version
             pnpm config set store-dir .pnpm-store
-            sudo corepack disable
+            
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
