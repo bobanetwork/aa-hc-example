@@ -10,6 +10,9 @@ jobs:
   integration-tests:
     docker:
       - image: ubuntu:22.04
+    executor:
+      name: go/default
+      tag: '1.21'
     shell: /bin/bash
     resource_class: large
     parallelism: 10
@@ -21,6 +24,9 @@ jobs:
             apt-get update
             apt-get install -y curl git sudo
       - go/install
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
       - node/install
       - rust/install
       - restore_cache:
