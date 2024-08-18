@@ -62,10 +62,7 @@ jobs:
           command: |
               curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
               sudo apt-get install -y nodejs
-              sudo corepack enable
-              corepack prepare yarn@stable pnpm@latest npm@latest --activate
-              sudo corepack enable yarn pnpm npm
-              echo "Node version: $(node --version)"
+              npm i -g yarn pnpm
               echo "NPM version: $(npm --version)"
               echo "Yarn version: $(yarn --version)"
               echo "PNPM version: $(pnpm --version)"
