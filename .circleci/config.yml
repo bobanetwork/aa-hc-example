@@ -24,6 +24,17 @@ jobs:
             apt-get update
             apt-get install -y curl git sudo
       - go/install
+      - run:
+          name: Diagnostic - Check directory structure
+          command: |
+            pwd
+            ls -la
+            tree -L 2
+      - run:
+          name: Diagnostic - Check boba directory
+          command: |
+            ls -la boba
+            cat boba/go.mod || echo "go.mod not found in boba directory"
       #- go/load-cache
       - run:
           name: Go mod download in boba directory
