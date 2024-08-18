@@ -60,6 +60,7 @@ jobs:
       - run:
           name: Install pnpm
           command: |
+            sudo npm install -g corepack
             sudo corepack enable
             sudo corepack prepare pnpm@latest-9 --activate
             pnpm config set store-dir .pnpm-store
