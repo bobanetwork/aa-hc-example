@@ -45,7 +45,7 @@ async function main() {
 
         if (!isPortInUse(8545) && !isPortInUse(9545)) {
             await execPromise("pnpm install", [], path.resolve(__dirname, "../../boba"));
-            await execPromise('go mod tidy -e', [], path.resolve(__dirname, "../../boba"));
+            //await execPromise('go mod tidy -e', [], path.resolve(__dirname, "../../boba"));
             await execPromise("make devnet-hardhat-up", [], path.resolve(__dirname, "../../boba"));
         } else {
             console.log("Boba Chain already running, skipping")

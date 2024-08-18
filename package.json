@@ -12,6 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/bobanetwork/aa-hc-example.git"
   },
+  "packageManager": "pnpm@9.7.1",
   "workspaces": [
     "backend",
     "frontend",
