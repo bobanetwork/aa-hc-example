@@ -29,7 +29,6 @@ jobs:
           command: |
             pwd
             ls -la
-            tree -L 2
       - run:
           name: Diagnostic - Check boba directory
           command: |
