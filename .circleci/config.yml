@@ -28,9 +28,7 @@ jobs:
       - run:
           name: Go mod download in boba directory
           command: |
-            cd boba
-            go mod tidy -e
-            go mod download
+            cd boba && go mod tidy -e && go mod download
       #- go/save-cache
       - node/install
       - rust/install
