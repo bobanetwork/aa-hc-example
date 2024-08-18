@@ -25,6 +25,9 @@ jobs:
             apt-get install -y curl git sudo
       - go/install
       - run:
+          name: Checkout submodules
+          command: git submodule update --init --recursive
+      - run:
           name: Diagnostic - Check directory structure
           command: |
             pwd
@@ -46,9 +49,6 @@ jobs:
           name: Restore pnpm Package Cache
           keys:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - run:
-          name: Checkout submodules
-          command: git submodule update --init --recursive
       - run:
           name: Install Foundry
           command: |
