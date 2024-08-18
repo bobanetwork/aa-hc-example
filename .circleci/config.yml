@@ -5,24 +5,22 @@ orbs:
   go: circleci/go@1.11.0
   python: circleci/python@2.1.1
   rust: circleci/rust@1.6.1
+  docker: circleci/docker@2.2.0
 
 jobs:
   integration-tests:
-    docker:
-      - image: ubuntu:22.04
-    executor:
-      name: go/default
-      tag: '1.21'
-    shell: /bin/bash
+    machine:
+      image: ubuntu-2204:current
     resource_class: large
     parallelism: 10
     steps:
       - checkout
+      - docker/install-docker
       - run:
           name: Install essential tools
           command: |
-            apt-get update
-            apt-get install -y curl git sudo software-properties-common  python3 python3-pip
+            sudo apt-get update
+            sudo apt-get install -y curl git software-properties-common python3 python3-pip
       - go/install:
           version: 1.22.5
       - run:
@@ -43,12 +41,10 @@ jobs:
           command: |
             ls -la boba
             cat boba/go.mod || echo "go.mod not found in boba directory"
-      #- go/load-cache
       - run:
           name: Go mod download in boba directory
           command: |
             go version && cd boba && go mod tidy -e && go mod download
-      #- go/save-cache
       - node/install
       - rust/install
       - restore_cache:
@@ -59,13 +55,13 @@ jobs:
           name: Install Foundry
           command: |
             curl -L https://foundry.paradigm.xyz | bash
-            export PATH="$PATH:/root/.foundry/bin"
+            export PATH="$PATH:$HOME/.foundry/bin"
             foundryup
       - run:
           name: Install pnpm
           command: |
-            corepack enable
-            corepack prepare pnpm@latest-9 --activate
+            sudo corepack enable
+            sudo corepack prepare pnpm@latest-9 --activate
             pnpm config set store-dir .pnpm-store
       - save_cache:
           name: Save pnpm Package Cache
