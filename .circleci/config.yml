@@ -25,7 +25,11 @@ jobs:
             apt-get install -y curl git sudo
       - go/install
       - go/load-cache
-      - go/mod-download
+      - run:
+          name: Go mod download in boba directory
+          command: |
+            cd boba
+            go mod download
       - go/save-cache
       - node/install
       - rust/install
