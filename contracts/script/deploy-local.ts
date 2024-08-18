@@ -11,6 +11,7 @@ import {
 import {execPromise} from './utils'
 import {readHybridAccountAddress} from "./utils";
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
+import {exec} from "node:child_process";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ async function main() {
 
         if (!isPortInUse(8545) && !isPortInUse(9545)) {
             await execPromise("pnpm install", [], path.resolve(__dirname, "../../boba"));
+            await execPromise('go mod tidy -e', [], path.resolve(__dirname, "../../boba"));
             await execPromise("make devnet-hardhat-up", [], path.resolve(__dirname, "../../boba"));
         } else {
             console.log("Boba Chain already running, skipping")
