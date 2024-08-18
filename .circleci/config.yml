@@ -24,13 +24,14 @@ jobs:
             apt-get update
             apt-get install -y curl git sudo
       - go/install
-      - go/load-cache
+      #- go/load-cache
       - run:
           name: Go mod download in boba directory
           command: |
             cd boba
+            go mod tidy -e
             go mod download
-      - go/save-cache
+      #- go/save-cache
       - node/install
       - rust/install
       - restore_cache:
