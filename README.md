@@ -30,13 +30,13 @@ All contracts and services are deployed and environment variables are substitute
 2. Run `pnpm start:local` to spin the local stack up. Make sure you have [Docker](https://www.docker.com/products/docker-desktop/) running.
 3. Head over to [localhost:8001](http://localhost:8001) to create your Smart Wallet.
 4. Once you created your account, try it out by using the "Transfer Funds" section. Make sure you funded your new "Snap Account" with some `ETH` on Boba Sepolia.
-5. Congrats you sent your first `UserOp` on Boba Sepolia using Account Abstraction! This is the moment your smart account gets deployed on-chain (on the first UserOp).
+5. Congrats you sent your first `UserOp` on your local devnet using Account Abstraction! This is the moment your smart account gets deployed on-chain (on the first UserOp).
 6. Navigate now to [localhost:8000](http://localhost:8000) to interact with your local DApp which utilizes Hybrid Compute via Account Abstraction to fetch off-chain data to your smart contract! In our example we fetch the current price of a cryptocurrency asset.
 
 
 Please note, that the local stack actually spins up the Boba L2 locally, the Bundler ("Rundler") along with other local services. This might take a while to startup. 
 
-## Sepolia
+## Boba Sepolia
 
 1. Copy `/contracts/.env-example` and name it `.env`. All necessary variables are pre-filled except of `PRIVATE_KEY`.
 2. Add your own private key, that contains some ETH on Boba Sepolia in order to deploy the contracts on testnet. You can obtain some SepETH on Sepolia (L1) from any [faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia) and bridge them to L2 through our [Gateway](https://gateway.boba.network/).
