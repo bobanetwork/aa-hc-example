@@ -155,8 +155,9 @@ const FormComponent = () => {
                             "Fetch price via HybridCompute"
                         )}
                     </Button>
-                    <small>If you receive the error "Failed to fetch" then wait a few minutes and try again. The offchain RPC server likely is in standby as it is being hosted on a free tier.</small>
                 </div>
+                <small>If you receive the error "Failed to fetch" then wait a few minutes and try again. The offchain
+                    RPC server likely is in standby as it is being hosted on a free tier.</small>
             </div>
             {error && (
                 <div className="flex w-full flex-col my-2">
