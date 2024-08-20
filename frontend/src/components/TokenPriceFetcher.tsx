@@ -15,6 +15,7 @@ const FormComponent = () => {
     const [contractAddress, setContractAddress] = useState(YOUR_CONTRACT);
     const [tokenSymbol, setTokenSymbol] = useState("ETH");
     const [tokenPrice, setTokenPrice] = useState("");
+    const [lastFetchedViaHC, setLastFetchedViaHC] = useState(0);
     const {abi: contractAbi} = useContractAbi("TokenPrice");
     const [txResponse, setTxResponse] = useState<any>(null);
     const [usePaymaster, setUsePaymaster] = useState(false)
@@ -37,7 +38,8 @@ const FormComponent = () => {
         const intervalId = setInterval(() => {
             contract.tokenPrices(tokenSymbol).then(response => {
                 setTokenPrice(response[0] ?? response['0']);
-                console.log("fetched price: ", tokenPrice);
+                setLastFetchedViaHC(parseInt(response[1] ?? response['1'])); // unix timestamp
+                console.log("fetched price: ", tokenPrice, lastFetchedViaHC);
             });
         }, 5_000);
 
@@ -53,6 +55,7 @@ const FormComponent = () => {
             }
             setIsLoading(true);
             setTokenPrice("");
+            setLastFetchedViaHC(0);
             setTxResponse("");
             setError("");
 
@@ -156,8 +159,6 @@ const FormComponent = () => {
                         )}
                     </Button>
                 </div>
-                <small>If you receive the error "Failed to fetch" then wait a few minutes and try again. The offchain
-                    RPC server likely is in standby as it is being hosted on a free tier.</small>
             </div>
             {error && (
                 <div className="flex w-full flex-col my-2">
@@ -184,7 +185,7 @@ const FormComponent = () => {
                     <div
                         className="flex flex-1 justify-between items-center rounded-md bg-gradient-to-r from-teal-400 to-blue-500 p-6 w-full shadow-lg">
                         <p className="text-xl font-semibold text-white">
-                            Price for{" "}
+                            Last Price for{" "}
                             <span
                                 className="text-yellow-300 text-2xl font-bold px-2 py-1 bg-opacity-50 bg-black rounded">
                 {tokenSymbol}
@@ -194,6 +195,8 @@ const FormComponent = () => {
                 ${parseFloat(tokenPrice).toLocaleString()}
               </span>
                         </p>
+                        <p className="text-sm font-semibold text-white">Last fetched via Hybrid Compute
+                            on {new Date(lastFetchedViaHC * 1_000 /* unix timestamp to time */).toLocaleString()}</p>
                     </div>
                     <div
                         className="flex flex-1 justify-between rounded-md bg-teal-100 p-4 mt-2 w-full cursor-pointer"
@@ -202,6 +205,7 @@ const FormComponent = () => {
                         }}
                     >
                         <div className="text-roboto-mono text-left text-xs text-blue-800 break-all whitespace-pre-wrap">
+                            <b>The UserOp response (not the transaction):</b><br/>
                             {JSON.stringify(txResponse, null, 2)}
                         </div>
                         <div className="w-4 h-4 justify-end items-end">
@@ -210,6 +214,8 @@ const FormComponent = () => {
                     </div>
                 </div>
             )}
+            <small>If you receive the error "Failed to fetch" then wait a few minutes and try again. The offchain
+                RPC server likely is in standby as it is being hosted on a free tier.</small>
         </div>
     );
 };
