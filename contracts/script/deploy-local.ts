@@ -113,28 +113,6 @@ async function main() {
             throw Error("Some contracts are not defined!");
         }
 
-        // /** @DEV Build Rundler with passed envs */
-        // await execPromise("docker compose up -d --build rundler-hc --build", [],
-        //     path.resolve(__dirname, "../../rundler-hc/hybrid-compute/"), {...process.env, ...{
-        //             HC_HELPER_ADDR: hcHelperAddr,
-        //             HC_SYS_ACCOUNT: hybridAccountAddr,
-        //             HC_SYS_OWNER: ha0Owner,
-        //             HC_SYS_PRIVKEY: ha0Privkey,
-        //             ENTRY_POINTS: entrypoint,
-        //             BUILDER_PRIVKEY: builderPrivkey,
-        //             NODE_HTTP: `http://${getLocalIpAddress()}:9545`,
-        //             CHAIN_ID: "901",
-        //         }}
-        // );
-
-        if (isCi) {
-            await execPromise(`find ${path.resolve(__dirname, "../../rundler-hc")} -name \"node_modules\" -type d -prune -exec rm -rf {} +`, []);
-            console.log("Deleted node_modules within rundler repo.")
-
-            await execPromise("sudo apt remove rustc cargo && sudo apt autoremove", []);
-            console.log("Deleted Rust and Cargo as not needed anymore.")
-        }
-
         /** @DEV Rundler Environment */
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, rootPath);
         updateEnvVariable("HC_SYS_ACCOUNT", hybridAccountAddr, rootPath);
@@ -181,13 +159,6 @@ async function main() {
         updateEnvVariable("LOCAL_SIMPLE_ACCOUNT_FACTORY", saFactory, snapEnv);
         updateEnvVariable("VERIFYING_PAYMASTER_ADDRESS", verifyingPaymasterContract, snapEnv);
         updateEnvVariable("LOCAL_BOBAPAYMASTER", tokenPaymasterAddress, snapEnv);
-
-        /** @DEV bootstrap frontend, backend and snap */
-        await execPromise(
-            "docker-compose -f docker-compose.local.yml up -d --build",
-            [],
-            path.resolve(__dirname, "../../")
-        );
     } catch (error) {
         console.error(error);
     }
@@ -201,7 +172,7 @@ const updateEnvVariable = (key: string, value: string, envPath: string) => {
         envFile = fs.readFileSync(envPath, "utf8");
     } catch (err: any) {
         if (err?.code! === 'ENOENT') {
-            // File doesn't exist, create it
+            console.log(`Creating .env file for ${envPath}`)
             envFile = '';
         } else {
             throw err;
