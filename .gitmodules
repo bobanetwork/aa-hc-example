@@ -5,9 +5,6 @@
 	path = contracts/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 	branch = release-v4.9
-[submodule "rundler-hc"]
-	path = rundler-hc
-	url = https://github.com/bobanetwork/rundler-hc.git
 [submodule "boba"]
 	path = boba
 	url = https://github.com/bobanetwork/boba.git
