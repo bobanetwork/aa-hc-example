@@ -11,7 +11,6 @@ import {
 import {execPromise} from './utils'
 import {readHybridAccountAddress} from "./utils";
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
-import {exec} from "node:child_process";
 
 dotenv.config();
 
@@ -26,12 +25,11 @@ const ha1Owner = ethers.getAddress("0xE073fC0ff8122389F6e693DD94CcDc5AF637448e")
 
 /** @DEV Configurations */
 const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env-local'
-const rundlerHcEnvPath = '../rundler-hc/hybrid-compute/.env'
+const rootPath = '../.env'
 const frontendEnvPath = path.resolve(__dirname, "../../frontend/.env-local");
 const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
 const contractsEnvPath = path.resolve(__dirname, "../.env");
 let aaConfigFile = fs.readFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', 'utf8');
-
 
 
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
@@ -67,7 +65,7 @@ async function main() {
 
         await sleep(5000);
 
-        const BACKEND_URL = process.env.BACKEND_URL ?? `http://${getLocalIpAddress()}:1234/rpc`
+        const BACKEND_URL = process.env.BACKEND_URL ?? `http://${getLocalIpAddress()}:1234/hc`
         if (!process.env.BACKEND_URL) {
             console.warn('[deploy-local.ts] No BACKEND_URL defined. Might be expected for default deployments and CI. Using localhost.')
             // NOTE: DO NOT THROW AN ERROR HERE, as we do use a default value above
@@ -115,19 +113,19 @@ async function main() {
             throw Error("Some contracts are not defined!");
         }
 
-        /** @DEV Build Rundler with passed envs */
-        await execPromise("docker compose up -d --build rundler-hc --build", [],
-            path.resolve(__dirname, "../../rundler-hc/hybrid-compute/"), {...process.env, ...{
-                    HC_HELPER_ADDR: hcHelperAddr,
-                    HC_SYS_ACCOUNT: hybridAccountAddr,
-                    HC_SYS_OWNER: ha0Owner,
-                    HC_SYS_PRIVKEY: ha0Privkey,
-                    ENTRY_POINTS: entrypoint,
-                    BUILDER_PRIVKEY: builderPrivkey,
-                    NODE_HTTP: `http://${getLocalIpAddress()}:9545`,
-                    CHAIN_ID: "901",
-                }}
-        );
+        // /** @DEV Build Rundler with passed envs */
+        // await execPromise("docker compose up -d --build rundler-hc --build", [],
+        //     path.resolve(__dirname, "../../rundler-hc/hybrid-compute/"), {...process.env, ...{
+        //             HC_HELPER_ADDR: hcHelperAddr,
+        //             HC_SYS_ACCOUNT: hybridAccountAddr,
+        //             HC_SYS_OWNER: ha0Owner,
+        //             HC_SYS_PRIVKEY: ha0Privkey,
+        //             ENTRY_POINTS: entrypoint,
+        //             BUILDER_PRIVKEY: builderPrivkey,
+        //             NODE_HTTP: `http://${getLocalIpAddress()}:9545`,
+        //             CHAIN_ID: "901",
+        //         }}
+        // );
 
         if (isCi) {
             await execPromise(`find ${path.resolve(__dirname, "../../rundler-hc")} -name \"node_modules\" -type d -prune -exec rm -rf {} +`, []);
@@ -138,18 +136,18 @@ async function main() {
         }
 
         /** @DEV Rundler Environment */
-        updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, rundlerHcEnvPath);
-        updateEnvVariable("HC_SYS_ACCOUNT", hybridAccountAddr, rundlerHcEnvPath);
-        updateEnvVariable("HC_SYS_OWNER", ha0Owner, rundlerHcEnvPath);
-        updateEnvVariable("HC_SYS_PRIVKEY", ha0Privkey, rundlerHcEnvPath);
-        updateEnvVariable("HA_FACTORY_ADDR", haFactory, rundlerHcEnvPath);
-        updateEnvVariable("SA_FACTORY_ADDR", saFactory, rundlerHcEnvPath);
-        updateEnvVariable("ENTRY_POINTS", entrypoint, rundlerHcEnvPath);
-        updateEnvVariable("BUILDER_PRIVKEY", builderPrivkey, rundlerHcEnvPath);
-        updateEnvVariable("NODE_HTTP", `http://${getLocalIpAddress()}:9545`, rundlerHcEnvPath);
-        updateEnvVariable("CHAIN_ID", "901", rundlerHcEnvPath);
-        updateEnvVariable("OC_LISTEN_PORT", "1234", rundlerHcEnvPath);
-        updateEnvVariable("BUNDLER_RPC", "http://localhost:3300", rundlerHcEnvPath);
+        updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, rootPath);
+        updateEnvVariable("HC_SYS_ACCOUNT", hybridAccountAddr, rootPath);
+        updateEnvVariable("HC_SYS_OWNER", ha0Owner, rootPath);
+        updateEnvVariable("HC_SYS_PRIVKEY", ha0Privkey, rootPath);
+        updateEnvVariable("HA_FACTORY_ADDR", haFactory, rootPath);
+        updateEnvVariable("SA_FACTORY_ADDR", saFactory, rootPath);
+        updateEnvVariable("ENTRY_POINTS", entrypoint, rootPath);
+        updateEnvVariable("BUILDER_PRIVKEY", builderPrivkey, rootPath);
+        updateEnvVariable("NODE_HTTP", `http://${getLocalIpAddress()}:9545`, rootPath);
+        updateEnvVariable("CHAIN_ID", "901", rootPath);
+        updateEnvVariable("OC_LISTEN_PORT", "1234", rootPath);
+        updateEnvVariable("BUNDLER_RPC", "http://localhost:3300", rootPath);
 
         /** @DEV Frontend Environment */
         updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
@@ -163,6 +161,7 @@ async function main() {
         updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
         updateEnvVariable("OC_PRIVKEY", deployKey, backendEnvPath);
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, backendEnvPath);
+        updateEnvVariable("OC_LISTEN_PORT", "1234", backendEnvPath);
 
         /** @DEV Contracts Environment */
         updateEnvVariable("HYBRID_ACCOUNT", hybridAccountAddr, contractsEnvPath);
@@ -170,6 +169,7 @@ async function main() {
         updateEnvVariable("TOKEN_PRICE_CONTRACT", tokenPriceAddress, contractsEnvPath);
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, contractsEnvPath);
         updateEnvVariable("PRIVATE_KEY", deployKey, contractsEnvPath);
+        updateEnvVariable("BACKEND_URL", `http://${getLocalIpAddress()}:1234/hc`, contractsEnvPath);
 
         /** @DEV SNAP Environment */
         const localConfigRegex = /(\[CHAIN_IDS\.LOCAL\]:\s*{[\s\S]*?entryPoint:\s*')([^']*)(\'[\s\S]*?simpleAccountFactory:\s*')([^']*)(\'[\s\S]*?bobaPaymaster:\s*')([^']*)(\'[\s\S]*?})/;
@@ -194,8 +194,19 @@ async function main() {
 }
 
 const updateEnvVariable = (key: string, value: string, envPath: string) => {
-    console.log(`Updating ${key} = ${value}`)
-    let envFile = fs.readFileSync(envPath, "utf8");
+    console.log(`Updating ${key} = ${value}`);
+
+    let envFile;
+    try {
+        envFile = fs.readFileSync(envPath, "utf8");
+    } catch (err: any) {
+        if (err?.code! === 'ENOENT') {
+            // File doesn't exist, create it
+            envFile = '';
+        } else {
+            throw err;
+        }
+    }
     const regex = new RegExp(`^${key}=.*`, "m");
     if (regex.test(envFile)) {
         envFile = envFile.replace(regex, `${key}=${value}`);
