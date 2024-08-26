@@ -147,6 +147,7 @@ const FormComponent = () => {
                         onClick={onSubmit}
                         className="py-2 px-7 mx-4 rounded-md text-sm"
                         variant="destructive"
+                        data-testid="send-request"
                         disabled={isLoading}
                     >
                         {isLoading ? (
