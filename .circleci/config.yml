@@ -63,14 +63,14 @@ jobs:
       - run:
           name: Install pnpm
           command: |
-              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-              sudo apt-get install -y nodejs
-              npm i -g yarn pnpm
-              echo "NPM version: $(npm --version)"
-              echo "Yarn version: $(yarn --version)"
-              echo "PNPM version: $(pnpm --version)"
-              pnpm config set store-dir .pnpm-store
-            
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            npm i -g yarn pnpm
+            echo "NPM version: $(npm --version)"
+            echo "Yarn version: $(yarn --version)"
+            echo "PNPM version: $(pnpm --version)"
+            pnpm config set store-dir .pnpm-store
+
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
@@ -99,7 +99,7 @@ jobs:
           name: Run Hardhat tests
           command: |
             cd ./contracts
-            npx hardhat test
+            npx playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
           environment:
             TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
             RPC_URL: ${RPC_URL}
