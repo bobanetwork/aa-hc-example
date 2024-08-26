@@ -6,6 +6,7 @@
     "start:local": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-local.ts && cd ..",
     "start:local:ci": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-local.ts --ci=true && cd .. && docker-compose -f docker-compose.local.yml up -d --build",
     "start:sepolia": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-sepolia.ts && cd ..",
+    "full-test": "cd contracts && npx pnpm compile && npx ts-node ./script/deploy-local.ts && cd .. && docker-compose -f docker-compose.local.yml up -d --build && cd contracts && yarn test-e2e",
     "test": "pnpm test -r"
   },
   "repository": {

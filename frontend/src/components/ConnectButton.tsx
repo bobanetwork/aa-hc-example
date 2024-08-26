@@ -13,7 +13,8 @@ const ConnectButton = ({ ...props }) => {
   return <Button
     {...props}
     variant="destructive"
-    className="py-2 px-7 mx-4 rounded-2xl">
+    className="py-2 px-7 mx-4 rounded-2xl"
+    data-testid="connect">
     <img src={MMFlaskFox} alt="mm fox" className="mr-2" />
     Connect To Sepolia
   </Button>

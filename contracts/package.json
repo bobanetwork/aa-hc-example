@@ -5,6 +5,7 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test && npx hardhat test",
+    "test-e2e": "npx playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000",
     "compile": "npx hardhat compile",
     "deploy": "npx ts-node script/deploy-sepolia.ts",
     "deploy-local": "npx ts-node script/deploy-local.ts"
@@ -44,6 +45,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.0.2",
+    "@playwright/test": "^1.46.1",
     "@types/express": "^4.17.21",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
