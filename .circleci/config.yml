@@ -98,7 +98,7 @@ jobs:
           name: Run Hardhat tests
           command: |
             cd ./contracts
-            npx playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
+            pnpm exec playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
           environment:
             TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
             RPC_URL: ${RPC_URL}
