@@ -90,7 +90,7 @@ jobs:
           name: Install Playwright Browser Binaries
           command: |
             cd ./contracts
-            npx playwright install-deps chromium
+            npx playwright install
       - run:
           name: Start local environment
           command: |
