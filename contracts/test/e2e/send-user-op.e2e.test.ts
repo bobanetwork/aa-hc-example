@@ -123,7 +123,9 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(nP3, 'send-request');
 
     await sleep(5000);
+    console.log('all pages: ', context.pages().map(b => b.url()));
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
+    await sleep(2500);
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
     await sleep(5000);
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
