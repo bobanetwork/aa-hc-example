@@ -9,17 +9,18 @@ orbs:
 
 jobs:
   integration-tests:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.23.1-focal
+    machine:
+      image: ubuntu-2204:current
     resource_class: large
     parallelism: 10
     steps:
       - checkout
+      - docker/install-docker
       - run:
           name: Install essential tools
           command: |
-            apt-get update
-            apt-get install -y curl git software-properties-common python3 python3-pip
+            sudo apt-get update
+            sudo apt-get install -y curl git software-properties-common python3 python3-pip
       - go/install:
           version: 1.22.5
       - node/install
@@ -62,8 +63,8 @@ jobs:
       - run:
           name: Install pnpm
           command: |
-            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-            apt-get install -y nodejs
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt-get install -y nodejs
             npm i -g yarn pnpm
             echo "NPM version: $(npm --version)"
             echo "Yarn version: $(yarn --version)"
@@ -76,10 +77,15 @@ jobs:
             - .pnpm-store
       - run:
           name: Install Make
-          command: apt-get install -y make
+          command: sudo apt-get install -y make
       - run:
           name: Install dependencies (root)
           command: pnpm install
+      - run:
+          name: Install Playwright and browsers
+          command: |
+            sudo apt-get install -y libgbm-dev
+            PLAYWRIGHT_BROWSERS_PATH=/home/circleci/playwright-browsers pnpm exec playwright install --with-deps chromium
       - run:
           name: Start local environment
           command: |
@@ -92,7 +98,7 @@ jobs:
           name: Run Hardhat tests
           command: |
             cd ./contracts
-            pnpm exec playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
+            PLAYWRIGHT_BROWSERS_PATH=/home/circleci/playwright-browsers pnpm exec playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
           environment:
             TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
             RPC_URL: ${RPC_URL}
