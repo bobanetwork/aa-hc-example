@@ -59,7 +59,9 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button');
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button');
     await clickTestIdAndWait(extensionPopup, 'snap-privacy-warning-scroll');
-    await clickButtonWithText(extensionPopup, "Accept");
+    await sleep(500);
+    await clickButtonWithClass(extensionPopup, "mm-button-primary");
+    await sleep(500);
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
@@ -138,6 +140,21 @@ export const clickTestIdAndWait = async (page: any, id: string) => {
     await page.click(`[data-testid="${id}"]`);
     await sleep(500);
 }
+
+export const clickButtonWithClass = async (page: any, buttonClass: string) => {
+    console.log(`Finding and clicking <button> with class ${buttonClass}`);
+    const buttonSelector = `button.${buttonClass}`;
+    const button = await page.$(buttonSelector);
+    if (button) {
+        await button.click();
+        console.log(`Clicked <button> with class ${buttonClass}`);
+    } else {
+        console.log(`No <button> found with class ${buttonClass}`);
+    }
+};
+
+
+
 
 export const getPageBy = (pages: any, byName: string) => {
     return pages.find((page: any) => page.url().startsWith(`${byName}`));
