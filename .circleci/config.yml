@@ -85,9 +85,7 @@ jobs:
           command: pnpm install
       - run:
           name: Install dependencies (contracts)
-          command: |
-            cd ./contracts
-            pnpm install
+          command: pnpm install
       - run:
           name: Install Playwright as Dev Dependency
           command: pnpm add playwright --save-dev
