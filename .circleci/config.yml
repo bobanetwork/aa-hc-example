@@ -83,8 +83,15 @@ jobs:
           name: Install dependencies (root)
           command: pnpm install
       - run:
+          name: Install dependencies (contracts)
+          command: |
+            cd ./contracts
+            pnpm install
+      - run:
           name: Install Playwright Browser Binaries
-          command: npx playwright install --with-deps
+          command: |
+            cd ./contracts
+            npx playwright install --with-deps
       - run:
           name: Start local environment
           command: |
