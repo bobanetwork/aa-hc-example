@@ -84,7 +84,7 @@ jobs:
           command: pnpm install
       - run:
           name: Install Playwright Browser Binaries
-          command: pnpm exec playwright install
+          command: npx playwright install --with-deps
       - run:
           name: Start local environment
           command: |
@@ -97,7 +97,7 @@ jobs:
           name: Run E2E tests
           command: |
             cd ./contracts
-            pnpm exec playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
+            npx playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
           environment:
             TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
             RPC_URL: ${RPC_URL}
