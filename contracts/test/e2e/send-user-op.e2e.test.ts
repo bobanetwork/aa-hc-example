@@ -59,7 +59,7 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button');
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button');
     await clickTestIdAndWait(extensionPopup, 'snap-privacy-warning-scroll');
-    await clickButtonWithText(extensionPopup, "Akzeptieren");
+    await clickButtonWithText(extensionPopup, "Accept");
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
