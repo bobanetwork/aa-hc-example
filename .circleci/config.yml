@@ -13,7 +13,6 @@ jobs:
       image: ubuntu-2204:current
     resource_class: large
     parallelism: 10
-    executor:
     steps:
       - checkout
       - docker/install-docker
