@@ -13,6 +13,7 @@ jobs:
       image: ubuntu-2204:current
     resource_class: large
     parallelism: 10
+    executor:
     steps:
       - checkout
       - docker/install-docker
@@ -87,6 +88,9 @@ jobs:
           command: |
             cd ./contracts
             pnpm install
+      - run:
+          name: Install Playwright (E2E)
+          command: pnpm playwright install
       - run:
           name: Start local environment
           command: |
