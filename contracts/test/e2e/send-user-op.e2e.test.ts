@@ -96,7 +96,7 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
 
 
     const addr = await extractAddress(nP2);
-    console.log('addr i: ', addr);
+    console.log('new address created: ', addr);
 
     // Fund the new Smart Account
     /** @DEV FUND THE ACCOUNT */
