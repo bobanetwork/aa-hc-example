@@ -89,8 +89,11 @@ jobs:
             cd ./contracts
             pnpm install
       - run:
-          name: Install Playwright (E2E)
-          command: pnpm playwright install
+          name: Install Playwright as Dev Dependency
+          command: pnpm add playwright --save-dev
+      - run:
+          name: Install Playwright Browser Binaries
+          command: pnpm exec playwright install
       - run:
           name: Start local environment
           command: |
