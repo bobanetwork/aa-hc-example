@@ -13,6 +13,7 @@ jobs:
       image: ubuntu-2204:current
     resource_class: large
     parallelism: 10
+    executor:
     steps:
       - checkout
       - docker/install-docker
@@ -82,10 +83,8 @@ jobs:
           name: Install dependencies (root)
           command: pnpm install
       - run:
-          name: Install Playwright and browsers
-          command: |
-            sudo apt-get install -y libgbm-dev
-            PLAYWRIGHT_BROWSERS_PATH=/home/circleci/playwright-browsers pnpm exec playwright install --with-deps chromium
+          name: Install Playwright Browser Binaries
+          command: pnpm exec playwright install
       - run:
           name: Start local environment
           command: |
@@ -93,12 +92,12 @@ jobs:
           no_output_timeout: 60m
           environment:
             PRIVATE_KEY: ${PRIVATE_KEY}
-            CONRANKING_API_KEY: ${CONRANKING_API_KEY}
+            COINRANKING_API_KEY: ${COINRANKING_API_KEY}
       - run:
-          name: Run Hardhat tests
+          name: Run E2E tests
           command: |
             cd ./contracts
-            PLAYWRIGHT_BROWSERS_PATH=/home/circleci/playwright-browsers pnpm exec playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
+            pnpm exec playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
           environment:
             TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
             RPC_URL: ${RPC_URL}
