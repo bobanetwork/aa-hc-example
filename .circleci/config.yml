@@ -84,12 +84,6 @@ jobs:
           name: Install dependencies (root)
           command: pnpm install
       - run:
-          name: Install dependencies (contracts)
-          command: pnpm install
-      - run:
-          name: Install Playwright as Dev Dependency
-          command: pnpm add playwright --save-dev
-      - run:
           name: Install Playwright Browser Binaries
           command: pnpm exec playwright install
       - run:
