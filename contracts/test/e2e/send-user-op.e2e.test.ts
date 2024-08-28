@@ -87,13 +87,12 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await createNewSmartWallet(nP2);
 
-    console.log('checkign for addr....')
+    console.log('checking for addr....')
     await sleep(3000);
     // confirmation
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
-
 
     const addr = await extractAddress(nP2);
     console.log('new address created: ', addr);
