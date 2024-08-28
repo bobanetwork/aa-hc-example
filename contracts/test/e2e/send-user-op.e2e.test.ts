@@ -192,14 +192,18 @@ export const clickButtonWithText = async (page: any, selector: any) => {
 export const createNewSmartWallet = async (page: any) => {
         // Locate and click the parent div with the specific class and text
         const parentDiv = await page.locator('div.Accordion__AccordionHeader-gECkYS.ddFrHO', { hasText: 'Create account (Deterministic)' });
+        console.log('clicking create account')
         await parentDiv.click();
+        console.log('clicked')
 
         // After clicking the parent div, locate the content div that appears
         const contentDiv = await parentDiv.locator('..').locator('div.Accordion__AccordionContent-czDJDU');
 
         // Locate the button within the content div and click it
         const button = await contentDiv.locator('button.Buttons__ActionButton-ixlOMU.hgzfsi', { hasText: 'Create Account' });
+        console.log('creating account')
         await button.click();
+        console.log('acc created')
 }
 
 
