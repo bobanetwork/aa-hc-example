@@ -1,7 +1,7 @@
-import { test } from './wallet-creation';
+import {test} from './wallet-creation';
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
 import {ethers} from "ethers";
-import {chromium, expect} from "@playwright/test";
+import {expect} from "@playwright/test";
 import * as http from "http";
 
 const RECOVERY_PHRASE = "test test test test test test test test test test test junk";
@@ -233,10 +233,11 @@ export const fundAddr = async (toAddr: string) => {
 }
 
 export const extractAddress = async (page: any) => {
-    const address = await page.evaluate(() => {
+    return await page.evaluate(() => {
         const div = document.querySelector('.styledComponents__CopyableItemValue-ctKSJz');
         if (div) {
             try {
+                console.log('text content: ', div.textContent);
                 const json = JSON.parse(div.textContent!);
                 return json.address;
             } catch (e) {
@@ -246,7 +247,6 @@ export const extractAddress = async (page: any) => {
         }
         return null;
     });
-    return address;
 }
 
 async function extractETHPrice(page:any) {
