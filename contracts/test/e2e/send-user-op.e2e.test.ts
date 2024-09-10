@@ -1,7 +1,7 @@
-import { test } from './wallet-creation';
+import {test} from './wallet-creation';
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
 import {ethers} from "ethers";
-import {chromium, expect} from "@playwright/test";
+import {expect} from "@playwright/test";
 import * as http from "http";
 
 const RECOVERY_PHRASE = "test test test test test test test test test test test junk";
@@ -59,7 +59,9 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button');
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button');
     await clickTestIdAndWait(extensionPopup, 'snap-privacy-warning-scroll');
-    await clickButtonWithText(extensionPopup, "Akzeptieren");
+    await sleep(500);
+    await clickButtonWithClass(extensionPopup, "mm-button-primary");
+    await sleep(500);
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
@@ -85,16 +87,15 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await createNewSmartWallet(nP2);
 
-    console.log('checkign for addr....')
+    console.log('checking for addr....')
     await sleep(3000);
     // confirmation
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
 
-
     const addr = await extractAddress(nP2);
-    console.log('addr i: ', addr);
+    console.log('new address created: ', addr);
 
     // Fund the new Smart Account
     /** @DEV FUND THE ACCOUNT */
@@ -121,7 +122,10 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(nP3, 'send-request');
 
     await sleep(5000);
+    console.log('all pages: ', context.pages().map(b => b.url()));
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
+    console.log(await nP3.innerText('#root'));
+    await sleep(2500);
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
     await sleep(5000);
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
@@ -138,6 +142,21 @@ export const clickTestIdAndWait = async (page: any, id: string) => {
     await page.click(`[data-testid="${id}"]`);
     await sleep(500);
 }
+
+export const clickButtonWithClass = async (page: any, buttonClass: string) => {
+    console.log(`Finding and clicking <button> with class ${buttonClass}`);
+    const buttonSelector = `button.${buttonClass}`;
+    const button = await page.$(buttonSelector);
+    if (button) {
+        await button.click();
+        console.log(`Clicked <button> with class ${buttonClass}`);
+    } else {
+        console.log(`No <button> found with class ${buttonClass}`);
+    }
+};
+
+
+
 
 export const getPageBy = (pages: any, byName: string) => {
     return pages.find((page: any) => page.url().startsWith(`${byName}`));
@@ -173,14 +192,18 @@ export const clickButtonWithText = async (page: any, selector: any) => {
 export const createNewSmartWallet = async (page: any) => {
         // Locate and click the parent div with the specific class and text
         const parentDiv = await page.locator('div.Accordion__AccordionHeader-gECkYS.ddFrHO', { hasText: 'Create account (Deterministic)' });
+        console.log('clicking create account')
         await parentDiv.click();
+        console.log('clicked')
 
         // After clicking the parent div, locate the content div that appears
         const contentDiv = await parentDiv.locator('..').locator('div.Accordion__AccordionContent-czDJDU');
 
         // Locate the button within the content div and click it
         const button = await contentDiv.locator('button.Buttons__ActionButton-ixlOMU.hgzfsi', { hasText: 'Create Account' });
+        console.log('creating account')
         await button.click();
+        console.log('acc created')
 }
 
 
@@ -210,10 +233,11 @@ export const fundAddr = async (toAddr: string) => {
 }
 
 export const extractAddress = async (page: any) => {
-    const address = await page.evaluate(() => {
+    return await page.evaluate(() => {
         const div = document.querySelector('.styledComponents__CopyableItemValue-ctKSJz');
         if (div) {
             try {
+                console.log('text content: ', div.textContent);
                 const json = JSON.parse(div.textContent!);
                 return json.address;
             } catch (e) {
@@ -223,7 +247,6 @@ export const extractAddress = async (page: any) => {
         }
         return null;
     });
-    return address;
 }
 
 async function extractETHPrice(page:any) {

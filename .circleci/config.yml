@@ -12,7 +12,7 @@ jobs:
     machine:
       image: ubuntu-2204:current
     resource_class: large
-    parallelism: 10
+    parallelism: 1
     steps:
       - checkout
       - docker/install-docker
@@ -63,14 +63,13 @@ jobs:
       - run:
           name: Install pnpm
           command: |
-              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-              sudo apt-get install -y nodejs
-              npm i -g yarn pnpm
-              echo "NPM version: $(npm --version)"
-              echo "Yarn version: $(yarn --version)"
-              echo "PNPM version: $(pnpm --version)"
-              pnpm config set store-dir .pnpm-store
-            
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            npm i -g yarn pnpm
+            echo "NPM version: $(npm --version)"
+            echo "Yarn version: $(yarn --version)"
+            echo "PNPM version: $(pnpm --version)"
+            pnpm config set store-dir .pnpm-store
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
@@ -88,18 +87,23 @@ jobs:
             cd ./contracts
             pnpm install
       - run:
+          name: Install Playwright Browser Binaries
+          command: |
+            cd ./contracts
+            npx playwright install
+      - run:
           name: Start local environment
           command: |
             pnpm start:local:ci 2>&1 | tee local_env.log
           no_output_timeout: 60m
           environment:
             PRIVATE_KEY: ${PRIVATE_KEY}
-            CONRANKING_API_KEY: ${CONRANKING_API_KEY}
+            COINRANKING_API_KEY: ${COINRANKING_API_KEY}
       - run:
-          name: Run Hardhat tests
+          name: Run E2E tests
           command: |
             cd ./contracts
-            npx hardhat test
+            npx playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
           environment:
             TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
             RPC_URL: ${RPC_URL}

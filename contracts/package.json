@@ -41,7 +41,8 @@
     "ts-jest": "^29.2.3",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "@playwright/test": "^1.42.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.0.2",

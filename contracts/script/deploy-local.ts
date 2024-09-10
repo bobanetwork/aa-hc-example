@@ -31,7 +31,6 @@ const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
 const contractsEnvPath = path.resolve(__dirname, "../.env");
 let aaConfigFile = fs.readFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', 'utf8');
 
-
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
 async function main() {
     try {
