@@ -2,52 +2,50 @@ import {useContext, useEffect, useState} from "react";
 import {Button} from "./ui/button";
 import {defaultSnapOrigin} from "@/config";
 import {MetaMaskContext} from "@/context/MetamaskContext";
-import {concat, ethers, FunctionFragment, Wallet} from "ethers";
+import {concat, ethers, FunctionFragment} from "ethers";
 import {AbiCoder} from "ethers";
 import {hexlify} from "ethers";
-import {CopyIcon} from "./CopyIcon";
-import {YOUR_CONTRACT} from "@/config/snap";
+import {CopyIcon} from "./components/CopyIcon.tsx";
+import {YOUR_CONTRACT_ADDRESS} from "@/config/snap";
 import {useContractAbi} from "@/hooks/useContractAbi";
 import {Loader2} from "lucide-react";
 
 const FormComponent = () => {
+    /** @DEV General Frontend Setup */
     const [state] = useContext(MetaMaskContext);
-    const [contractAddress, setContractAddress] = useState(YOUR_CONTRACT);
-    const [tokenSymbol, setTokenSymbol] = useState("ETH");
-    const [tokenPrice, setTokenPrice] = useState("");
     const [lastFetchedViaHC, setLastFetchedViaHC] = useState(0);
-    const {abi: contractAbi} = useContractAbi("TokenPrice");
     const [txResponse, setTxResponse] = useState<any>(null);
-    const [usePaymaster, setUsePaymaster] = useState(false)
-
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<any>(null);
-
     const abiCoder = new AbiCoder();
+
+    /** @DEV AA Configuration*/
+    const [usePaymaster] = useState(false)
+
+    /** @DEV Contract Configuration */
+    const [contractAddress, setContractAddress] = useState(YOUR_CONTRACT_ADDRESS);
+    const {abi: contractAbi} = useContractAbi("TokenPrice");
+    const [tokenSymbol, setTokenSymbol] = useState("ETH");
+    const [tokenPrice, setTokenPrice] = useState("");
     const provider = new ethers.JsonRpcProvider(
         import.meta.env.VITE_RPC_PROVIDER
     );
+    const contract = new ethers.Contract(contractAddress, contractAbi, provider);
 
-    const contract = new ethers.Contract(
-        contractAddress,
-        contractAbi,
-        provider,
-    );
-
+    /** @DEV Auto updating UI with data from the contract */
     useEffect(() => {
         const intervalId = setInterval(() => {
             contract.tokenPrices(tokenSymbol).then(response => {
                 setTokenPrice(response[0] ?? response['0']);
-                setLastFetchedViaHC(parseInt(response[1] ?? response['1'])); // unix timestamp
-                console.log("fetched price: ", tokenPrice, lastFetchedViaHC);
+                setLastFetchedViaHC(parseInt(response[1] ?? response['1']));
             });
         }, 5_000);
-
-        // Clear the interval on unmount
         return () => clearInterval(intervalId);
     }, [setTokenPrice, contract]);
 
-    const onSubmit = async () => {
+
+    /** @DEV Configure and call your contract */
+    const onInvokeSnapSubmit = async () => {
         try {
             if (!state.selectedAcount || !state.selectedAcount.id) {
                 console.error("Account not connected or invalid snap")
@@ -59,12 +57,11 @@ const FormComponent = () => {
             setTxResponse("");
             setError("");
 
-            // Prepare the function selector and encoded parameters for the smart contract interaction.
-            // This specifies which function to call on the contract and with what arguments
+
+            /** @DEV Build up the transaction  */
             const funcSelector = FunctionFragment.getSelector("fetchPrice", ["string"]);
             const encodedParams = abiCoder.encode(["string"], [tokenSymbol]);
             const txData = hexlify(concat([funcSelector, encodedParams]));
-
             const transactionDetails = {
                 payload: {
                     to: import.meta.env.VITE_SMART_CONTRACT,
@@ -75,7 +72,7 @@ const FormComponent = () => {
                 scope: `eip155:${state.chain}`,
             };
 
-            // Send request to RPC via our wallet.
+            /** @DEV Send request to RPC via our wallet. */
             const txResponse = await window.ethereum?.request({
                 method: "wallet_invokeSnap",
                 params: {
@@ -88,9 +85,7 @@ const FormComponent = () => {
                 },
             });
 
-            console.log("txResponse:", txResponse);
             setTxResponse(txResponse);
-
         } catch (error: any) {
             console.log(`error`, error);
             setError(error.message);
@@ -98,10 +93,6 @@ const FormComponent = () => {
             setIsLoading(false);
         }
     };
-
-    const handleChangePaymaster = () => {
-        setUsePaymaster(!usePaymaster)
-    }
 
     return (
         <div className="flex flex-col w-6/12 rounded-md shadow-sm border m-auto my-2 p-5">
@@ -133,18 +124,12 @@ const FormComponent = () => {
                             placeholder="ETH"
                         />
                     </div>
-                    {/*<label className="block text-sm font-medium leading-6 text-teal-900">Use paymaster</label>
-                    <div className="relative mt-2 rounded-md shadow-sm w-full">
-                        <input type="checkbox"
-                               checked={usePaymaster}
-                               onChange={handleChangePaymaster}/>
-                    </div>*/}
                 </div>
             </div>
             <div className="flex gap-1 items-stretch justify-around w-full">
                 <div className="flex items-end">
                     <Button
-                        onClick={onSubmit}
+                        onClick={onInvokeSnapSubmit}
                         className="py-2 px-7 mx-4 rounded-md text-sm"
                         variant="destructive"
                         data-testid="send-request"

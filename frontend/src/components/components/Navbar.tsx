@@ -1,9 +1,9 @@
 import logo from '@/assets/enya-logo.svg';
 import { snapPackageVersion } from '@/config';
-import { MetamaskActions, MetaMaskContext } from '@/context/MetamaskContext';
+import { MetamaskActions, MetaMaskContext } from '@/context/MetamaskContext.tsx';
 import { useContext } from 'react';
-import { HeaderButtons } from './ConnectButton';
-import { connectSnap, getSnap } from '@/lib/snap';
+import { HeaderButtons } from './ConnectButton.tsx';
+import { connectSnap, getSnap } from '@/lib/snap.ts';
 
 const Navbar = () => {
   const [state, dispatch] = useContext(MetaMaskContext);

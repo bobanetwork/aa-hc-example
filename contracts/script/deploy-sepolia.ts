@@ -83,7 +83,7 @@ async function main() {
         }
 
         await execPromise(
-            `node script/pushProduction.js ${RPC_URL} ${PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${finalBackendUrl}`
+            `node script/create-contract-configuration.js ${RPC_URL} ${PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${finalBackendUrl}`
         );
 
         console.log("Deployment process completed successfully!");

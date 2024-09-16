@@ -14,4 +14,4 @@ export const defaultSnapOrigin = import.meta.env.VITE_SNAP_ORIGIN ?? 'npm:@boban
 export const snapPackageVersion = import.meta.env.VITE_SNAP_VERSION ?? "1.1.3";
 
 /* Contract address that you want to invoke. */
-export const YOUR_CONTRACT = import.meta.env.VITE_SMART_CONTRACT;
+export const YOUR_CONTRACT_ADDRESS = import.meta.env.VITE_SMART_CONTRACT;

@@ -14,6 +14,7 @@ import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
 
 dotenv.config();
 
+/** @DEV addresses */
 const deployAddr = ethers.getAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
 const deployKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const bundlerAddr = ethers.getAddress("0xB834a876b7234eb5A45C0D5e693566e8842400bB");
@@ -22,6 +23,14 @@ const ha0Owner = ethers.getAddress("0x2A9099A58E0830A4Ab418c2a19710022466F1ce7")
 const ha0Privkey = "0x75cd983f0f4714969b152baa258d849473732905e2301467303dacf5a09fdd57";
 const ha1Owner = ethers.getAddress("0xE073fC0ff8122389F6e693DD94CcDc5AF637448e");
 
+/** @DEV Other Configurations */
+const RPC_URL_L1 = 'http://localhost:8545';
+const RPC_URL_L2 = 'http://localhost:9545';
+const L1StandardBridge = '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9';
+const l1provider = new ethers.JsonRpcProvider(RPC_URL_L1);
+const l2provider = new ethers.JsonRpcProvider(RPC_URL_L2);
+const walletL2 = new ethers.Wallet(deployKey, l2provider);
+const walletL1 = new ethers.Wallet(deployKey, l1provider);
 
 /** @DEV Configurations */
 const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env-local'
@@ -38,7 +47,6 @@ async function main() {
         const ciArg = args.find((arg) => arg.startsWith('--ci='));
         // if true, then the script will regularly clean up idle data to keep storage low
         const isCi: boolean = ciArg ? ciArg.split('=')[1].toLowerCase() === 'true' : false;
-
 
         if (!isPortInUse(8545) && !isPortInUse(9545)) {
             await execPromise("pnpm install", [], path.resolve(__dirname, "../../boba"));
@@ -58,9 +66,7 @@ async function main() {
             console.log("Deleted make and golang as not needed anymore.")
         }
 
-        const fundL2Vars = {...process.env, PRIVATE_KEY: deployKey,};
-
-        await execPromise("node fundL2.js", undefined, path.resolve(__dirname, "../script/"), fundL2Vars);
+        await fundL2();
 
         await sleep(5000);
 
@@ -186,5 +192,25 @@ const updateEnvVariable = (key: string, value: string, envPath: string) => {
     fs.writeFileSync(envPath, envFile);
     dotenv.config();
 };
+
+async function fundL2() {
+    if ((await l2provider.getBalance(walletL2)) > 1) {
+        console.log("Deployer already has funds on L2, continue");
+    } else {
+        console.log('Funding L2...')
+        try {
+            const tx = {
+                to: L1StandardBridge,
+                value: ethers.parseEther('100')
+            };
+            const response = await walletL1.sendTransaction(tx);
+            await response.wait();
+            console.log("Funding L2 done...");
+        } catch (e) {
+            console.error("Error: ", e);
+        }
+    }
+}
+
 
 main();
