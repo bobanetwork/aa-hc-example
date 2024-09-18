@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
-export const DEFAULT_SNAP_VERSION = '1.1.3'
+export const DEFAULT_SNAP_VERSION = '1.1.4'
 
 export const getLocalIpAddress = () => {
   const networkInterfaces = os.networkInterfaces();
