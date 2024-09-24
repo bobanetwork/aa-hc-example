@@ -2,9 +2,9 @@ import Web3 from "web3";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 import "dotenv/config";
-import { getTokenPrice, generateResponse } from "../offchain/token-price";
-import { parseRequest } from "../common/utils";
-import { OffchainParameterParsed } from "../offchain/utils";
+import { getTokenPrice, generateResponse } from "../src/token-price";
+import { parseRequest } from "../src/common/utils";
+import { OffchainParameterParsed } from "../src/utils";
 
 jest.mock("../common/utils", () => ({
   ...jest.requireActual("../common/utils"),

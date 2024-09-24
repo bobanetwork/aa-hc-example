@@ -2,13 +2,12 @@ import {useContext, useEffect, useState} from "react";
 import {Button} from "./ui/button";
 import {defaultSnapOrigin} from "@/config";
 import {MetaMaskContext} from "@/context/MetamaskContext";
-import {concat, ethers, FunctionFragment} from "ethers";
-import {AbiCoder} from "ethers";
-import {hexlify} from "ethers";
+import {ethers} from "ethers";
 import {CopyIcon} from "./components/CopyIcon.tsx";
 import {YOUR_CONTRACT_ADDRESS} from "@/config/snap";
 import {useContractAbi} from "@/hooks/useContractAbi";
 import {Loader2} from "lucide-react";
+import {HybridComputeClientSDK} from "@/components/hybrid-compute-client-sdk.ts";
 
 const FormComponent = () => {
     /** @DEV General Frontend Setup */
@@ -17,10 +16,6 @@ const FormComponent = () => {
     const [txResponse, setTxResponse] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<any>(null);
-    const abiCoder = new AbiCoder();
-
-    /** @DEV AA Configuration*/
-    const [usePaymaster] = useState(false)
 
     /** @DEV Contract Configuration */
     const [contractAddress, setContractAddress] = useState(YOUR_CONTRACT_ADDRESS);
@@ -32,6 +27,9 @@ const FormComponent = () => {
     );
     const contract = new ethers.Contract(contractAddress, contractAbi, provider);
 
+    /*** @DEV invoke the SDK */
+    let clientSdk: HybridComputeClientSDK;
+
     /** @DEV Auto updating UI with data from the contract */
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -42,6 +40,12 @@ const FormComponent = () => {
         }, 5_000);
         return () => clearInterval(intervalId);
     }, [setTokenPrice, contract]);
+
+    useEffect(() => {
+        if (state.selectedAcount) {
+            clientSdk = new HybridComputeClientSDK("901", state.selectedAcount.id)
+        }
+    }, [state.selectedAcount])
 
 
     /** @DEV Configure and call your contract */
@@ -57,33 +61,23 @@ const FormComponent = () => {
             setTxResponse("");
             setError("");
 
+            /** @DEV create the transaction */
+            const transactionDetails = await clientSdk.buildInvokeTransaction({
+                selector: { name: "fetchPrice", params: ["string"] },
+                transaction: {
+                    contractAddress: import.meta.env.VITE_SMART_CONTRACT,
+                    parameters: { types: ['string'], values: [tokenSymbol] },
+                    value: "0"
+                }
+            })
 
-            /** @DEV Build up the transaction  */
-            const funcSelector = FunctionFragment.getSelector("fetchPrice", ["string"]);
-            const encodedParams = abiCoder.encode(["string"], [tokenSymbol]);
-            const txData = hexlify(concat([funcSelector, encodedParams]));
-            const transactionDetails = {
-                payload: {
-                    to: import.meta.env.VITE_SMART_CONTRACT,
-                    value: "0",
-                    data: txData,
-                },
-                account: state.selectedAcount.id,
-                scope: `eip155:${state.chain}`,
-            };
+            /** @DEV invoke the snap */
+            const clientSdkTxResponse = await clientSdk.invokeSnap({
+                defaultSnapOrigin,
+                transactionDetails,
+            })
 
-            /** @DEV Send request to RPC via our wallet. */
-            const txResponse = await window.ethereum?.request({
-                method: "wallet_invokeSnap",
-                params: {
-                    snapId: defaultSnapOrigin,
-                    request: {
-                        method: `eth_sendUserOpBoba${usePaymaster ? 'PM' : ''}`,
-                        params: [transactionDetails],
-                        id: state.selectedAcount?.id,
-                    },
-                },
-            });
+            console.log("Tx response is: ", clientSdkTxResponse);
 
             setTxResponse(txResponse);
         } catch (error: any) {

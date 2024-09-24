@@ -1,19 +1,8 @@
-# Stage 1: Build the application
-FROM node:18 AS builder
-
+FROM node:18
 WORKDIR /app
-
-# Copy package.json and package-lock.json (if available)
-COPY ./package*.json ./
-
-# Install dependencies
+COPY package*.json ./
 RUN npm i
-
-# Copy the rest of the application code
-COPY *.ts .
-
-# Expose the port the app runs on
+COPY tsconfig.json ./
+COPY src ./src
 EXPOSE ${OC_LISTEN_PORT:-1234}
-
-# Build the TypeScript application
 CMD ["npm", "start"]

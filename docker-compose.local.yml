@@ -18,8 +18,8 @@ services:
 
   offchain-service:
     build:
-      context: ./backend/offchain
-      dockerfile: ../Dockerfile
+      context: ./backend
+      dockerfile: ./Dockerfile
     ports:
       - "${OC_LISTEN_PORT:-1234}:${OC_LISTEN_PORT:-1234}"
     env_file: ./backend/.env

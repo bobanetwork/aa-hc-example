@@ -4,9 +4,9 @@ import {
   parseOffchainParameter,
   parseRequest,
   selector,
-} from "../common/utils";
+} from "../src/common/utils";
 import "dotenv/config";
-import { OffchainParameter } from "../offchain/utils";
+import { OffchainParameter } from "../src/utils";
 
 const web3 = new Web3();
 

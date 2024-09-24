@@ -2,8 +2,9 @@
   "name": "aa-hc-example-backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "ts-node offchain/server.ts",
+    "start": "node dist/index.js",
     "test": "jest"
   },
   "license": "MIT",
@@ -28,8 +29,18 @@
     "axios": "^1.7.2",
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
     "express": "^4.19.2",
     "json-rpc-2.0": "^1.7.0",
     "web3": "^4.11.1"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    }
   }
 }

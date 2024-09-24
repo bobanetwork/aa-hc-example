@@ -1,8 +1,8 @@
 import request from "supertest";
-import { selector } from "../common/utils";
+import { selector } from "../src/common/utils";
 import Web3 from "web3";
 import "dotenv/config";
-import app from "../offchain/server";
+import app from "../src/common/server";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 
