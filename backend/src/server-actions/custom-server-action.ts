@@ -6,9 +6,8 @@ import {
     OffchainParameter,
     parseOffchainParameter,
     parseRequest,
-    selector,
     ServerActionResponse
-} from "../common/utils";
+} from "@bobanetwork/aa-hc-sdk-server";
 
 /**
  * Custom Server Action

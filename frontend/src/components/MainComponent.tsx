@@ -7,7 +7,7 @@ import {CopyIcon} from "./components/CopyIcon.tsx";
 import {YOUR_CONTRACT_ADDRESS} from "@/config/snap";
 import {useContractAbi} from "@/hooks/useContractAbi";
 import {Loader2} from "lucide-react";
-import {HybridComputeClientSDK} from "@/components/hybrid-compute-client-sdk.ts";
+import {HybridComputeClientSDK} from "@bobanetwork/aa-hc-sdk-client"
 
 const FormComponent = () => {
     /** @DEV General Frontend Setup */
@@ -61,12 +61,14 @@ const FormComponent = () => {
             setTxResponse("");
             setError("");
 
+            clientSdk = new HybridComputeClientSDK("901", state.selectedAcount.id)
+
             /** @DEV create the transaction */
             const transactionDetails = await clientSdk.buildInvokeTransaction({
-                selector: { name: "fetchPrice", params: ["string"] },
+                selector: {name: "fetchPrice", params: ["string"]},
                 transaction: {
                     contractAddress: import.meta.env.VITE_SMART_CONTRACT,
-                    parameters: { types: ['string'], values: [tokenSymbol] },
+                    parameters: {types: ['string'], values: [tokenSymbol]},
                     value: "0"
                 }
             })

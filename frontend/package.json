@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bobanetwork/aa-hc-sdk-client": "^1.0.0",
     "@metamask/keyring-api": "^8.0.0",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.0.2",
