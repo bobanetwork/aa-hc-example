@@ -1,5 +1,5 @@
-import { MetamaskState } from "@/context/MetamaskContext";
-import { Button } from "./ui/button";
+import { MetamaskState } from "@/context/MetamaskContext.tsx";
+import { Button } from "../ui/button.tsx";
 import MMFlaskFox from "@/assets/flask_fox.svg";
 import truncateEthAddress from 'truncate-eth-address';
 

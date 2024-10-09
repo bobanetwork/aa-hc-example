@@ -6,7 +6,7 @@ import * as http from "http";
 
 const RECOVERY_PHRASE = "test test test test test test test test test test test junk";
 
-test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => {
+test('Full e2e test', async ({ context, extensionId }) => {
 
     /** @DEV keep in production, snap needs to build longer */
     // await sleep(15000);
@@ -114,6 +114,8 @@ test('Scramble : Recover existing wallet!', async ({ context, extensionId }) => 
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next')
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next')
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next')
+
+    await sleep(1000);
     await nP3.reload();
     await sleep(5000);
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));

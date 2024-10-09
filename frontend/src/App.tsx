@@ -1,10 +1,10 @@
-import NetworkAlert from "@/components/AccountAlert";
-import Navbar from "@/components/Navbar";
+import NetworkAlert from "@/components/components/AccountAlert.tsx";
+import Navbar from "@/components/components/Navbar.tsx";
 import "./App.css";
-import Alert from "./components/Alert";
+import Alert from "./components/components/Alert.tsx";
 import { MetaMaskProvider } from "./context/MetamaskContext";
 import "./styles/global.css";
-import TokenPriceFetcher from "./components/TokenPriceFetcher";
+import MainComponent from "@/components/MainComponent.tsx";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
             <NetworkAlert />
           </div>
           <div className="flex-grow flex items-center justify-center">
-            {<TokenPriceFetcher />}
+            {<MainComponent />}
           </div>
         </div>
       </MetaMaskProvider>
