@@ -7,9 +7,9 @@
 5. Deploy: `pnpm start:local` 
 6. `docker-compose -f docker-compose.local.yml up —build`
 7. Access [localhost:8001](http://localhost:8001/)
-    a. You might need to wait a couple of seconds, as package is still running
+- You might need to wait a couple of seconds, as package is still running
 9. Once site is reachable click on „Connect To Boba Sepolia“
-    a. This will connect to your local chain
+- This will connect to your local chain
 10. Once Installation Complete was hit, click on „Create Account“ and enter
 - Exemplary Private Key: `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
 - Salt (optional): `123456789`
