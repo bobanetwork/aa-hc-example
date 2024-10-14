@@ -9,7 +9,6 @@ import {
     parseDeployAddresses
 } from "./utils";
 import {execPromise} from './utils'
-import {readHybridAccountAddress} from "./utils";
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
 
 dotenv.config();
@@ -102,7 +101,7 @@ async function main() {
         const tokenPaymasterAddress = getContractFromDeployAddresses(contracts, "TokenPaymaster");
         const verifyingPaymasterContract = getContractFromDeployAddresses(contracts, "VerifyingPaymaster");
         const entrypoint = getContractFromDeployAddresses(contracts, "EntryPoint");
-        const hybridAccountAddr = readHybridAccountAddress(latestBroadcast);
+        const hybridAccountAddr = getContractFromDeployAddresses(contracts, "ERC1967Proxy");
 
         if (!hybridAccountAddr) throw Error("Unable to parse created HA Account");
 
