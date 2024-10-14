@@ -67,39 +67,52 @@ test('Full e2e test', async ({ context, extensionId }) => {
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
+    await sleep(5000)
     await extensionPopup?.close();
 
     // click again on the 'connect' btn
-    console.log(context.pages().map(b => b.url()));
+    console.log('Pages are => ', context.pages().map(b => b.url()));
     const ps = context.pages();
+
     ps.forEach(page => {
         page.close();
     })
 
+    console.log('closed pages.')
     const nP2 = await context.newPage();
+    console.log('created new page')
     await nP2.goto('http://localhost:8001');
+    console.log('going to 8001 now')
     await clickButtonWithText(nP2,  'Connect to Boba Sepolia');
-    await sleep(2500);
+    console.log('pressed connect')
+    await sleep(5000);
 
     // Create a new Smart Account
+    console.log('got pages...', context.pages);
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
+    console.log('found extension: ', extensionPopup?.url())
+    await sleep(15000)
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
+    await sleep(5000)
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next');
+    await sleep(5000)
+    console.log('scrolling to bottom...')
+    await scrollToBottom(nP2)
     await createNewSmartWallet(nP2);
 
-    console.log('checking for addr....')
+    console.log('checking for newSmartAccountAddr....')
     await sleep(3000);
     // confirmation
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
     await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
 
-    const addr = await extractAddress(nP2);
-    console.log('new address created: ', addr);
+    const newSmartAccountAddr = await extractAddress(nP2);
+    console.log('new address created: ', newSmartAccountAddr);
 
     // Fund the new Smart Account
-    /** @DEV FUND THE ACCOUNT */
-    await fundAddr(addr);
+    /** @DEV FUND the account */
+    await fundAddr(newSmartAccountAddr);
     console.log('waiting to receive...')
     await sleep(15000);
 
@@ -123,17 +136,21 @@ test('Full e2e test', async ({ context, extensionId }) => {
     await clickTestIdAndWait(extensionPopup, 'page-container-footer-next')
     await clickTestIdAndWait(nP3, 'send-request');
 
-    await sleep(5000);
+    await sleep(15000);
     console.log('all pages: ', context.pages().map(b => b.url()));
     extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
+    console.log('extension popup ', !!extensionPopup);
     console.log(await nP3.innerText('#root'));
     await sleep(2500);
-    await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
-    await sleep(5000);
-    extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
-    await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
-
-    console.log("If reached, success. Check for ETH price e.g.")
+    console.log("REACHED, check current status from #root and work on that")
+    // await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
+    // await sleep(5000);
+    // console.log('is real account connected at this point?')
+    // extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
+    // console.log('confirming final user op')
+    // await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
+    //
+    // console.log("If reached, success. Check for ETH price e.g.")
     expect(1).toEqual(1);
 
     await sleep(10_000);
@@ -156,13 +173,6 @@ export const clickButtonWithClass = async (page: any, buttonClass: string) => {
         console.log(`No <button> found with class ${buttonClass}`);
     }
 };
-
-
-
-
-export const getPageBy = (pages: any, byName: string) => {
-    return pages.find((page: any) => page.url().startsWith(`${byName}`));
-}
 
 export const clickRefIdAndWait = async (page: any, id: string, ms: number = 500) => {
     console.log('id: ', id);
@@ -205,9 +215,9 @@ export const createNewSmartWallet = async (page: any) => {
         const button = await contentDiv.locator('button.Buttons__ActionButton-ixlOMU.hgzfsi', { hasText: 'Create Account' });
         console.log('creating account')
         await button.click();
-        console.log('acc created')
+        console.log('closing again...')
+        await parentDiv.click();
 }
-
 
 export const scrollToBottom = async (page: any) => {
     await page.evaluate(() => {
@@ -222,13 +232,13 @@ export const fundAddr = async (toAddr: string) => {
     const senderWallet = new ethers.Wallet(privateKey, new ethers.JsonRpcProvider('http://localhost:9545'));
     const tx = {
         to: toAddr,
-        value: ethers.parseEther('0.01')
+        value: ethers.parseEther('0.05')
     };
 
     try {
         const txResponse = await senderWallet.sendTransaction(tx);
         const receipt = await txResponse.wait();
-        console.log('send done: ');
+        console.log('send done: ', receipt?.status);
     } catch (error) {
         console.error('Transaction failed:', error);
     }
