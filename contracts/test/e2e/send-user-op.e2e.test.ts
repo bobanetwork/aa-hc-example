@@ -138,22 +138,15 @@ test('Full e2e test', async ({ context, extensionId }) => {
 
     await sleep(15000);
     console.log('all pages: ', context.pages().map(b => b.url()));
-    extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
-    console.log('extension popup ', !!extensionPopup);
-    console.log(await nP3.innerText('#root'));
-    await sleep(2500);
-    console.log("REACHED, check current status from #root and work on that")
-    // await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
-    // await sleep(5000);
-    // console.log('is real account connected at this point?')
-    // extensionPopup = context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
-    // console.log('confirming final user op')
-    // await clickTestIdAndWait(extensionPopup, 'confirmation-submit-button')
-    //
+
+    // latest popup
+    context.pages().find(page => page.url().startsWith(`chrome-extension://${extensionId}`));
+
+    console.log('If reached, success')
     // console.log("If reached, success. Check for ETH price e.g.")
     expect(1).toEqual(1);
 
-    await sleep(10_000);
+    await sleep(100_000);
 });
 
 export const clickTestIdAndWait = async (page: any, id: string) => {
@@ -188,6 +181,13 @@ export const fillForEach = async (page: any) => {
     }
 }
 
+export const fillIdInputAndWait = async (page: any, id: string, value: string, ms: number = 500) => {
+    console.log(`Filling input ${id} with value: ${value}`);
+    await page.fill(`#${id}`, value);
+    console.log('Sleep');
+    await sleep(ms);
+}
+
 export const fillInputAndWait = async (page: any, id: string, value: string, ms: number = 500) => {
     console.log(`Filling input ${id} with value: ${value}`);
     await page.fill(`[data-testid="${id}"]`, value);
@@ -203,10 +203,14 @@ export const clickButtonWithText = async (page: any, selector: any) => {
 
 export const createNewSmartWallet = async (page: any) => {
         // Locate and click the parent div with the specific class and text
-        const parentDiv = await page.locator('div.Accordion__AccordionHeader-gECkYS.ddFrHO', { hasText: 'Create account (Deterministic)' });
+        const parentDiv = await page.locator('div.Accordion__AccordionHeader-gECkYS.ddFrHO', { hasText: 'Create account', exact: true }).nth(0);
         console.log('clicking create account')
         await parentDiv.click();
         console.log('clicked')
+
+        console.log('filling...')
+        await fillIdInputAndWait(page,  'create-account-private-key', '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80')
+        await fillIdInputAndWait(page,  'create-account-salt', Math.floor(Math.random()*1_000_000).toString())
 
         // After clicking the parent div, locate the content div that appears
         const contentDiv = await parentDiv.locator('..').locator('div.Accordion__AccordionContent-czDJDU');
