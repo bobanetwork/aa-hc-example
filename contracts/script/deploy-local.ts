@@ -94,6 +94,7 @@ async function main() {
         // Contracts
         const latestBroadcast = "../broadcast/deploy.s.sol/901/run-latest.json"
         const contracts = parseDeployAddresses(latestBroadcast);
+        console.log('parsed Contracts: ', contracts)
         const hcHelperAddr = getContractFromDeployAddresses(contracts, "HCHelper");
         const haFactory = getContractFromDeployAddresses(contracts, "HybridAccountFactory");
         const saFactory = getContractFromDeployAddresses(contracts, "SimpleAccountFactory");
@@ -102,6 +103,8 @@ async function main() {
         const verifyingPaymasterContract = getContractFromDeployAddresses(contracts, "VerifyingPaymaster");
         const entrypoint = getContractFromDeployAddresses(contracts, "EntryPoint");
         const hybridAccountAddr = readHybridAccountAddress(latestBroadcast);
+
+        if (!hybridAccountAddr) throw Error("Unable to parse created HA Account");
 
         console.log(`Contract Addresses Deployed:
                     HCHelper: ${hcHelperAddr}
