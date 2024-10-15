@@ -9,7 +9,6 @@ import {
     parseDeployAddresses
 } from "./utils";
 import {execPromise} from './utils'
-import {readHybridAccountAddress} from "./utils";
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
 
 dotenv.config();
@@ -94,6 +93,7 @@ async function main() {
         // Contracts
         const latestBroadcast = "../broadcast/deploy.s.sol/901/run-latest.json"
         const contracts = parseDeployAddresses(latestBroadcast);
+        console.log('parsed Contracts: ', contracts)
         const hcHelperAddr = getContractFromDeployAddresses(contracts, "HCHelper");
         const haFactory = getContractFromDeployAddresses(contracts, "HybridAccountFactory");
         const saFactory = getContractFromDeployAddresses(contracts, "SimpleAccountFactory");
@@ -101,7 +101,9 @@ async function main() {
         const tokenPaymasterAddress = getContractFromDeployAddresses(contracts, "TokenPaymaster");
         const verifyingPaymasterContract = getContractFromDeployAddresses(contracts, "VerifyingPaymaster");
         const entrypoint = getContractFromDeployAddresses(contracts, "EntryPoint");
-        const hybridAccountAddr = readHybridAccountAddress(latestBroadcast);
+        const hybridAccountAddr = getContractFromDeployAddresses(contracts, "ERC1967Proxy");
+
+        if (!hybridAccountAddr) throw Error("Unable to parse created HA Account");
 
         console.log(`Contract Addresses Deployed:
                     HCHelper: ${hcHelperAddr}

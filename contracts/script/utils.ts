@@ -105,9 +105,11 @@ export const readHybridAccountAddress = (latestBroadcast: string) => {
       latestBroadcast
   );
   const jsonContent = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+  console.log('content: ', jsonContent)
   const transaction = jsonContent.transactions.find(
       (tx: any) => tx.transactionType === "CALL" && tx.function === "createAccount(address,uint256)"
   );
+  console.log("Transaction object:", JSON.stringify(transaction, null, 2));
   if (!transaction) {
     throw new Error("HybridAccount Creation transaction not found in the JSON file");
   }
