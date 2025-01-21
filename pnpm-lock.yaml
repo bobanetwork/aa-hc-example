@@ -68,6 +68,9 @@ importers:
 
   contracts:
     dependencies:
+      '@bobanetwork/aa-hc-sdk-contracts':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@openzeppelin/contracts':
         specifier: ^4.0.2
         version: 4.9.6
@@ -467,6 +470,9 @@ packages:
     resolution: {integrity: sha512-oInsYMjyFfeUWF6K2sohEZbS1JbfUrM55+nhKdeyp+2fRZiwPy5wmegV/HgFXHeVzoSnUm8+m62EQiuqQJeFxQ==}
     peerDependencies:
       react: ^18.0.0
+
+  '@bobanetwork/aa-hc-sdk-contracts@1.0.0':
+    resolution: {integrity: sha512-cHqaI7F34v1lc4p3Batupl+b6nkhI//d/PkHA33pw+PbaOhPAX5xCCjpbjMhJkmZvjWe1CP8yHWDWnCJc1AOOg==}
 
   '@bobanetwork/aa-hc-sdk-server@1.0.1':
     resolution: {integrity: sha512-o6RxpsbdXKEC+J5XkXuh/4WIchTnxmZssKNJskfebJth2l8ykE1hD/hbsWkNlMeKz9NVnNTA3bLqJRgNQv6g2A==}
@@ -2319,6 +2325,7 @@ packages:
   eslint@8.57.0:
     resolution: {integrity: sha512-dZ6+mexnaTIbSBZWgou51U6OmzIhYM2VcNdtiTtI7qPNZm35Akpr0f6vtw3w1Kmn5PYo+tZVfh13WrhpS6oLqQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -2373,6 +2380,7 @@ packages:
 
   ethereumjs-abi@0.6.8:
     resolution: {integrity: sha512-Tx0r/iXI6r+lRsdvkFDlut0N08jWMnKRZ6Gkq+Nmw75lZe4e6o3EkSnkaBP5NF6+m5PTGAr9JP43N3LyeoglsA==}
+    deprecated: This library has been deprecated and usage is discouraged.
 
   ethereumjs-util@6.2.1:
     resolution: {integrity: sha512-W2Ktez4L01Vexijrm5EB6w7dg4n/TgpoYU4avuT5T3Vmnw/eCRtiBrJfQYS/DCSvDIOLn2k57GcHdeBcgVxAqw==}
@@ -4784,6 +4792,10 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@bobanetwork/aa-hc-sdk-contracts@1.0.0':
+    dependencies:
+      '@openzeppelin/contracts': 4.9.6
 
   '@bobanetwork/aa-hc-sdk-server@1.0.1(typescript@5.5.4)(zod@3.23.8)':
     dependencies:
