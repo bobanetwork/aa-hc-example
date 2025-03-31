@@ -1,6 +1,3 @@
-[![Backend Tests](https://github.com/bobanetwork/aa-hc-example/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/bobanetwork/aa-hc-example/actions/workflows/backend-tests.yml)
-[![Smart Contract Tests](https://github.com/bobanetwork/aa-hc-example/actions/workflows/contract-tests.yml/badge.svg)](https://github.com/bobanetwork/aa-hc-example/actions/workflows/contract-tests.yml)
-
 # What is this?
 This is a (hopefully) easy to use example of how you can use [Hybrid Compute](https://docs.boba.network/developer/features/aa-basics/hybrid-compute) with [Account Abstraction](https://docs.boba.network/developer/features/aa-basics) to build powerful Web3 Apps!
 
