@@ -3,8 +3,8 @@ version: '3.8'
 services:
   offchain-service:
     build:
-      context: ./offchain
-      dockerfile: ../Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "${OC_LISTEN_PORT:-1234}:${OC_LISTEN_PORT:-1234}"
     env_file: .env
