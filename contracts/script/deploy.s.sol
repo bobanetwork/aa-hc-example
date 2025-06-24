@@ -7,8 +7,8 @@ import "../contracts/core/HCHelper.sol";
 import "../contracts/samples/HybridAccountFactory.sol";
 import "../contracts/samples/SimpleAccountFactory.sol";
 import "../contracts/samples/TokenPaymaster.sol";
-import "../contracts/TokenPrice.sol";
 import "../contracts/samples/VerifyingPaymaster.sol";
+import "../contracts/TokenPrice.sol";
 
 contract DeployExample is Script {
     // Configs
@@ -58,8 +58,8 @@ contract DeployExample is Script {
         // use block number to always deploy fresh HA & SA
         hybridAccount = haf.createAccount(deployerAddress, block.number);
 
-        tokenPrice = new TokenPrice(payable(hybridAccount));
-        hybridAccount.PermitCaller(address(tokenPrice), true);
+        translator = new TokenPrice(payable(hybridAccount));
+        hybridAccount.PermitCaller(address(translator), true);
 
         verifyingPaymaster = new VerifyingPaymaster(entrypoint, address(deployerAddress));
         tokenPaymaster = new TokenPaymaster(address(haf), "sym", IEntryPoint(entrypoint));

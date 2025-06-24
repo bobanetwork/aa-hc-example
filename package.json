@@ -12,11 +12,6 @@
     "type": "git",
     "url": "git+https://github.com/bobanetwork/aa-hc-example.git"
   },
-  "workspaces": [
-    "backend",
-    "frontend",
-    "contracts"
-  ],
   "keywords": [
     "aa",
     "hc",

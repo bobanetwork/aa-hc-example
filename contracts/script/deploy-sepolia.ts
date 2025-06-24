@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import {
@@ -12,9 +11,9 @@ import {
 dotenv.config();
 
 const DEFAULT_BOBA_SEPOLIA = {
-    RPC_URL: 'https://sepolia.boba.network',
-    HC_HELPER_ADDR: '0x1c64EC0A5E2C58295c3208a63209A2A719dF68D8',
-    ENTRYPOINT_ADDR: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789',
+    RPC_URL: 'https://boba-sepolia.gateway.tenderly.co',
+    HC_HELPER_ADDR: '0x11c4DbbaC4A0A47a7c76b5603bc219c5dAe752D6',
+    ENTRYPOINT_ADDR: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
 }
 
 async function main() {
@@ -28,7 +27,10 @@ async function main() {
         // Step 2: Deploy Hybrid Account
         console.log("Deploying Hybrid Account...");
         const forgeOutput = await execPromise(
-            `forge script script/deploy-sepolia.s.sol:DeployExample --rpc-url ${RPC_URL} --broadcast`
+            `forge script script/deploy-sepolia.s.sol:DeployExample --rpc-url ${RPC_URL} --broadcast`,
+            [],
+            undefined,
+            process.env
         );
         console.log("forgeoutput: ", forgeOutput);
 
@@ -36,7 +38,7 @@ async function main() {
         const hybridAccountAddress = readHybridAccountAddress(latestBroadcast);
         const contracts = parseDeployAddresses(latestBroadcast)
 
-        const tokenPriceAddress = getContractFromDeployAddresses(contracts, "TokenPrice")
+        const tokenPriceContract = getContractFromDeployAddresses(contracts, "TokenPrice")
 
         console.log("Verifying HybridAccount contract...");
         await execPromise(
@@ -48,17 +50,17 @@ async function main() {
         console.log(`Updated HYBRID_ACCOUNT in .env: ${hybridAccountAddress}`);
 
         // Update TOKEN_PRICE_ADDR in .env
-        updateEnvVariable("TOKEN_PRICE_CONTRACT", tokenPriceAddress);
-        console.log(`Updated TOKEN_PRICE_CONTRACT in .env: ${tokenPriceAddress}`);
+        updateEnvVariable("CUSTOM_CONTRACT", tokenPriceContract);
+        console.log(`Updated CUSTOM_CONTRACT in .env: ${tokenPriceContract}`);
 
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
 
-        const {PRIVATE_KEY, BACKEND_URL} = process.env
+        const {OC_PRIVATE_KEY, BACKEND_URL} = process.env
         // Step 4: Verify contract
         console.log("Verifying TokenPrice contract...");
         await execPromise(
-            `npx hardhat verify --network boba_sepolia ${tokenPriceAddress} ${hybridAccountAddress}`
+            `npx hardhat verify --network boba_sepolia ${tokenPriceContract} ${hybridAccountAddress}`
         );
 
 
@@ -66,39 +68,43 @@ async function main() {
         console.log("Running production push script...");
         console.log('HCH = ', HC_HELPER_ADDR)
         console.log('HA = ', hybridAccountAddress);
-        console.log('TTP = ', tokenPriceAddress);
+        console.log('TC = ', tokenPriceContract);
         console.log('BE = ', BACKEND_URL)
         console.log('RPC_URL = ', RPC_URL)
         console.log('-------------------')
 
-        const finalBackendUrl = BACKEND_URL ?? "https://aa-hc-example.onrender.com/hc"
-        updateEnvVariable("BACKEND_URL", finalBackendUrl)
+        const finalBackendUrl = BACKEND_URL
+        updateEnvVariable("BACKEND_URL", finalBackendUrl!)
         updateEnvVariable("ENTRY_POINT", ENTRYPOINT_ADDR)
 
         if (!BACKEND_URL) {
-            console.warn('BACKEND_URL not defined. Using default public endpoint https://aa-hc-example.onrender.com/hc')
+            console.warn('BACKEND_URL not defined. Using default public endpoint')
         }
-        if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceAddress || !PRIVATE_KEY || !RPC_URL) {
+
+        if(!OC_PRIVATE_KEY) {
+            throw Error("OC_PRIVATE_KEY not defined")
+        }
+
+        if (!HC_HELPER_ADDR || !hybridAccountAddress || !tokenPriceContract || !RPC_URL || !OC_PRIVATE_KEY) {
             throw Error("Configuration missing")
         }
 
         await execPromise(
-            `node script/pushProduction.js ${RPC_URL} ${PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceAddress} ${finalBackendUrl}`
+            `node script/create-contract-configuration.js ${RPC_URL} ${OC_PRIVATE_KEY} ${HC_HELPER_ADDR} ${hybridAccountAddress} ${tokenPriceContract} ${finalBackendUrl}`
         );
 
         console.log("Deployment process completed successfully!");
 
-
         // save relevant envs to frontend
         console.log('Saving relevant env variables to frontend. The Boba sepolia config will be used if some variables are missing.')
         const frontendEnvPath = '../../frontend/.env-boba-sepolia'
-        updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
+        updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceContract, frontendEnvPath);
         updateEnvVariable("VITE_SNAP_ORIGIN", 'npm:@bobanetwork/snap-account-abstraction-keyring-hc', frontendEnvPath);
         updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);
         updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPath);
 
-        const frontendEnvPathSnapLocal = '../../frontend/.env-boba-sepolia-snaplocal'
-        updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPathSnapLocal);
+        const frontendEnvPathSnapLocal = '../../frontend/.env-local-boba-sepolia-snaplocal'
+        updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceContract, frontendEnvPathSnapLocal);
         updateEnvVariable("VITE_SNAP_ORIGIN", 'local:http://localhost:8080', frontendEnvPathSnapLocal);
         updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPathSnapLocal);
         updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPathSnapLocal);
@@ -109,7 +115,7 @@ async function main() {
         updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development.hc`)
 
         // Backend env vars
-        const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
+        const backendEnvPath = path.resolve(__dirname, "../../backend/.env-local");
         updateEnvVariable(
             "OC_HYBRID_ACCOUNT",
             hybridAccountAddress,
@@ -118,11 +124,11 @@ async function main() {
 
         updateEnvVariable(
             "ENTRY_POINTS",
-            ENTRYPOINT_ADDR, // @dev Official Boba Sepolia Entrypoint: https://docs.boba.network/developer/features/aa-basics/contract-addresses
+            DEFAULT_BOBA_SEPOLIA.ENTRYPOINT_ADDR, // @dev Official Boba Sepolia Entrypoint: https://docs.boba.network/developer/features/aa-basics/contract-addresses
             backendEnvPath
         );
-        updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
-        updateEnvVariable("OC_PRIVKEY", PRIVATE_KEY!, backendEnvPath);
+        updateEnvVariable("CHAIN_ID", "2882", backendEnvPath);
+        updateEnvVariable("OC_PRIVKEY", OC_PRIVATE_KEY!, backendEnvPath);
         updateEnvVariable(
             "HC_HELPER_ADDR",
             HC_HELPER_ADDR,
