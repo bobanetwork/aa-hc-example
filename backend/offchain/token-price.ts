@@ -1,18 +1,12 @@
 import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
-import {
-    OffchainParameter,
-    parseOffchainParameter,
-    parseRequest,
-} from "./utils";
-import {HybridComputeSDK, generateResponse} from "@bobanetwork/aa-hc-sdk-server";
+import {HybridComputeSDK, generateResponse, OffchainParameter, getParsedRequest} from "@bobanetwork/aa-hc-sdk-server";
 
 const web3 = new Web3();
 
 export async function offchainTokenPrice(sdk: HybridComputeSDK, params: OffchainParameter) {
-    const parsedParams = parseOffchainParameter(params);
-    const request = parseRequest(parsedParams);
+    const request = getParsedRequest(params)
 
     try {
         // Tokensymbol was encoded with a string in the smart-contract
