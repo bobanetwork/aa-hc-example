@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@metamask/keyring-api": "^8.0.0",
+    "@metamask/keyring-snap-client": "^5.0.0",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.0.2",
     "autoprefixer": "^10.4.19",

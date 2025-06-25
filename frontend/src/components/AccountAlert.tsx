@@ -1,12 +1,12 @@
 import { MetaMaskContext } from '@/context/MetamaskContext'
 import { AlertTriangle, } from 'lucide-react'
 import { useContext } from 'react'
-import { Button } from './ui/button'
-import { switchToBobaSepolia } from '@/lib/snap'
 
 const NetworkAlert = () => {
 
   const [state] = useContext(MetaMaskContext)
+
+    console.log('state is: ', state);
 
   if (!state.selectedAcount) {
     return (

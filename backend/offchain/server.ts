@@ -1,12 +1,11 @@
 import { HybridComputeSDK } from '@bobanetwork/aa-hc-sdk-server';
 import { offchainTokenPrice } from "./token-price";
-import { selector } from "./utils";
 
 const port = process.env.OC_LISTEN_PORT || 1234;
 const sdk = new HybridComputeSDK();
 
 sdk.createJsonRpcServerInstance()
-   .addServerAction(selector("getprice(string)"), async (params) => {
+   .addServerAction("getprice(string)", async (params) => {
      console.log("Received params:", params);
      const result = await offchainTokenPrice(params);
      console.log("Price result:", result);

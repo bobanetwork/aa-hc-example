@@ -61,6 +61,8 @@ const FormComponent = () => {
 
             // Prepare the function selector and encoded parameters for the smart contract interaction.
             // This specifies which function to call on the contract and with what arguments
+
+            console.log('calling fetchPrice to ... ', import.meta.env.VITE_SMART_CONTRACT);
             const funcSelector = FunctionFragment.getSelector("fetchPrice", ["string"]);
             const encodedParams = abiCoder.encode(["string"], [tokenSymbol]);
             const txData = hexlify(concat([funcSelector, encodedParams]));

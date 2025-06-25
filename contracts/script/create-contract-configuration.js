@@ -101,17 +101,17 @@ async function main() {
     /** @DEV permit to call the account */
     async function permitCaller(caller) {
         let tx = await hybridAccountContract.PermitCaller(caller, true);
-        await tx.wait();
+        // await tx.wait();
         console.log('Caller permission updated successfully.');
     }
 
-    try {
-        console.log('Registering permitCaller...')
-        await permitCaller(TOKEN_PRICE_CONTRACT);
-        console.log('DONE')
-    } catch (e) {
-        console.log('[Ignore on testnet] failed permitCaller: ', e);
-    }
+    // try {
+    //     console.log(`Registering permitCaller... ${TOKEN_PRICE_CONTRACT}`)
+    //     await permitCaller(TOKEN_PRICE_CONTRACT);
+    //     console.log('DONE')
+    // } catch (e) {
+    //     console.log('[Ignore on testnet] failed permitCaller: ', e);
+    // }
 
     if (RPC_URL.includes('localhost')) {
         try {

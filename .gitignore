@@ -40,3 +40,5 @@ lerna-debug.log*
 dist-ssr
 *.local
 node_modules
+
+.yarn

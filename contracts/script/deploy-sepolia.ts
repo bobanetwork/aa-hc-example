@@ -11,7 +11,7 @@ import {
 dotenv.config();
 
 const DEFAULT_BOBA_SEPOLIA = {
-    RPC_URL: 'https://boba-sepolia.gateway.tenderly.co',
+    RPC_URL: 'https://gateway.tenderly.co/public/boba-sepolia',
     HC_HELPER_ADDR: '0x11c4DbbaC4A0A47a7c76b5603bc219c5dAe752D6',
     ENTRYPOINT_ADDR: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
 }
@@ -109,10 +109,10 @@ async function main() {
         updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPathSnapLocal);
         updateEnvVariable("VITE_RPC_PROVIDER", RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPathSnapLocal);
 
-        const snapSiteEnvFolder = '../../snap-account-abstraction-keyring/packages/site/'
-        updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env`)
-        updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development`)
-        updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development.hc`)
+        // const snapSiteEnvFolder = '../../snap-account-abstraction-keyring/packages/site/'
+        // updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env`)
+        // updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development`)
+        // updateEnvVariable('USE_LOCAL_NETWORK', "false", `${snapSiteEnvFolder}/.env.development.hc`)
 
         // Backend env vars
         const backendEnvPath = path.resolve(__dirname, "../../backend/.env-local");
@@ -138,11 +138,11 @@ async function main() {
         console.log("Backend ENV vars set...");
 
         /** @DEV bootstrap frontend */
-        await execPromise(
-            "docker-compose -f docker-compose.sepolia.yml up --build",
-            [],
-            path.resolve(__dirname, "../../")
-        );
+        // await execPromise(
+        //     "docker-compose -f docker-compose.sepolia.yml up --build",
+        //     [],
+        //     path.resolve(__dirname, "../../")
+        // );
 
     } catch (error) {
         console.error("An error occurred during the deployment process:", error);
