@@ -5,12 +5,12 @@ import {
     OffchainParameter,
     parseOffchainParameter,
     parseRequest,
-    selector,
 } from "./utils";
+import {HybridComputeSDK, generateResponse} from "@bobanetwork/aa-hc-sdk-server";
 
 const web3 = new Web3();
 
-export async function offchainTokenPrice(params: OffchainParameter) {
+export async function offchainTokenPrice(sdk: HybridComputeSDK, params: OffchainParameter) {
     const parsedParams = parseOffchainParameter(params);
     const request = parseRequest(parsedParams);
 
@@ -71,117 +71,4 @@ export async function getTokenPrice(tokenSymbol: string): Promise<number> {
         {headers}
     );
     return priceResponse.data.data.price;
-}
-
-/**
- * Generates and returns a response object with a signed payload.
- *
- * This function takes a request object, an error code, and a response payload,
- * encodes the necessary parameters, estimates gas, and signs the final encoded
- * parameters before returning the result. It ensures the integrity and
- * authenticity of the response by using the account's private key to sign the
- * hash of the final encoded parameters.
- *
- * @param {object} req - The request object containing source address, nonce, and other details.
- * @param {number} errorCode - The error code to include in the response.
- * @param {string} respPayload - The response payload to include.
- * @returns {object} - An object containing the success status, response payload, and signature.
- * @throws {Error}
- */
-export const generateResponse = (
-    req: {
-        readonly srcAddr: string;
-        readonly reqBytes: string;
-        readonly srcNonce: bigint | number;
-        readonly skey: Uint8Array;
-        readonly opNonce: bigint | number
-    },
-    errorCode: number,
-    respPayload: string
-) => {
-    if (!process.env.HC_HELPER_ADDR) {
-        throw new Error("HC_HELPER_ADDR not defined!");
-    }
-    const encodedResponse = web3.eth.abi.encodeParameters(
-        ["address", "uint256", "uint32", "bytes"],
-        [req.srcAddr, req.srcNonce, errorCode, respPayload]
-    );
-    const putResponseCallData = web3.eth.abi.encodeParameters(
-        ["bytes32", "bytes"],
-        [req.skey, encodedResponse]
-    );
-    const putResponseEncoded =
-        "0x" +
-        selector("PutResponse(bytes32,bytes)") +
-        putResponseCallData.slice(2);
-
-    const executeCallData = web3.eth.abi.encodeParameters(
-        ["address", "uint256", "bytes"],
-        [
-            web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR),
-            0,
-            putResponseEncoded,
-        ]
-    );
-    const executeEncoded =
-        "0x" +
-        selector("execute(address,uint256,bytes)") +
-        executeCallData.slice(2);
-
-    const callGasEstimate = 705 * web3.utils.hexToBytes(respPayload).length + 170000; // needs to be calculated this way for correct signature
-    console.log("Final gas estimate: ", callGasEstimate)
-
-    const finalEncodedParameters = web3.eth.abi.encodeParameters(
-        [
-            "address",
-            "uint256",
-            "bytes32",
-            "bytes32",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256",
-            "bytes32",
-        ],
-        [
-            process.env.OC_HYBRID_ACCOUNT,
-            req.opNonce,
-            web3.utils.keccak256("0x"), // initcode
-            web3.utils.keccak256(executeEncoded),
-            callGasEstimate, // callGas
-            0x10000, // verificationGasLimit
-            0x10000, // preVerificationGas
-            0, // maxFeePerGas
-            0, // maxPriorityFeePerGas
-            web3.utils.keccak256("0x"), // paymasterAndData
-        ]
-    );
-
-    const finalHash = web3.utils.keccak256(
-        web3.eth.abi.encodeParameters(
-            ["bytes32", "address", "uint256"],
-            [
-                web3.utils.keccak256(finalEncodedParameters),
-                process.env.ENTRY_POINTS,
-                process.env.CHAIN_ID,
-            ]
-        )
-    );
-
-    // Retrieve account from private key
-    const account = web3.eth.accounts.privateKeyToAccount(
-        process.env.OC_PRIVKEY!
-    );
-
-    // Sign the final hash
-    const signature = account.sign(finalHash);
-
-    console.log("Returning response payload:", respPayload);
-
-    return {
-        success: errorCode === 0,
-        response: respPayload,
-        signature: signature.signature,
-    };
 }

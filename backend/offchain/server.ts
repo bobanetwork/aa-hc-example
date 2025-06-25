@@ -7,7 +7,7 @@ const sdk = new HybridComputeSDK();
 sdk.createJsonRpcServerInstance()
    .addServerAction("getprice(string)", async (params) => {
      console.log("Received params:", params);
-     const result = await offchainTokenPrice(params);
+     const result = await offchainTokenPrice(sdk, params);
      console.log("Price result:", result);
      return result;
    })
