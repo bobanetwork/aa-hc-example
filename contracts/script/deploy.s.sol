@@ -105,7 +105,6 @@ contract DeployExample is Script {
         console.log("SIMPLE_ACCOUNT=", address(simpleAccount));
         console.log("HA_FACTORY=", address(haf));
         console.log("SA_FACTORY=", address(saf));
-        console.log("CLIENT_PRIVKEY=", deployerPrivateKey);
         console.log("HC_SYS_OWNER", address(deployerAddress));
     }
 }
