@@ -63,23 +63,25 @@ export function generateV7Response(req: any, errorCode: number, respPayload: str
     console.log('  - respPayload.length (string):', respPayload.length);
     console.log('  - callGasEstimate:', callGasEstimate);
 
-    // Step 5: v0.7 GAS PACKING (FIXED)
-    console.log('\n🔗 Step 5: Creating v0.7 gas packing (FIXED)...');
+    // Step 5: v0.7 GAS PACKING (FIXED - Python method)
+    console.log('\n🔗 Step 5: Creating v0.7 gas packing (PYTHON METHOD)...');
     
-    // Pack accountGasLimits as bytes32 (verificationGasLimit high 128 bits, callGasLimit low 128 bits)
-    const accountGasLimits = '0x' + 
-        BigInt(verificationGasLimit).toString(16).padStart(32, '0') + 
-        BigInt(callGasEstimate).toString(16).padStart(32, '0');
+    // Python method: encode each as uint128 and take bytes 16:32, then concatenate
+    const verificationGasEncoded = web3.eth.abi.encodeParameter('uint128', verificationGasLimit);
+    const callGasEncoded = web3.eth.abi.encodeParameter('uint128', callGasEstimate);
     
-    // Pack gasFees as bytes32 (maxPriorityFeePerGas high 128 bits, maxFeePerGas low 128 bits)  
-    const gasFees = '0x' + 
-        BigInt(0).toString(16).padStart(32, '0') +  // maxPriorityFeePerGas
-        BigInt(0).toString(16).padStart(32, '0');   // maxFeePerGas
+    // Take bytes 16:32 (skip the first 16 bytes of padding)
+    const verificationGasPacked = verificationGasEncoded.slice(34);  // 0x + 32 chars = 34
+    const callGasPacked = callGasEncoded.slice(34);
     
+    const accountGasLimits = '0x' + verificationGasPacked + callGasPacked;
+    
+    console.log('  - verificationGasEncoded:', verificationGasEncoded);
+    console.log('  - callGasEncoded:', callGasEncoded);
+    console.log('  - verificationGasPacked:', verificationGasPacked);
+    console.log('  - callGasPacked:', callGasPacked);
     console.log('  - accountGasLimits:', accountGasLimits);
     console.log('  - accountGasLimits length:', accountGasLimits.length);
-    console.log('  - gasFees:', gasFees);
-    console.log('  - gasFees length:', gasFees.length);
 
     // Step 6: v0.7 USER OPERATION ENCODING (FIXED)
     console.log('\n📊 Step 6: Creating v0.7 UserOperation encoding (FIXED)...');
@@ -99,9 +101,9 @@ export function generateV7Response(req: any, errorCode: number, respPayload: str
         req.opNonce,
         initCodeHash,           // initCode hash
         callDataHash,           // callData hash
-        accountGasLimits,       // FIXED: proper bytes32 packed value
+        accountGasLimits,       // FIXED: Python method packed value
         preVerificationGas,
-        gasFees,                // FIXED: proper bytes32 packed value
+        '0x' + '0'.repeat(64),  // FIXED: 64 zeros like Python
         paymasterAndDataHash    // paymasterAndData hash
     ]);
     
@@ -119,13 +121,19 @@ export function generateV7Response(req: any, errorCode: number, respPayload: str
     ));
     console.log('  - finalHash:', finalHash);
 
-    // Step 8: Sign the hash (same as before)
-    console.log('\n✍️  Step 8: Signing hash...');
+    // Step 8: Sign with Ethereum message prefix (CRITICAL FIX)
+    console.log('\n✍️  Step 8: Signing with Ethereum message prefix (CRITICAL FIX)...');
     const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY!);
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     
-    const signature = account.sign(finalHash);
+    // CRITICAL: Use Ethereum message prefix like Python SDK does
+    const prefixedMessage = `\x19Ethereum Signed Message:\n32${finalHash.slice(2)}`;
+    const prefixedHash = web3.utils.keccak256(prefixedMessage);
+    console.log('  - prefixedMessage (hex):', web3.utils.toHex(prefixedMessage));
+    console.log('  - prefixedHash:', prefixedHash);
+    
+    const signature = account.sign(prefixedHash);
     console.log('  - Signature:', signature.signature);
     console.log('  - Signature length:', signature.signature.length);
 
@@ -155,7 +163,7 @@ export function generateResponse(request: any, errorCode: number, respPayload: s
     return {
         success: errorCode === 0,
         response: respPayload,
-        signature: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1b"
+        signature: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1b"
     };
 }
 
