@@ -5,7 +5,7 @@ import {HybridComputeSDK, OffchainParameter, getParsedRequest} from "@bobanetwor
 
 const web3 = new Web3();
 
-// v0.7 Response Generator (based on working Python implementation)
+// v0.7 Response Generator using correct UserOperation format
 function generateV7Response(request: any, errorCode: number, respPayload: string) {
     // Environment variables
     const entryPointAddr = process.env.ENTRY_POINTS!;
@@ -14,7 +14,7 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     const hybridAccountAddr = process.env.OC_HYBRID_ACCOUNT!;
     const helperAddr = process.env.HC_HELPER_ADDR!;
     
-    console.log('\n=== V0.7 RESPONSE GENERATION (Python-matched) ===');
+    console.log('\n=== V0.7 RESPONSE GENERATION (Correct UserOp Format) ===');
     console.log('🔧 Environment Config:');
     console.log('  - entryPointAddr:', entryPointAddr);
     console.log('  - chainId:', chainId);
@@ -22,166 +22,138 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - helperAddr:', helperAddr);
     console.log('  - privateKey ends with:', privateKey.slice(-6));
     
-    console.log('📝 Request details:');
-    console.log('  - srcAddr:', request.srcAddr);
-    console.log('  - srcNonce:', request.srcNonce, typeof request.srcNonce);
-    console.log('  - opNonce:', request.opNonce, typeof request.opNonce);
-    console.log('  - skey:', web3.utils.bytesToHex(request.skey));
-    console.log('  - skey length:', request.skey.length);
-    console.log('  - errorCode:', errorCode);
-    console.log('  - respPayload length:', respPayload.length);
-    
-    // Step 1: Generate initial response encoding (EXACTLY like Python)
+    // Step 1: Generate merged response (same as before)
     console.log('\n📦 Step 1: Encoding response...');
-    const resp2 = web3.eth.abi.encodeParameters(
+    const mergedResponse = web3.eth.abi.encodeParameters(
         ['address', 'uint256', 'uint32', 'bytes'],
         [request.srcAddr, request.srcNonce, errorCode, respPayload]
     );
-    console.log('  - resp2:', resp2);
-    console.log('  - resp2 length:', resp2.length);
+    console.log('  - merged response:', mergedResponse);
     
-    // Step 2: Create PutResponse call data (EXACTLY like Python)
+    // Step 2: Create PutResponse call data (same as before)
     console.log('\n📋 Step 2: Creating PutResponse call data...');
     const putResponseSelector = web3.utils.keccak256("PutResponse(bytes32,bytes)").slice(0, 10);
-    console.log('  - PutResponse selector:', putResponseSelector);
-    
     const putResponseParams = web3.eth.abi.encodeParameters(
         ['bytes32', 'bytes'],
-        [request.skey, resp2]
+        [request.skey, mergedResponse]
     );
-    console.log('  - PutResponse params:', putResponseParams);
-    
     const putResponseCallData = putResponseSelector + putResponseParams.slice(2);
     console.log('  - PutResponse call data:', putResponseCallData);
-    console.log('  - PutResponse call data length:', putResponseCallData.length);
     
-    // Step 3: Create execute call data (EXACTLY like Python)
+    // Step 3: Create execute call data (same as before)
     console.log('\n⚡ Step 3: Creating execute call data...');
     const executeSelector = web3.utils.keccak256("execute(address,uint256,bytes)").slice(0, 10);
-    console.log('  - Execute selector:', executeSelector);
-    
     const executeParams = web3.eth.abi.encodeParameters(
         ['address', 'uint256', 'bytes'],
         [web3.utils.toChecksumAddress(helperAddr), 0, putResponseCallData]
     );
-    console.log('  - Execute params:', executeParams);
-    
     const executeCallData = executeSelector + executeParams.slice(2);
     console.log('  - Execute call data:', executeCallData);
-    console.log('  - Execute call data length:', executeCallData.length);
     
-    // Step 4: Calculate gas limits (EXACTLY like Python)
+    // Step 4: Calculate gas limits (same as before)
     console.log('\n⛽ Step 4: Calculating gas limits...');
-    const limits = {
-        verificationGasLimit: "0x10000",
-        preVerificationGas: "0x10000",
-        maxFeePerGas: "0x0",
-        maxPriorityFeePerGas: "0x0"
-    };
-    // Python: call_gas = 705*len(resp_payload) + 170000
-    // respPayload is hex string, so we need string length, not bytes length
     const callGas = 705 * respPayload.length + 170000;
-    console.log('  - respPayload length (string):', respPayload.length);
-    console.log('  - callGas calculation: 705 *', respPayload.length, '+ 170000 =', callGas);
-    console.log('  - verificationGasLimit:', limits.verificationGasLimit, '=', web3.utils.hexToNumber(limits.verificationGasLimit));
-    console.log('  - preVerificationGas:', limits.preVerificationGas, '=', web3.utils.hexToNumber(limits.preVerificationGas));
+    const verificationGasLimit = 0x10000;
+    const preVerificationGas = 0x10000;
+    const maxFeePerGas = 0;
+    const maxPriorityFeePerGas = 0;
     
-    // Step 5: Create account gas limits (EXACTLY like Python)
-    console.log('\n🔗 Step 5: Creating account gas limits...');
-    // Python: ethabi.encode(['uint128'], [Web3.to_int(hexstr=limits['verificationGasLimit'])])[16:32]
-    const verificationGasEncoded = web3.eth.abi.encodeParameter('uint128', web3.utils.hexToNumber(limits.verificationGasLimit));
-    const verificationGasBytes = verificationGasEncoded.slice(2).slice(32); // Remove 0x, then get chars 32-63 (last 16 bytes)
-    console.log('  - verificationGasEncoded:', verificationGasEncoded);
-    console.log('  - verificationGasBytes:', verificationGasBytes);
+    console.log('  - callGas:', callGas);
+    console.log('  - verificationGasLimit:', verificationGasLimit);
+    console.log('  - preVerificationGas:', preVerificationGas);
     
-    const callGasEncoded = web3.eth.abi.encodeParameter('uint128', callGas);
-    const callGasBytes = callGasEncoded.slice(2).slice(32); // Remove 0x, then get chars 32-63 (last 16 bytes)
-    console.log('  - callGasEncoded:', callGasEncoded);
-    console.log('  - callGasBytes:', callGasBytes);
+    // Step 5: Create packed v0.7 UserOperation fields
+    console.log('\n🔗 Step 5: Creating v0.7 UserOperation fields...');
     
-    const accountGasLimits = verificationGasBytes + callGasBytes;
+    // Pack accountGasLimits (verificationGasLimit high 128 bits, callGasLimit low 128 bits)
+    const accountGasLimits = web3.eth.abi.encodeParameters(
+        ['uint128', 'uint128'],
+        [verificationGasLimit, callGas]
+    );
     console.log('  - accountGasLimits:', accountGasLimits);
-    console.log('  - accountGasLimits length:', accountGasLimits.length);
     
-    // Step 6: Create gas fees (EXACTLY like Python)
-    console.log('\n💰 Step 6: Creating gas fees...');
-    // Python: ethabi.encode(['uint128'],[Web3.to_int(hexstr=op['maxPriorityFeePerGas'])])[16:32] + ethabi.encode(['uint128'],[Web3.to_int(hexstr=op['maxFeePerGas'])])[16:32]
-    const maxPriorityFeeEncoded = web3.eth.abi.encodeParameter('uint128', web3.utils.hexToNumber(limits.maxPriorityFeePerGas));
-    const maxPriorityFeeBytes = maxPriorityFeeEncoded.slice(2).slice(32); // Remove 0x, then get last 16 bytes
-    console.log('  - maxPriorityFeeEncoded:', maxPriorityFeeEncoded);
-    console.log('  - maxPriorityFeeBytes:', maxPriorityFeeBytes);
-    
-    const maxFeePerGasEncoded = web3.eth.abi.encodeParameter('uint128', web3.utils.hexToNumber(limits.maxFeePerGas));
-    const maxFeePerGasBytes = maxFeePerGasEncoded.slice(2).slice(32); // Remove 0x, then get last 16 bytes
-    console.log('  - maxFeePerGasEncoded:', maxFeePerGasEncoded);
-    console.log('  - maxFeePerGasBytes:', maxFeePerGasBytes);
-    
-    const gasFees = maxPriorityFeeBytes + maxFeePerGasBytes;
+    // Pack gasFees (maxPriorityFeePerGas high 128 bits, maxFeePerGas low 128 bits)
+    const gasFees = web3.eth.abi.encodeParameters(
+        ['uint128', 'uint128'],
+        [maxPriorityFeePerGas, maxFeePerGas]
+    );
     console.log('  - gasFees:', gasFees);
-    console.log('  - gasFees length:', gasFees.length);
     
-    // Step 7: Pack UserOperation (EXACTLY like Python)
-    console.log('\n📊 Step 7: Packing UserOperation...');
-    const initCodeHash = web3.utils.keccak256("0x");
-    const executeCallDataHash = web3.utils.keccak256(executeCallData);
-    const paymasterAndDataHash = web3.utils.keccak256("0x");
+    // Step 6: Create v0.7 UserOperation structure
+    console.log('\n📊 Step 6: Creating UserOperation structure...');
+    const userOp = {
+        sender: web3.utils.toChecksumAddress(hybridAccountAddr),
+        nonce: request.opNonce,
+        initCode: "0x",
+        callData: executeCallData,
+        accountGasLimits: accountGasLimits,
+        preVerificationGas: preVerificationGas,
+        gasFees: gasFees,
+        paymasterAndData: "0x",
+        signature: "0x"
+    };
     
-    console.log('  - sender:', web3.utils.toChecksumAddress(hybridAccountAddr));
-    console.log('  - nonce:', request.opNonce);
+    console.log('  - UserOperation created:');
+    console.log('    - sender:', userOp.sender);
+    console.log('    - nonce:', userOp.nonce);
+    console.log('    - initCode:', userOp.initCode);
+    console.log('    - callData length:', userOp.callData.length);
+    console.log('    - accountGasLimits:', userOp.accountGasLimits);
+    console.log('    - preVerificationGas:', userOp.preVerificationGas);
+    console.log('    - gasFees:', userOp.gasFees);
+    console.log('    - paymasterAndData:', userOp.paymasterAndData);
+    
+    // Step 7: Calculate UserOperation hash using EntryPoint specification
+    console.log('\n🔐 Step 7: Calculating UserOperation hash...');
+    
+    // Hash components as per UserOperationLib.sol encode function
+    const initCodeHash = web3.utils.keccak256(userOp.initCode);
+    const callDataHash = web3.utils.keccak256(userOp.callData);
+    const paymasterAndDataHash = web3.utils.keccak256(userOp.paymasterAndData);
+    
     console.log('  - initCodeHash:', initCodeHash);
-    console.log('  - executeCallDataHash:', executeCallDataHash);
-    console.log('  - accountGasLimits (raw bytes):', accountGasLimits);
-    console.log('  - preVerificationGas:', web3.utils.hexToNumber(limits.preVerificationGas));
-    console.log('  - gasFees (raw bytes):', gasFees);
+    console.log('  - callDataHash:', callDataHash);
     console.log('  - paymasterAndDataHash:', paymasterAndDataHash);
     
-    // Python passes raw bytes to ethabi.encode, so we need to pass Buffer objects
-    const accountGasLimitsBuffer = Buffer.from(accountGasLimits, 'hex');
-    const gasFeesBuffer = Buffer.from(gasFees, 'hex');
-    
-    console.log('  - accountGasLimitsBuffer:', accountGasLimitsBuffer);
-    console.log('  - gasFeesBuffer:', gasFeesBuffer);
-    
-    const packed = web3.eth.abi.encodeParameters([
-        'address', 'uint256', 'bytes32', 'bytes32', 'bytes32',
-        'uint256', 'bytes32', 'bytes32'
-    ], [
-        web3.utils.toChecksumAddress(hybridAccountAddr),
-        request.opNonce,
-        initCodeHash, // initCode
-        executeCallDataHash,
-        accountGasLimitsBuffer, // Pass as Buffer (raw bytes)
-        web3.utils.hexToNumber(limits.preVerificationGas),
-        gasFeesBuffer, // Pass as Buffer (raw bytes)
-        paymasterAndDataHash // paymasterAndData
-    ]);
-    
-    console.log('  - packed UserOperation:', packed);
-    console.log('  - packed length:', packed.length);
-    
-    // Step 8: Calculate operation hash (EXACTLY like Python)
-    console.log('\n🔐 Step 8: Calculating operation hash...');
-    const packedHash = web3.utils.keccak256(packed);
-    console.log('  - packedHash:', packedHash);
-    
-    const hashInput = web3.eth.abi.encodeParameters(
-        ['bytes32', 'address', 'uint256'],
-        [packedHash, entryPointAddr, chainId]
+    // Encode as per UserOperationLib.sol specification
+    const userOpEncoded = web3.eth.abi.encodeParameters(
+        ['address', 'uint256', 'bytes32', 'bytes32', 'bytes32', 'uint256', 'bytes32', 'bytes32'],
+        [
+            userOp.sender,
+            userOp.nonce,
+            initCodeHash,
+            callDataHash,
+            userOp.accountGasLimits,
+            userOp.preVerificationGas,
+            userOp.gasFees,
+            paymasterAndDataHash
+        ]
     );
-    console.log('  - hashInput:', hashInput);
     
-    const operationHash = web3.utils.keccak256(hashInput);
+    console.log('  - userOpEncoded:', userOpEncoded);
+    
+    // Hash the encoded UserOperation
+    const userOpHash = web3.utils.keccak256(userOpEncoded);
+    console.log('  - userOpHash:', userOpHash);
+    
+    // Final hash as per EntryPoint.getUserOpHash()
+    const finalHashInput = web3.eth.abi.encodeParameters(
+        ['bytes32', 'address', 'uint256'],
+        [userOpHash, entryPointAddr, chainId]
+    );
+    
+    console.log('  - finalHashInput:', finalHashInput);
+    
+    const operationHash = web3.utils.keccak256(finalHashInput);
     console.log('  - operationHash (final):', operationHash);
     
-    // Step 9: Sign with Ethereum message prefix (EXACTLY like Python)
-    console.log('\n✍️  Step 9: Signing operation hash...');
+    // Step 8: Sign the operation hash
+    console.log('\n✍️  Step 8: Signing operation hash...');
     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     
-    // Python: e_msg = eth_account.messages.encode_defunct(Web3.keccak(pack2))
-    // This is equivalent to account.sign() in Web3.js which automatically adds the message prefix
-    console.log('  - Signing operationHash with message prefix:', operationHash);
+    // Sign with Ethereum message prefix
     const signature = account.sign(operationHash);
     console.log('  - Signature:', signature.signature);
     console.log('  - Signature length:', signature.signature.length);
