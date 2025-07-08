@@ -14,7 +14,7 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     const hybridAccountAddr = process.env.OC_HYBRID_ACCOUNT!;
     const helperAddr = process.env.HC_HELPER_ADDR!;
     
-    console.log('\n=== V0.7 RESPONSE GENERATION ===');
+    console.log('\n=== V0.7 RESPONSE GENERATION (Python-matched) ===');
     console.log('🔧 Environment Config:');
     console.log('  - entryPointAddr:', entryPointAddr);
     console.log('  - chainId:', chainId);
@@ -75,6 +75,8 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     const limits = {
         verificationGasLimit: "0x10000",
         preVerificationGas: "0x10000",
+        maxFeePerGas: "0x0",
+        maxPriorityFeePerGas: "0x0"
     };
     // Python: call_gas = 705*len(resp_payload) + 170000
     // respPayload is hex string, so we need string length, not bytes length
@@ -101,16 +103,22 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - accountGasLimits:', accountGasLimits);
     console.log('  - accountGasLimits length:', accountGasLimits.length);
     
-    // Add 0x prefix for proper bytes32 encoding
-    const accountGasLimitsHex = "0x" + accountGasLimits;
-    console.log('  - accountGasLimitsHex:', accountGasLimitsHex);
-    
     // Step 6: Create gas fees (EXACTLY like Python)
     console.log('\n💰 Step 6: Creating gas fees...');
-    // Python: Web3.to_bytes(hexstr="0x" + "0"*64)
-    const gasFeesHex = "0x" + "0".repeat(64);
-    console.log('  - gasFeesHex:', gasFeesHex);
-    console.log('  - gasFeesHex length:', gasFeesHex.length);
+    // Python: ethabi.encode(['uint128'],[Web3.to_int(hexstr=op['maxPriorityFeePerGas'])])[16:32] + ethabi.encode(['uint128'],[Web3.to_int(hexstr=op['maxFeePerGas'])])[16:32]
+    const maxPriorityFeeEncoded = web3.eth.abi.encodeParameter('uint128', web3.utils.hexToNumber(limits.maxPriorityFeePerGas));
+    const maxPriorityFeeBytes = maxPriorityFeeEncoded.slice(2).slice(32); // Remove 0x, then get last 16 bytes
+    console.log('  - maxPriorityFeeEncoded:', maxPriorityFeeEncoded);
+    console.log('  - maxPriorityFeeBytes:', maxPriorityFeeBytes);
+    
+    const maxFeePerGasEncoded = web3.eth.abi.encodeParameter('uint128', web3.utils.hexToNumber(limits.maxFeePerGas));
+    const maxFeePerGasBytes = maxFeePerGasEncoded.slice(2).slice(32); // Remove 0x, then get last 16 bytes
+    console.log('  - maxFeePerGasEncoded:', maxFeePerGasEncoded);
+    console.log('  - maxFeePerGasBytes:', maxFeePerGasBytes);
+    
+    const gasFees = maxPriorityFeeBytes + maxFeePerGasBytes;
+    console.log('  - gasFees:', gasFees);
+    console.log('  - gasFees length:', gasFees.length);
     
     // Step 7: Pack UserOperation (EXACTLY like Python)
     console.log('\n📊 Step 7: Packing UserOperation...');
@@ -122,10 +130,14 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - nonce:', request.opNonce);
     console.log('  - initCodeHash:', initCodeHash);
     console.log('  - executeCallDataHash:', executeCallDataHash);
-    console.log('  - accountGasLimitsHex:', accountGasLimitsHex);
+    console.log('  - accountGasLimits (raw bytes):', accountGasLimits);
     console.log('  - preVerificationGas:', web3.utils.hexToNumber(limits.preVerificationGas));
-    console.log('  - gasFeesHex:', gasFeesHex);
+    console.log('  - gasFees (raw bytes):', gasFees);
     console.log('  - paymasterAndDataHash:', paymasterAndDataHash);
+    
+    // Python packs with raw bytes, so we need to pass the bytes as hex strings with 0x prefix
+    const accountGasLimitsHex = "0x" + accountGasLimits;
+    const gasFeesHex = "0x" + gasFees;
     
     const packed = web3.eth.abi.encodeParameters([
         'address', 'uint256', 'bytes32', 'bytes32', 'bytes32',
@@ -135,9 +147,9 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
         request.opNonce,
         initCodeHash, // initCode
         executeCallDataHash,
-        accountGasLimitsHex, // Pass with 0x prefix for proper bytes32 encoding
+        accountGasLimitsHex, // Pass as hex string with 0x prefix
         web3.utils.hexToNumber(limits.preVerificationGas),
-        gasFeesHex, // Pass as hex string
+        gasFeesHex, // Pass as hex string with 0x prefix
         paymasterAndDataHash // paymasterAndData
     ]);
     
@@ -164,6 +176,9 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     
+    // Python: e_msg = eth_account.messages.encode_defunct(Web3.keccak(pack2))
+    // This is equivalent to account.sign() in Web3.js which automatically adds the message prefix
+    console.log('  - Signing operationHash with message prefix:', operationHash);
     const signature = account.sign(operationHash);
     console.log('  - Signature:', signature.signature);
     console.log('  - Signature length:', signature.signature.length);
