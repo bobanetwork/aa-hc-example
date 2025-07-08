@@ -101,6 +101,10 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - accountGasLimits:', accountGasLimits);
     console.log('  - accountGasLimits length:', accountGasLimits.length);
     
+    // Add 0x prefix for proper bytes32 encoding
+    const accountGasLimitsHex = "0x" + accountGasLimits;
+    console.log('  - accountGasLimitsHex:', accountGasLimitsHex);
+    
     // Step 6: Create gas fees (EXACTLY like Python)
     console.log('\n💰 Step 6: Creating gas fees...');
     // Python: Web3.to_bytes(hexstr="0x" + "0"*64)
@@ -118,7 +122,7 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - nonce:', request.opNonce);
     console.log('  - initCodeHash:', initCodeHash);
     console.log('  - executeCallDataHash:', executeCallDataHash);
-    console.log('  - accountGasLimits:', accountGasLimits);
+    console.log('  - accountGasLimitsHex:', accountGasLimitsHex);
     console.log('  - preVerificationGas:', web3.utils.hexToNumber(limits.preVerificationGas));
     console.log('  - gasFeesHex:', gasFeesHex);
     console.log('  - paymasterAndDataHash:', paymasterAndDataHash);
@@ -131,7 +135,7 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
         request.opNonce,
         initCodeHash, // initCode
         executeCallDataHash,
-        accountGasLimits, // Pass as raw bytes, not hex string with 0x
+        accountGasLimitsHex, // Pass with 0x prefix for proper bytes32 encoding
         web3.utils.hexToNumber(limits.preVerificationGas),
         gasFeesHex, // Pass as hex string
         paymasterAndDataHash // paymasterAndData
