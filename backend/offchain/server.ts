@@ -4,6 +4,17 @@ import { offchainTokenPrice } from "./token-price";
 const port = process.env.OC_LISTEN_PORT || 1234;
 const sdk = new HybridComputeSDK();
 
+// Log configuration values
+console.log('Config', {
+    'OC_LISTEN_PORT': process.env.OC_LISTEN_PORT || 1234,
+    'COINRANKING_API_KEY': process.env.COINRANKING_API_KEY || '',
+    'OC_HYBRID_ACCOUNT': process.env.OC_HYBRID_ACCOUNT || '',
+    'ENTRY_POINTS': process.env.ENTRY_POINTS || '',
+    'CHAIN_ID': process.env.CHAIN_ID || '',
+    'OC_PRIVKEY': process.env.OC_PRIVKEY || '',
+    'HC_HELPER_ADDR': process.env.HC_HELPER_ADDR || ''
+});
+
 sdk.createJsonRpcServerInstance()
    .addServerAction("getprice(string)", async (params) => {
      console.log("Received params:", params);
