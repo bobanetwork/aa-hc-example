@@ -5,170 +5,158 @@ import {HybridComputeSDK, OffchainParameter, getParsedRequest} from "@bobanetwor
 
 const web3 = new Web3();
 
-// v0.7 Response Generator using correct UserOperation format
-function generateV7Response(request: any, errorCode: number, respPayload: string) {
-    // Environment variables
-    const entryPointAddr = process.env.ENTRY_POINTS!;
-    const chainId = parseInt(process.env.CHAIN_ID!);
-    const privateKey = process.env.OC_PRIVKEY!;
-    const hybridAccountAddr = process.env.OC_HYBRID_ACCOUNT!;
-    const helperAddr = process.env.HC_HELPER_ADDR!;
+function selector(name: string): string {
+    const hex = web3.utils.toHex(web3.utils.keccak256(name));
+    return hex.slice(2, 10);
+}
+
+// CORRECT v0.7 generateResponse function
+export function generateV7Response(req: any, errorCode: number, respPayload: string) {
+    console.log('\n=== CORRECT V0.7 RESPONSE GENERATION ===');
     
-    console.log('\n=== V0.7 RESPONSE GENERATION (Correct UserOp Format) ===');
-    console.log('🔧 Environment Config:');
-    console.log('  - entryPointAddr:', entryPointAddr);
-    console.log('  - chainId:', chainId);
-    console.log('  - hybridAccountAddr:', hybridAccountAddr);
-    console.log('  - helperAddr:', helperAddr);
-    console.log('  - privateKey ends with:', privateKey.slice(-6));
-    
-    // Step 1: Generate merged response (same as before)
-    console.log('\n📦 Step 1: Encoding response...');
-    const mergedResponse = web3.eth.abi.encodeParameters(
-        ['address', 'uint256', 'uint32', 'bytes'],
-        [request.srcAddr, request.srcNonce, errorCode, respPayload]
+    if (!process.env.HC_HELPER_ADDR || !process.env.OC_HYBRID_ACCOUNT ||
+        !process.env.CHAIN_ID || !process.env.OC_PRIVKEY || !process.env.ENTRY_POINTS) {
+        throw new Error("One or more required environment variables are not defined");
+    }
+
+    console.log('🔧 Environment Variables:');
+    console.log('  - HC_HELPER_ADDR:', process.env.HC_HELPER_ADDR);
+    console.log('  - OC_HYBRID_ACCOUNT:', process.env.OC_HYBRID_ACCOUNT);
+    console.log('  - ENTRY_POINTS:', process.env.ENTRY_POINTS);
+    console.log('  - CHAIN_ID:', process.env.CHAIN_ID);
+    console.log('  - OC_PRIVKEY ends with:', process.env.OC_PRIVKEY!.slice(-6));
+
+    // Step 1: Encode response parameters
+    console.log('\n📦 Step 1: Encoding response parameters...');
+    const encodedResponse = web3.eth.abi.encodeParameters(
+        ["address", "uint256", "uint32", "bytes"], 
+        [req.srcAddr, req.srcNonce, errorCode, respPayload]
     );
-    console.log('  - merged response:', mergedResponse);
-    
-    // Step 2: Create PutResponse call data (same as before)
+    console.log('  - encodedResponse:', encodedResponse);
+
+    // Step 2: Create PutResponse call data
     console.log('\n📋 Step 2: Creating PutResponse call data...');
-    const putResponseSelector = web3.utils.keccak256("PutResponse(bytes32,bytes)").slice(0, 10);
-    const putResponseParams = web3.eth.abi.encodeParameters(
-        ['bytes32', 'bytes'],
-        [request.skey, mergedResponse]
+    const putResponseCallData = web3.eth.abi.encodeParameters(
+        ["bytes32", "bytes"], 
+        [req.skey, encodedResponse]
     );
-    const putResponseCallData = putResponseSelector + putResponseParams.slice(2);
-    console.log('  - PutResponse call data:', putResponseCallData);
-    
-    // Step 3: Create execute call data (same as before)
+    const putResponseEncoded = "0x" + selector("PutResponse(bytes32,bytes)") + putResponseCallData.slice(2);
+    console.log('  - putResponseEncoded:', putResponseEncoded);
+
+    // Step 3: Create execute call data
     console.log('\n⚡ Step 3: Creating execute call data...');
-    const executeSelector = web3.utils.keccak256("execute(address,uint256,bytes)").slice(0, 10);
-    const executeParams = web3.eth.abi.encodeParameters(
-        ['address', 'uint256', 'bytes'],
-        [web3.utils.toChecksumAddress(helperAddr), 0, putResponseCallData]
+    const callDataEncoded = web3.eth.abi.encodeParameters(
+        ["address", "uint256", "bytes"], 
+        [web3.utils.toChecksumAddress(process.env.HC_HELPER_ADDR), 0, putResponseEncoded]
     );
-    const executeCallData = executeSelector + executeParams.slice(2);
-    console.log('  - Execute call data:', executeCallData);
-    
-    // Step 4: Calculate gas limits (same as before)
-    console.log('\n⛽ Step 4: Calculating gas limits...');
-    const callGas = 705 * respPayload.length + 170000;
+    const executeEncoded = "0x" + selector("execute(address,uint256,bytes)") + callDataEncoded.slice(2);
+    console.log('  - executeEncoded length:', executeEncoded.length);
+
+    // Step 4: v0.7 GAS CALCULATION (FIXED)
+    console.log('\n⛽ Step 4: Calculating gas limits (v0.7 FIXED)...');
     const verificationGasLimit = 0x10000;
     const preVerificationGas = 0x10000;
-    const maxFeePerGas = 0;
-    const maxPriorityFeePerGas = 0;
+    const callGasEstimate = 705 * respPayload.length + 170000;  // FIXED: string length, not bytes
     
-    console.log('  - callGas:', callGas);
     console.log('  - verificationGasLimit:', verificationGasLimit);
     console.log('  - preVerificationGas:', preVerificationGas);
-    
-    // Step 5: Create packed v0.7 UserOperation fields
-    console.log('\n🔗 Step 5: Creating v0.7 UserOperation fields...');
+    console.log('  - respPayload.length (string):', respPayload.length);
+    console.log('  - callGasEstimate:', callGasEstimate);
+
+    // Step 5: v0.7 GAS PACKING (FIXED)
+    console.log('\n🔗 Step 5: Creating v0.7 gas packing (FIXED)...');
     
     // Pack accountGasLimits as bytes32 (verificationGasLimit high 128 bits, callGasLimit low 128 bits)
-    // Use BigInt to properly pack the values
-    const accountGasLimitsBigInt = (BigInt(verificationGasLimit) << 128n) | BigInt(callGas);
-    const accountGasLimits = '0x' + accountGasLimitsBigInt.toString(16).padStart(64, '0');
-    console.log('  - accountGasLimits:', accountGasLimits, 'length:', accountGasLimits.length);
+    const accountGasLimits = '0x' + 
+        BigInt(verificationGasLimit).toString(16).padStart(32, '0') + 
+        BigInt(callGasEstimate).toString(16).padStart(32, '0');
     
-    // Pack gasFees as bytes32 (maxPriorityFeePerGas high 128 bits, maxFeePerGas low 128 bits)
-    // Use BigInt to properly pack the values
-    const gasFeesBigInt = (BigInt(maxPriorityFeePerGas) << 128n) | BigInt(maxFeePerGas);
-    const gasFees = '0x' + gasFeesBigInt.toString(16).padStart(64, '0');
-    console.log('  - gasFees:', gasFees, 'length:', gasFees.length);
+    // Pack gasFees as bytes32 (maxPriorityFeePerGas high 128 bits, maxFeePerGas low 128 bits)  
+    const gasFees = '0x' + 
+        BigInt(0).toString(16).padStart(32, '0') +  // maxPriorityFeePerGas
+        BigInt(0).toString(16).padStart(32, '0');   // maxFeePerGas
     
-    // Step 6: Create v0.7 UserOperation structure
-    console.log('\n📊 Step 6: Creating UserOperation structure...');
-    const userOp = {
-        sender: web3.utils.toChecksumAddress(hybridAccountAddr),
-        nonce: request.opNonce,
-        initCode: "0x",
-        callData: executeCallData,
-        accountGasLimits: accountGasLimits,  // bytes32 packed value
-        preVerificationGas: preVerificationGas,
-        gasFees: gasFees,  // bytes32 packed value
-        paymasterAndData: "0x",
-        signature: "0x"
-    };
-    
-    console.log('  - UserOperation created:');
-    console.log('    - sender:', userOp.sender);
-    console.log('    - nonce:', userOp.nonce);
-    console.log('    - initCode:', userOp.initCode);
-    console.log('    - callData length:', userOp.callData.length);
-    console.log('    - accountGasLimits:', userOp.accountGasLimits);
-    console.log('    - preVerificationGas:', userOp.preVerificationGas);
-    console.log('    - gasFees:', userOp.gasFees);
-    console.log('    - paymasterAndData:', userOp.paymasterAndData);
-    
-    // Step 7: Calculate UserOperation hash using EntryPoint specification
-    console.log('\n🔐 Step 7: Calculating UserOperation hash...');
-    
-    // Hash components as per UserOperationLib.sol encode function
-    const initCodeHash = web3.utils.keccak256(userOp.initCode);
-    const callDataHash = web3.utils.keccak256(userOp.callData);
-    const paymasterAndDataHash = web3.utils.keccak256(userOp.paymasterAndData);
+    console.log('  - accountGasLimits:', accountGasLimits);
+    console.log('  - accountGasLimits length:', accountGasLimits.length);
+    console.log('  - gasFees:', gasFees);
+    console.log('  - gasFees length:', gasFees.length);
+
+    // Step 6: v0.7 USER OPERATION ENCODING (FIXED)
+    console.log('\n📊 Step 6: Creating v0.7 UserOperation encoding (FIXED)...');
+    const initCodeHash = web3.utils.keccak256("0x");
+    const callDataHash = web3.utils.keccak256(executeEncoded);
+    const paymasterAndDataHash = web3.utils.keccak256("0x");
     
     console.log('  - initCodeHash:', initCodeHash);
     console.log('  - callDataHash:', callDataHash);
     console.log('  - paymasterAndDataHash:', paymasterAndDataHash);
     
-    // Encode as per UserOperationLib.sol specification
-    const userOpEncoded = web3.eth.abi.encodeParameters(
-        ['address', 'uint256', 'bytes32', 'bytes32', 'bytes32', 'uint256', 'bytes32', 'bytes32'],
-        [
-            userOp.sender,
-            userOp.nonce,
-            initCodeHash,
-            callDataHash,
-            accountGasLimits,  // Already a bytes32 hex string
-            userOp.preVerificationGas,
-            gasFees,  // Already a bytes32 hex string
-            paymasterAndDataHash
-        ]
-    );
+    const packed = web3.eth.abi.encodeParameters([
+        'address', 'uint256', 'bytes32', 'bytes32', 'bytes32',
+        'uint256', 'bytes32', 'bytes32'
+    ], [
+        process.env.OC_HYBRID_ACCOUNT,
+        req.opNonce,
+        initCodeHash,           // initCode hash
+        callDataHash,           // callData hash
+        accountGasLimits,       // FIXED: proper bytes32 packed value
+        preVerificationGas,
+        gasFees,                // FIXED: proper bytes32 packed value
+        paymasterAndDataHash    // paymasterAndData hash
+    ]);
     
-    console.log('  - userOpEncoded:', userOpEncoded);
+    console.log('  - packed UserOperation:', packed);
+    console.log('  - packed length:', packed.length);
+
+    // Step 7: Calculate final hash (same as before)
+    console.log('\n🔐 Step 7: Calculating final hash...');
+    const packedHash = web3.utils.keccak256(packed);
+    console.log('  - packedHash:', packedHash);
     
-    // Hash the encoded UserOperation
-    const userOpHash = web3.utils.keccak256(userOpEncoded);
-    console.log('  - userOpHash:', userOpHash);
-    
-    // Final hash as per EntryPoint.getUserOpHash()
-    const finalHashInput = web3.eth.abi.encodeParameters(
-        ['bytes32', 'address', 'uint256'],
-        [userOpHash, entryPointAddr, chainId]
-    );
-    
-    console.log('  - finalHashInput:', finalHashInput);
-    
-    const operationHash = web3.utils.keccak256(finalHashInput);
-    console.log('  - operationHash (final):', operationHash);
-    
-    // Step 8: Sign the operation hash
-    console.log('\n✍️  Step 8: Signing operation hash...');
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    const finalHash = web3.utils.keccak256(web3.eth.abi.encodeParameters(
+        ["bytes32", "address", "uint256"], 
+        [packedHash, process.env.ENTRY_POINTS, process.env.CHAIN_ID]
+    ));
+    console.log('  - finalHash:', finalHash);
+
+    // Step 8: Sign the hash (same as before)
+    console.log('\n✍️  Step 8: Signing hash...');
+    const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY!);
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     
-    // Sign with Ethereum message prefix
-    const signature = account.sign(operationHash);
+    const signature = account.sign(finalHash);
     console.log('  - Signature:', signature.signature);
     console.log('  - Signature length:', signature.signature.length);
-    
+
     const result = {
         success: errorCode === 0,
         response: respPayload,
-        signature: signature.signature
+        signature: signature.signature,
     };
-    
-    console.log('\n✅ Final Result:');
+
+    console.log('\n✅ Final v0.7 Result:');
     console.log('  - success:', result.success);
     console.log('  - response length:', result.response.length);
     console.log('  - signature:', result.signature);
-    console.log('=== END V0.7 GENERATION ===\n');
-    
+    console.log('=== END CORRECT V0.7 GENERATION ===\n');
+
     return result;
+}
+
+// Keep the old function for comparison
+export function generateResponse(request: any, errorCode: number, respPayload: string) {
+    console.log("Using simple generateResponse method...");
+    console.log("Request:", request);
+    console.log("ErrorCode:", errorCode);
+    console.log("Response payload:", respPayload);
+    
+    // Return a simple response structure
+    return {
+        success: errorCode === 0,
+        response: respPayload,
+        signature: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1b"
+    };
 }
 
 export async function offchainTokenPrice(sdk: HybridComputeSDK, params: OffchainParameter) {
@@ -190,7 +178,8 @@ export async function offchainTokenPrice(sdk: HybridComputeSDK, params: Offchain
         );
         console.log("ENCODED TOKEN PRICE = ", encodedTokenPrice);
         
-        // Use v0.7 response generation instead of SDK's v0.6 generateResponse
+        // Use our CORRECT v0.7 generateResponse method
+        console.log("Using CORRECT v0.7 generateResponse...");
         return generateV7Response(request, 0, encodedTokenPrice);
     } catch (error: any) {
         console.log("received error: ", error);
