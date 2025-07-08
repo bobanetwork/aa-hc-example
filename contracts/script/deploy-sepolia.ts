@@ -137,13 +137,6 @@ async function main() {
 
         console.log("Backend ENV vars set...");
 
-        /** @DEV bootstrap frontend */
-        // await execPromise(
-        //     "docker-compose -f docker-compose.sepolia.yml up --build",
-        //     [],
-        //     path.resolve(__dirname, "../../")
-        // );
-
     } catch (error) {
         console.error("An error occurred during the deployment process:", error);
     }
