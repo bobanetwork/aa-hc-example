@@ -88,12 +88,12 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('\n🔗 Step 5: Creating account gas limits...');
     // Python: ethabi.encode(['uint128'], [Web3.to_int(hexstr=limits['verificationGasLimit'])])[16:32]
     const verificationGasEncoded = web3.eth.abi.encodeParameter('uint128', web3.utils.hexToNumber(limits.verificationGasLimit));
-    const verificationGasBytes = verificationGasEncoded.slice(-32, -16);
+    const verificationGasBytes = verificationGasEncoded.slice(2).slice(32); // Remove 0x, then get chars 32-63 (last 16 bytes)
     console.log('  - verificationGasEncoded:', verificationGasEncoded);
     console.log('  - verificationGasBytes:', verificationGasBytes);
     
     const callGasEncoded = web3.eth.abi.encodeParameter('uint128', callGas);
-    const callGasBytes = callGasEncoded.slice(-32, -16);
+    const callGasBytes = callGasEncoded.slice(2).slice(32); // Remove 0x, then get chars 32-63 (last 16 bytes)
     console.log('  - callGasEncoded:', callGasEncoded);
     console.log('  - callGasBytes:', callGasBytes);
     
