@@ -17,9 +17,6 @@
     "hc",
     "boba"
   ],
-  "workspaces": [
-    "frontend"
-  ],
   "engines": {
     "node": "^18.18 || >=20"
   },
