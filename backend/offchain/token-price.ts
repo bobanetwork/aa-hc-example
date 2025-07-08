@@ -135,9 +135,12 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     console.log('  - gasFees (raw bytes):', gasFees);
     console.log('  - paymasterAndDataHash:', paymasterAndDataHash);
     
-    // Python packs with raw bytes, so we need to pass the bytes as hex strings with 0x prefix
-    const accountGasLimitsHex = "0x" + accountGasLimits;
-    const gasFeesHex = "0x" + gasFees;
+    // Python passes raw bytes to ethabi.encode, so we need to pass Buffer objects
+    const accountGasLimitsBuffer = Buffer.from(accountGasLimits, 'hex');
+    const gasFeesBuffer = Buffer.from(gasFees, 'hex');
+    
+    console.log('  - accountGasLimitsBuffer:', accountGasLimitsBuffer);
+    console.log('  - gasFeesBuffer:', gasFeesBuffer);
     
     const packed = web3.eth.abi.encodeParameters([
         'address', 'uint256', 'bytes32', 'bytes32', 'bytes32',
@@ -147,9 +150,9 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
         request.opNonce,
         initCodeHash, // initCode
         executeCallDataHash,
-        accountGasLimitsHex, // Pass as hex string with 0x prefix
+        accountGasLimitsBuffer, // Pass as Buffer (raw bytes)
         web3.utils.hexToNumber(limits.preVerificationGas),
-        gasFeesHex, // Pass as hex string with 0x prefix
+        gasFeesBuffer, // Pass as Buffer (raw bytes)
         paymasterAndDataHash // paymasterAndData
     ]);
     
