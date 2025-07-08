@@ -65,19 +65,17 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
     // Step 5: Create packed v0.7 UserOperation fields
     console.log('\n🔗 Step 5: Creating v0.7 UserOperation fields...');
     
-    // Pack accountGasLimits (verificationGasLimit high 128 bits, callGasLimit low 128 bits)
-    const accountGasLimits = web3.eth.abi.encodeParameters(
-        ['uint128', 'uint128'],
-        [verificationGasLimit, callGas]
-    );
-    console.log('  - accountGasLimits:', accountGasLimits);
+    // Pack accountGasLimits as bytes32 (verificationGasLimit high 128 bits, callGasLimit low 128 bits)
+    // Use BigInt to properly pack the values
+    const accountGasLimitsBigInt = (BigInt(verificationGasLimit) << 128n) | BigInt(callGas);
+    const accountGasLimits = '0x' + accountGasLimitsBigInt.toString(16).padStart(64, '0');
+    console.log('  - accountGasLimits:', accountGasLimits, 'length:', accountGasLimits.length);
     
-    // Pack gasFees (maxPriorityFeePerGas high 128 bits, maxFeePerGas low 128 bits)
-    const gasFees = web3.eth.abi.encodeParameters(
-        ['uint128', 'uint128'],
-        [maxPriorityFeePerGas, maxFeePerGas]
-    );
-    console.log('  - gasFees:', gasFees);
+    // Pack gasFees as bytes32 (maxPriorityFeePerGas high 128 bits, maxFeePerGas low 128 bits)
+    // Use BigInt to properly pack the values
+    const gasFeesBigInt = (BigInt(maxPriorityFeePerGas) << 128n) | BigInt(maxFeePerGas);
+    const gasFees = '0x' + gasFeesBigInt.toString(16).padStart(64, '0');
+    console.log('  - gasFees:', gasFees, 'length:', gasFees.length);
     
     // Step 6: Create v0.7 UserOperation structure
     console.log('\n📊 Step 6: Creating UserOperation structure...');
@@ -86,9 +84,9 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
         nonce: request.opNonce,
         initCode: "0x",
         callData: executeCallData,
-        accountGasLimits: accountGasLimits,
+        accountGasLimits: accountGasLimits,  // bytes32 packed value
         preVerificationGas: preVerificationGas,
-        gasFees: gasFees,
+        gasFees: gasFees,  // bytes32 packed value
         paymasterAndData: "0x",
         signature: "0x"
     };
@@ -123,9 +121,9 @@ function generateV7Response(request: any, errorCode: number, respPayload: string
             userOp.nonce,
             initCodeHash,
             callDataHash,
-            userOp.accountGasLimits,
+            accountGasLimits,  // Already a bytes32 hex string
             userOp.preVerificationGas,
-            userOp.gasFees,
+            gasFees,  // Already a bytes32 hex string
             paymasterAndDataHash
         ]
     );
