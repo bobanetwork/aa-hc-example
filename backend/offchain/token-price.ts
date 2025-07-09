@@ -30,6 +30,18 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
     console.log('  - ENTRY_POINTS:', process.env.ENTRY_POINTS);
     console.log('  - CHAIN_ID:', process.env.CHAIN_ID);
     console.log('  - OC_PRIVKEY ends with:', process.env.OC_PRIVKEY!.slice(-6));
+    
+    // CRITICAL: Check address derivation
+    const signerAccount = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY!);
+    console.log('  - Derived address from OC_PRIVKEY:', signerAccount.address);
+    console.log('  - OC_OWNER env var:', process.env.OC_OWNER || 'NOT SET');
+    console.log('  - Does derived address match OC_OWNER?', signerAccount.address.toLowerCase() === (process.env.OC_OWNER || '').toLowerCase());
+
+    // CRITICAL: Check request addresses
+    console.log('\n🔍 Request Analysis:');
+    console.log('  - req.srcAddr:', req.srcAddr);
+    console.log('  - OC_HYBRID_ACCOUNT:', process.env.OC_HYBRID_ACCOUNT);
+    console.log('  - Source matches hybrid account?', req.srcAddr.toLowerCase() === process.env.OC_HYBRID_ACCOUNT!.toLowerCase());
 
     // Step 1: Generate initial response encoding (same as Python)
     console.log('\n📦 Step 1: Encoding response parameters...');
@@ -105,12 +117,20 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
     console.log('  - callDataHash:', callDataHash);
     console.log('  - paymasterAndDataHash:', paymasterAndDataHash);
     
+    // CRITICAL: Handle large nonce properly like Python
+    console.log('  - req.opNonce (raw):', req.opNonce);
+    console.log('  - req.opNonce type:', typeof req.opNonce);
+    
+    // Ensure we use the nonce as Python does - convert to proper format
+    const opNonce = typeof req.opNonce === 'string' ? req.opNonce : req.opNonce.toString();
+    console.log('  - opNonce (string):', opNonce);
+    
     const packed = web3.eth.abi.encodeParameters([
         'address', 'uint256', 'bytes32', 'bytes32', 'bytes32',
         'uint256', 'bytes32', 'bytes32'
     ], [
         process.env.OC_HYBRID_ACCOUNT,
-        req.opNonce,
+        opNonce, // Use string format to avoid precision loss
         initCodeHash,
         callDataHash,
         accountGasLimits,
@@ -139,12 +159,24 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     
-    // Python: eth_account.messages.encode_defunct(oo_hash)
-    // This is equivalent to web3.eth.accounts.hashMessage
-    const messageHash = web3.eth.accounts.hashMessage(ooHash);
-    console.log('  - messageHash (with prefix):', messageHash);
+    // Method 1: Use web3.eth.accounts.hashMessage (current)
+    const messageHash1 = web3.eth.accounts.hashMessage(ooHash);
+    console.log('  - Method 1 messageHash:', messageHash1);
     
-    const signature = account.sign(messageHash);
+    // Method 2: Manual Ethereum message prefix (exactly like Python encode_defunct)
+    const messageBytes = web3.utils.hexToBytes(ooHash);
+    const messageLength = messageBytes.length;
+    const prefix = `\x19Ethereum Signed Message:\n${messageLength}`;
+    const prefixBytes = web3.utils.hexToBytes(web3.utils.toHex(prefix));
+    const fullMessage = new Uint8Array([...prefixBytes, ...messageBytes]);
+    const messageHash2 = web3.utils.keccak256('0x' + Array.from(fullMessage).map(b => b.toString(16).padStart(2, '0')).join(''));
+    console.log('  - Method 2 messageHash:', messageHash2);
+    
+    // Compare the methods
+    console.log('  - Methods match:', messageHash1 === messageHash2);
+    
+    // Use Method 1 for now (web3.js standard)
+    const signature = account.sign(messageHash1);
     console.log('  - signature:', signature.signature);
     console.log('  - signature length:', signature.signature.length);
 
