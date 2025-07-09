@@ -171,10 +171,10 @@ export async function offchainTokenPrice(sdk: HybridComputeSDK, params: Offchain
         
         // Use our CORRECT v0.7 generateResponse method
         console.log("Using CORRECT v0.7 generateResponse...");
-        return generateResponseV7(request, 0, encodedTokenPrice);
+        return generateResponseV7_hc(request, 0, encodedTokenPrice);
     } catch (error: any) {
         console.log("received error: ", error);
-        return generateResponseV7(request, 1, web3.utils.asciiToHex(error.message));
+        return generateResponseV7_hc(request, 1, web3.utils.asciiToHex(error.message));
     }
 }
 
