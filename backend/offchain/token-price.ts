@@ -153,40 +153,25 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
     ));
     console.log('  - ooHash:', ooHash);
 
-    // Step 8: Sign with Ethereum message prefix (Python: encode_defunct)
-    console.log('\n✍️  Step 8: Signing with encode_defunct equivalent...');
+    // Step 8: Sign WITHOUT Ethereum message prefix (Bundler expects raw hash)
+    console.log('\n✍️  Step 8: Signing WITHOUT prefix (bundler uses RecoveryMessage::Data)...');
     const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY!);
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     
-    // Method 1: Use web3.eth.accounts.hashMessage (current)
-    const messageHash1 = web3.eth.accounts.hashMessage(ooHash);
-    console.log('  - Method 1 messageHash:', messageHash1);
-    
-    // Method 2: Manual Ethereum message prefix (exactly like Python encode_defunct)
-    const messageBytes = web3.utils.hexToBytes(ooHash);
-    const messageLength = messageBytes.length;
-    const prefix = `\x19Ethereum Signed Message:\n${messageLength}`;
-    const prefixBytes = web3.utils.hexToBytes(web3.utils.toHex(prefix));
-    const fullMessage = new Uint8Array([...prefixBytes, ...messageBytes]);
-    const messageHash2 = web3.utils.keccak256('0x' + Array.from(fullMessage).map(b => b.toString(16).padStart(2, '0')).join(''));
-    console.log('  - Method 2 messageHash:', messageHash2);
-    
-    // Compare the methods
-    console.log('  - Methods match:', messageHash1 === messageHash2);
-    
-    // Use Method 1 for now (web3.js standard)
-    const signature = account.sign(messageHash1);
-    console.log('  - signature:', signature.signature);
+    // CRITICAL: Bundler verification code uses RecoveryMessage::Data() which expects RAW hash
+    // let check_msg: ethers::types::RecoveryMessage = Data(check_hash.to_fixed_bytes().to_vec());
+    const signature = account.sign(ooHash);
+    console.log('  - Raw hash signature (NO prefix):', signature.signature);
     console.log('  - signature length:', signature.signature.length);
 
     const result = {
         success: errorCode === 0,
-        response: web3.utils.toHex(respPayload), // Python: Web3.to_hex(resp_payload)
-        signature: signature.signature, // Python: Web3.to_hex(sig.signature)
+        response: web3.utils.toHex(respPayload),
+        signature: signature.signature,
     };
 
-    console.log('\n✅ Final v0.7 Result (Python match):');
+    console.log('\n✅ Final v0.7 Result (Raw hash signature):');
     console.log('  - success:', result.success);
     console.log('  - response:', result.response);
     console.log('  - signature:', result.signature);
