@@ -9,11 +9,11 @@ import {
     parseDeployAddresses
 } from "./utils";
 import {execPromise} from './utils'
+import {readHybridAccountAddress} from "./utils";
 import {sleep} from "@nomicfoundation/hardhat-verify/internal/utilities";
 
 dotenv.config();
 
-/** @DEV addresses */
 const deployAddr = ethers.getAddress("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
 const deployKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const bundlerAddr = ethers.getAddress("0xB834a876b7234eb5A45C0D5e693566e8842400bB");
@@ -22,22 +22,15 @@ const ha0Owner = ethers.getAddress("0x2A9099A58E0830A4Ab418c2a19710022466F1ce7")
 const ha0Privkey = "0x75cd983f0f4714969b152baa258d849473732905e2301467303dacf5a09fdd57";
 const ha1Owner = ethers.getAddress("0xE073fC0ff8122389F6e693DD94CcDc5AF637448e");
 
-/** @DEV Other Configurations */
-const RPC_URL_L1 = 'http://localhost:8545';
-const RPC_URL_L2 = 'http://localhost:9545';
-const L1StandardBridge = '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9';
-const l1provider = new ethers.JsonRpcProvider(RPC_URL_L1);
-const l2provider = new ethers.JsonRpcProvider(RPC_URL_L2);
-const walletL2 = new ethers.Wallet(deployKey, l2provider);
-const walletL1 = new ethers.Wallet(deployKey, l1provider);
 
 /** @DEV Configurations */
-const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env-local'
+const snapEnv = '../snap-account-abstraction-keyring/packages/snap/.env'
 const rootPath = '../.env'
 const frontendEnvPath = path.resolve(__dirname, "../../frontend/.env-local");
 const backendEnvPath = path.resolve(__dirname, "../../backend/.env");
 const contractsEnvPath = path.resolve(__dirname, "../.env");
 let aaConfigFile = fs.readFileSync('../snap-account-abstraction-keyring/packages/snap/src/constants/aa-config.ts', 'utf8');
+
 
 // TODO: fix .env file loading. Currently .env needs to be in /script directory
 async function main() {
@@ -46,6 +39,7 @@ async function main() {
         const ciArg = args.find((arg) => arg.startsWith('--ci='));
         // if true, then the script will regularly clean up idle data to keep storage low
         const isCi: boolean = ciArg ? ciArg.split('=')[1].toLowerCase() === 'true' : false;
+
 
         if (!isPortInUse(8545) && !isPortInUse(9545)) {
             await execPromise("pnpm install", [], path.resolve(__dirname, "../../boba"));
@@ -65,7 +59,9 @@ async function main() {
             console.log("Deleted make and golang as not needed anymore.")
         }
 
-        await fundL2();
+        const fundL2Vars = {...process.env, PRIVATE_KEY: deployKey,};
+
+        await execPromise("node fundL2.js", undefined, path.resolve(__dirname, "../script/"), fundL2Vars);
 
         await sleep(5000);
 
@@ -93,30 +89,27 @@ async function main() {
         // Contracts
         const latestBroadcast = "../broadcast/deploy.s.sol/901/run-latest.json"
         const contracts = parseDeployAddresses(latestBroadcast);
-        console.log('parsed Contracts: ', contracts)
         const hcHelperAddr = getContractFromDeployAddresses(contracts, "HCHelper");
         const haFactory = getContractFromDeployAddresses(contracts, "HybridAccountFactory");
         const saFactory = getContractFromDeployAddresses(contracts, "SimpleAccountFactory");
-        const tokenPriceAddress = getContractFromDeployAddresses(contracts, "TokenPrice");
+        const tokenPriceContract = getContractFromDeployAddresses(contracts, "TokenPrice");
         const tokenPaymasterAddress = getContractFromDeployAddresses(contracts, "TokenPaymaster");
         const verifyingPaymasterContract = getContractFromDeployAddresses(contracts, "VerifyingPaymaster");
         const entrypoint = getContractFromDeployAddresses(contracts, "EntryPoint");
-        const hybridAccountAddr = getContractFromDeployAddresses(contracts, "ERC1967Proxy");
-
-        if (!hybridAccountAddr) throw Error("Unable to parse created HA Account");
+        const hybridAccountAddr = readHybridAccountAddress(latestBroadcast);
 
         console.log(`Contract Addresses Deployed:
                     HCHelper: ${hcHelperAddr}
                     HybridAccountFactory: ${haFactory}
                     SimpleAccountFactory: ${saFactory}
-                    TokenPrice: ${tokenPriceAddress}
+                    TokenPrice: ${tokenPriceContract}
                     TokenPaymaster: ${tokenPaymasterAddress}
                     VerifyingPaymaster: ${verifyingPaymasterContract}
                     EntryPoint: ${entrypoint}
                     HybridAccount: ${hybridAccountAddr}
         `);
 
-        if (!hcHelperAddr || !hybridAccountAddr || !haFactory || !tokenPriceAddress || !tokenPaymasterAddress || !verifyingPaymasterContract || !saFactory || !entrypoint) {
+        if (!hcHelperAddr || !hybridAccountAddr || !haFactory || !tokenPriceContract || !tokenPaymasterAddress || !verifyingPaymasterContract || !saFactory || !entrypoint) {
             throw Error("Some contracts are not defined!");
         }
 
@@ -135,7 +128,7 @@ async function main() {
         updateEnvVariable("BUNDLER_RPC", "http://localhost:3300", rootPath);
 
         /** @DEV Frontend Environment */
-        updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceAddress, frontendEnvPath);
+        updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceContract, frontendEnvPath);
         updateEnvVariable("VITE_RPC_PROVIDER", "http://localhost:9545", frontendEnvPath);
         updateEnvVariable("VITE_SNAP_ORIGIN", "local:http://localhost:8080", frontendEnvPath);
         updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);
@@ -144,14 +137,14 @@ async function main() {
         updateEnvVariable("OC_HYBRID_ACCOUNT", hybridAccountAddr, backendEnvPath);
         updateEnvVariable("ENTRY_POINTS", entrypoint, backendEnvPath);
         updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
-        updateEnvVariable("OC_PRIVKEY", deployKey, backendEnvPath);
+        updateEnvVariable("PRIVATE_KEY", deployKey, backendEnvPath);
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, backendEnvPath);
         updateEnvVariable("OC_LISTEN_PORT", "1234", backendEnvPath);
 
         /** @DEV Contracts Environment */
         updateEnvVariable("HYBRID_ACCOUNT", hybridAccountAddr, contractsEnvPath);
-        updateEnvVariable("ENTRY_POINT", entrypoint, contractsEnvPath);
-        updateEnvVariable("TOKEN_PRICE_CONTRACT", tokenPriceAddress, contractsEnvPath);
+        updateEnvVariable("ENTRY_POINTS", entrypoint, contractsEnvPath);
+        updateEnvVariable("CUSTOM_CONTRACT", tokenPriceContract, contractsEnvPath);
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, contractsEnvPath);
         updateEnvVariable("PRIVATE_KEY", deployKey, contractsEnvPath);
         updateEnvVariable("BACKEND_URL", `http://${getLocalIpAddress()}:1234/hc`, contractsEnvPath);
@@ -194,25 +187,5 @@ const updateEnvVariable = (key: string, value: string, envPath: string) => {
     fs.writeFileSync(envPath, envFile);
     dotenv.config();
 };
-
-async function fundL2() {
-    if ((await l2provider.getBalance(walletL2)) > 1) {
-        console.log("Deployer already has funds on L2, continue");
-    } else {
-        console.log('Funding L2...')
-        try {
-            const tx = {
-                to: L1StandardBridge,
-                value: ethers.parseEther('100')
-            };
-            const response = await walletL1.sendTransaction(tx);
-            await response.wait();
-            console.log("Funding L2 done...");
-        } catch (e) {
-            console.error("Error: ", e);
-        }
-    }
-}
-
 
 main();

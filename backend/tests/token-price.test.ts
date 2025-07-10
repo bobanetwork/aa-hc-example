@@ -23,7 +23,7 @@ describe("getTokenPrice", () => {
       "0x734ab78da8f5ad3290b6abf784d0bea6bd480be1";
     process.env.ENTRY_POINTS = "0x43536f912f87490fa70d0AB6D58f8B9CD250394A";
     process.env.CHAIN_ID = "901";
-    process.env.OC_PRIVKEY =
+    process.env.PRIVATE_KEY =
       "0x7c0c629efc797f8c5f658919b7efbae01275470d59d03fdeb0fca1e6bd11d7fa";
     process.env.HC_HELPER_ADDR = "0x351B40044aa4D5A3Eb69Cb36d6895897EA8Aa844";
   });
@@ -87,7 +87,7 @@ describe("generateResponse", () => {
       "0x734ab78da8f5ad3290b6abf784d0bea6bd480be1";
     process.env.ENTRY_POINTS = "0x43536f912f87490fa70d0AB6D58f8B9CD250394A";
     process.env.CHAIN_ID = "901";
-    process.env.OC_PRIVKEY =
+    process.env.PRIVATE_KEY =
       "0x7c0c629efc797f8c5f658919b7efbae01275470d59d03fdeb0fca1e6bd11d7fa";
     process.env.HC_HELPER_ADDR = "0x351B40044aa4D5A3Eb69Cb36d6895897EA8Aa844";
   });

@@ -1,137 +1,82 @@
-const {ethers} = require('ethers');
+import {ethers} from "ethers";
+import {hcHelperABI, hybridAccountABI} from "./utils";
 
 const args = process.argv.slice(2);
 
-const RPC_URL = args[0];
-const PRIVATE_KEY = args[1];
-const HC_HELPER_ADDR = args[2];
-const HYBRID_ACCOUNT = args[3];
-const TOKEN_PRICE_ACCOUNT_ADDR = args[4];
-const BACKEND_URL = args[5] ?? 'https://aa-hc-example.onrender.com/hc'; // use public backend by default
+const contractConfiguration = {
+    RPC_URL: args[0],
+    PRIVATE_KEY: args[1],
+    HC_HELPER_ADDR: args[2],
+    HYBRID_ACCOUNT: args[3],
+    TOKEN_PRICE_CONTRACT: args[4],
+    BACKEND_URL: args[5]
+}
 
-console.log('HCH = ', HC_HELPER_ADDR)
-console.log('HA = ', HYBRID_ACCOUNT);
-console.log('TTP = ', TOKEN_PRICE_ACCOUNT_ADDR);
-console.log('BE = ', BACKEND_URL)
-console.log('RPC_URL = ', RPC_URL)
+const signer = new ethers.Wallet(
+    contractConfiguration.PRIVATE_KEY, 
+    new ethers.JsonRpcProvider(contractConfiguration.RPC_URL)
+);
 
-const signer = new ethers.Wallet(PRIVATE_KEY, new ethers.JsonRpcProvider(RPC_URL));
-
-if (!HC_HELPER_ADDR || !HYBRID_ACCOUNT || !TOKEN_PRICE_ACCOUNT_ADDR || !BACKEND_URL) {
-    throw Error("Configuration missing")
+if (!contractConfiguration.HC_HELPER_ADDR || 
+    !contractConfiguration.HYBRID_ACCOUNT || 
+    !contractConfiguration.TOKEN_PRICE_CONTRACT ||
+    !contractConfiguration.BACKEND_URL) {
+    throw new Error("Configuration missing")
 }
 
 async function main() {
-    const hybridAccountABI = [
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "caller",
-                    "type": "address"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "allowed",
-                    "type": "bool"
-                }
-            ],
-            "name": "PermitCaller",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        }
-    ];
-    const hcHelperABI = [
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "contract_addr",
-                    "type": "address"
-                },
-                {
-                    "internalType": "string",
-                    "name": "url",
-                    "type": "string"
-                }
-            ],
-            "name": "RegisterUrl",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "contract_addr",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "numCredits",
-                    "type": "uint256"
-                }
-            ],
-            "name": "AddCredit",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        }
-    ]
+    const hybridAccountContract = new ethers.Contract(
+        contractConfiguration.HYBRID_ACCOUNT,
+        hybridAccountABI,
+        signer
+    );
 
-    const hybridAccountContract = new ethers.Contract(HYBRID_ACCOUNT, hybridAccountABI, signer);
-    const hcHelperContract = new ethers.Contract(HC_HELPER_ADDR, hcHelperABI, signer);
+    const hcHelperContract = new ethers.Contract(
+        contractConfiguration.HC_HELPER_ADDR, 
+        hcHelperABI, 
+        signer
+    );
 
-    /** @DEV can be called */
+    /** @DEV cannot be called, reach out to the BOBA Team */
     async function registerUrl(contractAddr, backendURL) {
         const tx = await hcHelperContract.RegisterUrl(contractAddr, backendURL);
         await tx.wait();
         console.log('URL registered successfully.');
     }
 
-    /** @DEV No restrictions */
+    /** @DEV add credits to the hybrid account */
     async function addCredit(contractAddr, numCredits) {
         const tx = await hcHelperContract.AddCredit(contractAddr, numCredits);
         await tx.wait();
         console.log('Credits added successfully.');
     }
 
-    /** @DEV No restrictions */
+    /** @DEV permit to call the account */
     async function permitCaller(caller) {
         let tx = await hybridAccountContract.PermitCaller(caller, true);
-        await tx.wait();
+        // await tx.wait();
         console.log('Caller permission updated successfully.');
     }
 
-    try {
-        console.log('Registering permitCaller...')
-        await permitCaller(TOKEN_PRICE_ACCOUNT_ADDR);
-        console.log('DONE')
-    } catch (e) {
-        console.log('[Ignore on testnet] failed permitCaller: ', e);
-    }
-
-    if (RPC_URL.includes('localhost')) {
+    if (contractConfiguration.RPC_URL.includes('localhost')) {
         try {
             console.log('Registering URL... (is expected to fail on testnet since you are not owner)')
-            await registerUrl(HYBRID_ACCOUNT, BACKEND_URL);
+            await registerUrl(contractConfiguration.HYBRID_ACCOUNT, contractConfiguration.BACKEND_URL);
             console.log('DONE')
         } catch (e) {
             console.log('[Ignore on testnet] failed registerURL: ', e);
         }
-    } else {
-        console.log('NOT REGISTERING URL, since you are not deploying locally. Reach out to Boba Foundation to get your backend url registered on your HybridAccount.')
     }
 
-    try {
-        console.log('Adding Credits...')
-        await addCredit(HYBRID_ACCOUNT, 100);
-        console.log('DONE')
-    } catch (e) {
-        console.log('[Ignore on testnet] failed addCredit: ', e);
-    }
+    console.log('Final Steps to do:')
+    console.log('\n 1. Reach out to the BOBA Foundation to REGISTER_URL and to ADD_CREDITS')
+    console.table({
+        BACKEND_URL: contractConfiguration.BACKEND_URL,
+        YOUR_HYBRID_ACCOUNT: contractConfiguration.HYBRID_ACCOUNT
+    });
+    console.log('Here is a summary of the complete contracts, please store them: ')
+    console.table(contractConfiguration)
+
 }
 
 // go

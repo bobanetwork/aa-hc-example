@@ -17,7 +17,7 @@ contract Deposit is Script {
 
     // Contracts
     address public hybridAccount = vm.envAddress("HYBRID_ACCOUNT");
-    address public tokenContract = vm.envAddress("TOKEN_PRICE_CONTRACT");
+    address public tokenContract = vm.envAddress("CUSTOM_CONTRACT");
     address public entrypoint = vm.envAddress("ENTRY_POINT"); // system wide
     address public paymaster = address(0x8223388f7aF211d84289783ed97ffC5Fefa14256); // system wide paymaster boba sepolia
 

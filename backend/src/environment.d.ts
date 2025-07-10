@@ -1,7 +1,7 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      OC_PRIVKEY: string;
+      PRIVATE_KEY: string;
       ENTRY_POINTS: string;
       HC_HELPER_ADDR: string;
       OC_HYBRID_ACCOUNT: string;

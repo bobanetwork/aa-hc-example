@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.19;
+import "./HybridAccount.sol";
 
-import "@bobanetwork/aa-hc-sdk-contracts/samples/HybridAccount.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-contract TokenPrice is Ownable {
+contract TokenPrice {
     mapping(string => TokenPriceStruct) public tokenPrices;
     HybridAccount public HA;
 
@@ -18,7 +15,7 @@ contract TokenPrice is Ownable {
 
     constructor(
         address _hybridAccount
-    ) Ownable() {
+    ) {
         HA = HybridAccount(payable(_hybridAccount));
     }
 

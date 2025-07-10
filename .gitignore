@@ -40,3 +40,8 @@ lerna-debug.log*
 dist-ssr
 *.local
 node_modules
+
+.yarn
+
+hc.rs
+aa-hc-sdk

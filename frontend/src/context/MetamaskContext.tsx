@@ -1,5 +1,4 @@
 import type { KeyringAccount } from '@metamask/keyring-api';
-import { KeyringSnapRpcClient } from '@metamask/keyring-api';
 import type { Dispatch, ReactNode, Reducer } from 'react';
 import { createContext, useEffect, useReducer } from 'react';
 
@@ -7,6 +6,7 @@ import { hasMetaMask } from '@/lib/metamask';
 import { getSnap, loadAccountConnected } from '@/lib/snap';
 import type { Snap } from '@/types/snap';
 import { defaultSnapOrigin } from '@/config';
+import {KeyringSnapRpcClient} from "@metamask/keyring-snap-client";
 
 export type MetamaskState = {
   hasMetaMask: boolean;

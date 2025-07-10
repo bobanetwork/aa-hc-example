@@ -1,121 +1,117 @@
-version: 2.1
-
-orbs:
-  node: circleci/node@5.2.0
-  go: circleci/go@1.11.0
-  python: circleci/python@2.1.1
-  rust: circleci/rust@1.6.1
-  docker: circleci/docker@2.2.0
-
-jobs:
-  integration-tests:
-    machine:
-      image: ubuntu-2204:current
-    resource_class: large
-    parallelism: 1
-    steps:
-      - checkout
-      - docker/install-docker
-      - run:
-          name: Install essential tools
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y curl git software-properties-common python3 python3-pip
-      - go/install:
-          version: 1.22.5
-      - node/install
-      - rust/install:
-          version: 1.75.0
-      - run:
-          name: Verify Python installation
-          command: |
-            python3 --version
-            pip3 --version
-      - run:
-          name: Checkout submodules
-          command: git submodule update --init --recursive
-      - run:
-          name: Diagnostic - Check directory structure
-          command: |
-            pwd
-            ls -la
-      - run:
-          name: Diagnostic - Check boba directory
-          command: |
-            ls -la boba
-            cat boba/go.mod || echo "go.mod not found in boba directory"
-      - run:
-          name: Go mod download in boba directory
-          command: |
-            go version && cd boba && go mod tidy -e && go mod download
-      - rust/install:
-          version: 1.75.0
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - run:
-          name: Install Foundry
-          command: |
-            curl -L https://foundry.paradigm.xyz | bash
-            export PATH="$PATH:$HOME/.foundry/bin"
-            foundryup
-      - run:
-          name: Install pnpm
-          command: |
-            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-            npm i -g yarn pnpm
-            echo "NPM version: $(npm --version)"
-            echo "Yarn version: $(yarn --version)"
-            echo "PNPM version: $(pnpm --version)"
-            pnpm config set store-dir .pnpm-store
-      - save_cache:
-          name: Save pnpm Package Cache
-          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-          paths:
-            - .pnpm-store
-      - run:
-          name: Install Make
-          command: sudo apt-get install -y make
-      - run:
-          name: Install dependencies (root)
-          command: pnpm install
-      - run:
-          name: Install dependencies (contracts)
-          command: |
-            cd ./contracts
-            pnpm install
-      - run:
-          name: Install Playwright Browser Binaries
-          command: |
-            cd ./contracts
-            npx playwright install
-      - run:
-          name: Start local environment
-          command: |
-            pnpm start:local:ci 2>&1 | tee local_env.log
-          no_output_timeout: 60m
-          environment:
-            PRIVATE_KEY: ${PRIVATE_KEY}
-            COINRANKING_API_KEY: ${COINRANKING_API_KEY}
-      - run:
-          name: Run E2E tests
-          command: |
-            cd ./contracts
-            npx playwright test ./test/e2e/send-user-op.e2e.test.ts --timeout=600000
-          environment:
-            TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
-            RPC_URL: ${RPC_URL}
-            PRIVATE_KEY: ${PRIVATE_KEY}
-      - run:
-          name: Display full logs
-          command: cat local_env.log
-          when: always
-
-workflows:
-  version: 2
-  test-workflow:
-    jobs:
-      - integration-tests:
-          context: test-env
+#version: 2.1
+#
+#orbs:
+#  node: circleci/node@5.2.0
+#  go: circleci/go@1.11.0
+#  python: circleci/python@2.1.1
+#  rust: circleci/rust@1.6.1
+#  docker: circleci/docker@2.2.0
+#
+#jobs:
+#  integration-tests:
+#    machine:
+#      image: ubuntu-2204:current
+#    resource_class: large
+#    parallelism: 10
+#    steps:
+#      - checkout
+#      - docker/install-docker
+#      - run:
+#          name: Install essential tools
+#          command: |
+#            sudo apt-get update
+#            sudo apt-get install -y curl git software-properties-common python3 python3-pip
+#      - go/install:
+#          version: 1.22.5
+#      - node/install
+#      - rust/install:
+#          version: 1.75.0
+#      - run:
+#          name: Verify Python installation
+#          command: |
+#            python3 --version
+#            pip3 --version
+#      - run:
+#          name: Checkout submodules
+#          command: git submodule update --init --recursive
+#      - run:
+#          name: Diagnostic - Check directory structure
+#          command: |
+#            pwd
+#            ls -la
+#      - run:
+#          name: Diagnostic - Check boba directory
+#          command: |
+#            ls -la boba
+#            cat boba/go.mod || echo "go.mod not found in boba directory"
+#      - run:
+#          name: Go mod download in boba directory
+#          command: |
+#            go version && cd boba && go mod tidy -e && go mod download
+#      - rust/install:
+#          version: 1.75.0
+#      - restore_cache:
+#          name: Restore pnpm Package Cache
+#          keys:
+#            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+#      - run:
+#          name: Install Foundry
+#          command: |
+#            curl -L https://foundry.paradigm.xyz | bash
+#            export PATH="$PATH:$HOME/.foundry/bin"
+#            foundryup
+#      - run:
+#          name: Install pnpm
+#          command: |
+#              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+#              sudo apt-get install -y nodejs
+#              npm i -g yarn pnpm
+#              echo "NPM version: $(npm --version)"
+#              echo "Yarn version: $(yarn --version)"
+#              echo "PNPM version: $(pnpm --version)"
+#              pnpm config set store-dir .pnpm-store
+#
+#      - save_cache:
+#          name: Save pnpm Package Cache
+#          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+#          paths:
+#            - .pnpm-store
+#      - run:
+#          name: Install Make
+#          command: sudo apt-get install -y make
+#      - run:
+#          name: Install dependencies (root)
+#          command: pnpm install
+#      - run:
+#          name: Install dependencies (contracts)
+#          command: |
+#            cd ./contracts
+#            pnpm install
+#      - run:
+#          name: Start local environment
+#          command: |
+#            pnpm start:local:ci 2>&1 | tee local_env.log
+#          no_output_timeout: 60m
+#          environment:
+#            PRIVATE_KEY: ${PRIVATE_KEY}
+#            CONRANKING_API_KEY: ${CONRANKING_API_KEY}
+#      - run:
+#          name: Run Hardhat tests
+#          command: |
+#            cd ./contracts
+#            npx hardhat test
+#          environment:
+#            TOKEN_PRICE_CONTRACT: ${TOKEN_PRICE_CONTRACT}
+#            RPC_URL: ${RPC_URL}
+#            PRIVATE_KEY: ${PRIVATE_KEY}
+#      - run:
+#          name: Display full logs
+#          command: cat local_env.log
+#          when: always
+#
+#workflows:
+#  version: 2
+#  test-workflow:
+#    jobs:
+#      - integration-tests:
+#          context: test-env

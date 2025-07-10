@@ -44,7 +44,7 @@ Please note, that the local stack actually spins up the Boba L2 locally, the Bun
 7. Navigate now to [localhost:8000](http://localhost:8000) to interact with your local DApp which utilizes Hybrid Compute via Account Abstraction to fetch off-chain data to your smart contract! In our example we fetch the current price of a cryptocurrency asset.
 
 When you follow the steps above your application will use the already deployed backend below for simplification. If you want to deploy your own backend instead follow these steps: 
-1. Deploy the backend to your cloud of your choosing [[here is more documentation on that](./backend/README.md)]. We've provided you with a [Dockerfile](./backend/Dockerfile) and [Docker Compose](./backend/docker-compose.yml) to make this as easy as possible.
+1. Deploy the backend to your cloud of your choosing [[here is more documentation on that](backend/README.md)]. We've provided you with a [Dockerfile](backend/Dockerfile) and [Docker Compose](backend/docker-compose.yml) to make this as easy as possible.
 2. Once your backend is live, change the `BACKEND_URL` in your [.env](./contracts/.env) (if the file doesn't exist, you skipped the steps above) within your `contracts folder`. 
 3. Rerun the script `pnpm start:sepolia` and try it out as described above.
 
