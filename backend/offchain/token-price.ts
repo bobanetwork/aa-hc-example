@@ -20,7 +20,7 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
     console.log('\n=== V0.7 RESPONSE GENERATION (Python SDK Match) ===');
     
     if (!process.env.HC_HELPER_ADDR || !process.env.OC_HYBRID_ACCOUNT ||
-        !process.env.CHAIN_ID || !process.env.OC_PRIVKEY || !process.env.ENTRY_POINTS) {
+        !process.env.CHAIN_ID || !process.env.PRIVATE_KEY || !process.env.ENTRY_POINTS) {
         throw new Error("One or more required environment variables are not defined");
     }
 
@@ -29,11 +29,11 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
     console.log('  - OC_HYBRID_ACCOUNT:', process.env.OC_HYBRID_ACCOUNT);
     console.log('  - ENTRY_POINTS:', process.env.ENTRY_POINTS);
     console.log('  - CHAIN_ID:', process.env.CHAIN_ID);
-    console.log('  - OC_PRIVKEY ends with:', process.env.OC_PRIVKEY!.slice(-6));
+    console.log('  - PRIVATE_KEY ends with:', process.env.PRIVATE_KEY!.slice(-6));
     
     // CRITICAL: Check address derivation
-    const signerAccount = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY!);
-    console.log('  - Derived address from OC_PRIVKEY:', signerAccount.address);
+    const signerAccount = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY!);
+    console.log('  - Derived address from PRIVATE_KEY:', signerAccount.address);
     console.log('  - OC_OWNER env var:', process.env.OC_OWNER || 'NOT SET');
     console.log('  - Does derived address match OC_OWNER?', signerAccount.address.toLowerCase() === (process.env.OC_OWNER || '').toLowerCase());
 
@@ -155,7 +155,7 @@ export function generateResponseV7(req: any, errorCode: number, respPayload: any
 
     // Step 8: Sign WITHOUT Ethereum message prefix (Bundler expects raw hash)
     console.log('\n✍️  Step 8: Signing WITHOUT prefix (bundler uses RecoveryMessage::Data)...');
-    const account = web3.eth.accounts.privateKeyToAccount(process.env.OC_PRIVKEY!);
+    const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY!);
     console.log('  - Signer address:', account.address);
     console.log('  - Signer address (last 6):', account.address.slice(-6));
     

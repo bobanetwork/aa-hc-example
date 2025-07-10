@@ -5,8 +5,6 @@ import * as fs from "fs";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
-export const DEFAULT_SNAP_VERSION = '1.1.3'
-
 export const getLocalIpAddress = () => {
   const networkInterfaces = os.networkInterfaces();
   for (const interfaceName in networkInterfaces) {
@@ -137,7 +135,7 @@ export const parseDeployAddresses = (latestBroadcast: string): DeployedContracts
           address: transaction.contractAddress ?? "",
         }));
 
-    console.log("Parsed JSON data:", contracts);
+
     return contracts;
   } catch (err) {
     console.error("Error reading or parsing the file:", err);
@@ -152,3 +150,62 @@ export const getContractFromDeployAddresses = (contracts: DeployedContracts, con
   }
   return addr;
 }
+
+export const hybridAccountABI = [
+  {
+      "inputs": [
+          {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+          },
+          {
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+          }
+      ],
+      "name": "PermitCaller",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+  }
+];
+export const hcHelperABI = [
+  {
+      "inputs": [
+          {
+              "internalType": "address",
+              "name": "contract_addr",
+              "type": "address"
+          },
+          {
+              "internalType": "string",
+              "name": "url",
+              "type": "string"
+          }
+      ],
+      "name": "RegisterUrl",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+  },
+  {
+      "inputs": [
+          {
+              "internalType": "address",
+              "name": "contract_addr",
+              "type": "address"
+          },
+          {
+              "internalType": "uint256",
+              "name": "numCredits",
+              "type": "uint256"
+          }
+      ],
+      "name": "AddCredit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+  }
+]

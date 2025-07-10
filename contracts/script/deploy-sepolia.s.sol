@@ -13,14 +13,11 @@ import "@account-abstraction/contracts/samples/VerifyingPaymaster.sol";
 import "@account-abstraction/contracts/samples/VerifyingPaymaster.sol";
 
 contract DeployExample is Script {
-    // Configs
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
     address public deployerAddress;
     string public backendURL = vm.envString("BACKEND_URL");
     address public hcHelperAddr = vm.envAddress("HC_HELPER_ADDR");
-
-    // Contracts
-    address public entrypoint = vm.envAddress("ENTRY_POINT");
+    address public entrypoint = vm.envAddress("ENTRY_POINTS");
     address public haFactory = vm.envAddress("HA_FACTORY");
 
     HybridAccount public hybridAccount;
@@ -34,19 +31,17 @@ contract DeployExample is Script {
         // Init HCHelper
         hcHelper = IHCHelper(vm.envAddress("HC_HELPER_ADDR"));
         hybridAccount = HybridAccountFactory(haFactory).createAccount(deployerAddress, block.number);
-        console.log("Hybrid Account created");
+        console.log("Hybrid Account Created:");
         console.log(address(hybridAccount));
 
-        // Fund the account if needed
         if (address(hybridAccount).balance < 0.01 ether) {
             payable(address(hybridAccount)).transfer(
                 0.001 ether - address(hybridAccount).balance
             );
         }
-        console.log("Hybrid Account Funded");
 
         TokenPrice tokenPrice = new TokenPrice(payable(hybridAccount));
-        console.log("SimpleContract/Translator created");
+        console.log("Contract created");
 
         console.log("Allowance before:", IERC20(0x4200000000000000000000000000000000000023).allowance(deployerAddress, address(hcHelper)));
         IERC20(0x4200000000000000000000000000000000000023).approve(address(hcHelper), 30000000000000000);

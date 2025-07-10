@@ -11,7 +11,6 @@ console.log('Config', {
     'OC_HYBRID_ACCOUNT': process.env.OC_HYBRID_ACCOUNT || '',
     'ENTRY_POINTS': process.env.ENTRY_POINTS || '',
     'CHAIN_ID': process.env.CHAIN_ID || '',
-    'OC_PRIVKEY': process.env.OC_PRIVKEY || '',
     'HC_HELPER_ADDR': process.env.HC_HELPER_ADDR || ''
 });
 

@@ -137,13 +137,13 @@ async function main() {
         updateEnvVariable("OC_HYBRID_ACCOUNT", hybridAccountAddr, backendEnvPath);
         updateEnvVariable("ENTRY_POINTS", entrypoint, backendEnvPath);
         updateEnvVariable("CHAIN_ID", "901", backendEnvPath);
-        updateEnvVariable("OC_PRIVKEY", deployKey, backendEnvPath);
+        updateEnvVariable("PRIVATE_KEY", deployKey, backendEnvPath);
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, backendEnvPath);
         updateEnvVariable("OC_LISTEN_PORT", "1234", backendEnvPath);
 
         /** @DEV Contracts Environment */
         updateEnvVariable("HYBRID_ACCOUNT", hybridAccountAddr, contractsEnvPath);
-        updateEnvVariable("ENTRY_POINT", entrypoint, contractsEnvPath);
+        updateEnvVariable("ENTRY_POINTS", entrypoint, contractsEnvPath);
         updateEnvVariable("CUSTOM_CONTRACT", tokenPriceContract, contractsEnvPath);
         updateEnvVariable("HC_HELPER_ADDR", hcHelperAddr, contractsEnvPath);
         updateEnvVariable("PRIVATE_KEY", deployKey, contractsEnvPath);
