@@ -17,13 +17,14 @@ Of course you can use whichever cloud provider you like. But for demo purposes w
 
 Our demo server will spin down with inactivity or due to exceeding the free monthly limit since we are using the free version. In this case your smart contract call will fail. 
 
-The demo server should still be available here: https://aa-hc-example.onrender.com/hc
+The latest demo server v7 should still be available here:
+https://pricefeed-frontend.onrender.com/ (v7)
 
 If you want to setup your own server on Render, just follow these steps: 
 1. Create account on [render.com](https://render.com)
 2. Click on **New** and choose **Web Service**
 3. Connect your Git repository with Render
-4. If you are using this example repo you need to change the **Root directory** to `backend/offchain` since the isolated service is located there.
+4. If you are using this example repo you need to change the **Root directory** to `backend` since the isolated service is located there.
 5. Set the build command to `pnpm build`, the start command to `pnpm start`.
 6. Select the instance type you prefer, we chose "Free" for now.
 7. Then import your environment variables either one by one or via **Add from .env** import.
