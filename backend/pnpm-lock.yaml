@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bobanetwork/aa-hc-sdk-server':
-        specifier: ^1.0.2
-        version: 1.0.2(typescript@5.5.4)(zod@3.23.8)
+        specifier: ^1.0.3
+        version: 1.0.3(typescript@5.5.4)(zod@3.23.8)
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -239,8 +239,8 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@bobanetwork/aa-hc-sdk-server@1.0.2':
-    resolution: {integrity: sha512-U7EhKiMPd1c+Np1RPnDWU/hoGWigKDN6MbFXDyhP1hkZZ1fOaZEldXVWCOejXvDe2dHvWghvrDp2iLUHw0QIVw==}
+  '@bobanetwork/aa-hc-sdk-server@1.0.3':
+    resolution: {integrity: sha512-Z+/VxyJyWhwJ7j13nB6cBE+KhqcKzL0ZnKLiVkjmAUhg/0/XINC16cIzZFkefqEEu5zIfJQkt/0cMIk1b+AgmQ==}
     peerDependencies:
       typescript: ^5.0.0
 
@@ -2629,6 +2629,7 @@ packages:
   superagent@10.2.1:
     resolution: {integrity: sha512-O+PCv11lgTNJUzy49teNAWLjBZfc+A1enOwTpLlH6/rsvKcTwcdTT8m9azGkVqM7HBl5jpyZ7KTPhHweokBcdg==}
     engines: {node: '>=14.18.0'}
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   superagent@9.0.2:
     resolution: {integrity: sha512-xuW7dzkUpcJq7QnhOsnNUgtYp3xRwpt2F7abdRYIpCsAt0hhUqia0EdxyXZQQpNmGtsCzYHryaKSV3q3GJnq7w==}
@@ -2641,6 +2642,7 @@ packages:
   supertest@7.1.1:
     resolution: {integrity: sha512-aI59HBTlG9e2wTjxGJV+DygfNLgnWbGdZxiA/sgrnNNikIW8lbDvCtF6RnhZoJ82nU7qv7ZLjrvWqCEm52fAmw==}
     engines: {node: '>=14.18.0'}
+    deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supports-color@3.2.3:
     resolution: {integrity: sha512-Jds2VIYDrlp5ui7t8abHN2bjAu4LV/q4N2KivFPpGH0lrka0BMq/33AmECUXlKPcHigkNaqfXRENFju+rlcy+A==}
@@ -3279,7 +3281,7 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@bobanetwork/aa-hc-sdk-server@1.0.2(typescript@5.5.4)(zod@3.23.8)':
+  '@bobanetwork/aa-hc-sdk-server@1.0.3(typescript@5.5.4)(zod@3.23.8)':
     dependencies:
       body-parser: 1.20.3
       dotenv: 16.4.5

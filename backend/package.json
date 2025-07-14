@@ -2,8 +2,9 @@
   "name": "aa-hc-example-backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "ts-node offchain/server.ts",
+    "start": "npx tsx src/index.ts",
     "test": "jest"
   },
   "license": "MIT",
@@ -24,7 +25,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@bobanetwork/aa-hc-sdk-server": "^1.0.2",
+    "@bobanetwork/aa-hc-sdk-server": "^1.0.3",
     "@types/express": "^4.17.21",
     "axios": "^1.7.2",
     "body-parser": "^1.20.2",

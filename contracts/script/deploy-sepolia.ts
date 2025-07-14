@@ -6,7 +6,6 @@ import {
     readHybridAccountAddress,
     updateEnvVariable
 } from './utils'
-
 dotenv.config();
 
 const configuration = {
@@ -44,6 +43,8 @@ async function main() {
 
         updateEnvVariable("HYBRID_ACCOUNT", hybridAccountAddress);
         updateEnvVariable("CUSTOM_CONTRACT", implementationContract);
+
+        console.log(`Verifying Hybrid Account ${hybridAccountAddress}`);
 
         await execPromise(
             `npx hardhat verify --network boba_sepolia ${implementationContract} ${hybridAccountAddress}`

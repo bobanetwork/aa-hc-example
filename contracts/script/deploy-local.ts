@@ -3,7 +3,7 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 import {ethers} from "ethers";
 import {
-    DEFAULT_SNAP_VERSION, getContractFromDeployAddresses,
+    getContractFromDeployAddresses,
     getLocalIpAddress,
     isPortInUse,
     parseDeployAddresses
@@ -131,7 +131,7 @@ async function main() {
         updateEnvVariable("VITE_SMART_CONTRACT", tokenPriceContract, frontendEnvPath);
         updateEnvVariable("VITE_RPC_PROVIDER", "http://localhost:9545", frontendEnvPath);
         updateEnvVariable("VITE_SNAP_ORIGIN", "local:http://localhost:8080", frontendEnvPath);
-        updateEnvVariable("VITE_SNAP_VERSION", DEFAULT_SNAP_VERSION, frontendEnvPath);
+        updateEnvVariable("VITE_SNAP_VERSION", "1.1.26", frontendEnvPath);
 
         /** @DEV Backend Environment */
         updateEnvVariable("OC_HYBRID_ACCOUNT", hybridAccountAddr, backendEnvPath);

@@ -2,10 +2,8 @@ import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
 import {
-    generateResponse,
+    generateResponseV7, getParsedRequest,
     OffchainParameter,
-    parseOffchainParameter,
-    parseRequest,
     ServerActionResponse
 } from "@bobanetwork/aa-hc-sdk-server";
 
@@ -20,8 +18,7 @@ import {
 const web3 = new Web3();
 
 export async function action(params: OffchainParameter): Promise<ServerActionResponse> {
-    const parsedParams = parseOffchainParameter(params);
-    const request = parseRequest(parsedParams);
+    const request = getParsedRequest(params)
 
     try {
         // Tokensymbol was encoded with a string in the smart-contract
@@ -56,9 +53,9 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
         const encodedTokenPrice = web3.eth.abi.encodeParameter("string", tokenPrice);
 
         console.log("ENCODED TOKEN PRICE = ", encodedTokenPrice);
-        return generateResponse(request, 0, encodedTokenPrice);
+        return generateResponseV7(request, 0, encodedTokenPrice);
     } catch (error: any) {
         console.log("received error: ", error);
-        return generateResponse(request, 1, web3.utils.asciiToHex(error.message));
+        return generateResponseV7(request, 1, web3.utils.asciiToHex(error.message));
     }
 }
