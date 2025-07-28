@@ -5,10 +5,10 @@ import {MetaMaskContext} from "@/context/MetamaskContext";
 import {concat, ethers, FunctionFragment, Wallet} from "ethers";
 import {AbiCoder} from "ethers";
 import {hexlify} from "ethers";
-import {CopyIcon} from "./CopyIcon";
 import {YOUR_CONTRACT} from "@/config/snap";
 import {useContractAbi} from "@/hooks/useContractAbi";
 import {Loader2} from "lucide-react";
+import {CopyIcon} from "@/components/components/CopyIcon.tsx";
 
 const FormComponent = () => {
     const [state] = useContext(MetaMaskContext);

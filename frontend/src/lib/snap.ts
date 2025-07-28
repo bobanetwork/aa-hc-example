@@ -1,4 +1,4 @@
-import { defaultSnapOrigin, snapPackageVersion } from "../config";
+import { defaultSnapOrigin } from "../config";
 import type { GetSnapsResponse, Snap } from "../types/snap";
 
 /**
@@ -33,32 +33,20 @@ export const switchToBobaSepolia = async () => {
   }
 };
 
+
 /**
- * Connect a snap to MetaMask.
+ * Connects a Snap to MetaMask without specifying a version.
+ * This will always attempt to install the latest available version.
  *
- * @param snapId - The ID of the snap.
- * @param params - The params to pass with the snap to connect.
+ * @param snapId - The ID or origin of the Snap (e.g., 'npm:my-snap' or 'https://your-host.com').
+ * @param params - Optional additional parameters to pass to the Snap during connection.
  */
 export const connectSnap = async (
-  snapId: string = defaultSnapOrigin,
-  params: Record<"version" | string, unknown> = {
-    version: snapPackageVersion,
-  }
-) => {
-  // check for current connected chain and force user to switch to boba sepolia.
-  // const currentChain = window.ethereum.networkVersion;
-  // if (currentChain !== "28882") {
-  //   await window.ethereum.request({
-  //     method: "wallet_switchEthereumChain",
-  //     params: [
-  //       {
-  //         chainId: "0x70d2",
-  //       },
-  //     ],
-  //   });
-  // }
+    snapId: string = defaultSnapOrigin,
+    params: Record<string, unknown> = {}
+): Promise<void> => {
   await window.ethereum.request({
-    method: "wallet_requestSnaps",
+    method: 'wallet_requestSnaps',
     params: {
       [snapId]: params,
     },

@@ -1,5 +1,4 @@
 import logo from '@/assets/enya-logo.svg';
-import { snapPackageVersion } from '@/config';
 import { MetamaskActions, MetaMaskContext } from '@/context/MetamaskContext.tsx';
 import { useContext } from 'react';
 import { HeaderButtons } from './ConnectButton.tsx';
@@ -39,7 +38,7 @@ const Navbar = () => {
           <span className="block text-sm text-gray-500 sm:text-center dark:text-gray-400">
             Snap Version:{' '}
             <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400 font-semibold">
-              {snapPackageVersion}
+              latest
             </span>
           </span>
           <span className="block text-sm text-gray-500 sm:text-center dark:text-gray-400">
