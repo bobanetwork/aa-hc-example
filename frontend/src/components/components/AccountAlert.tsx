@@ -14,7 +14,7 @@ const NetworkAlert = () => {
         <AlertTriangle color="#fff" />
         <p className="text-sm text-white">
           Please select snap account or create snap account on link
-          <a href="https://hc-wallet.sepolia.boba.network/" className="underline ml-1" target='blank'>HC Wallet</a>
+          <a href="https://hub.boba.network/smartaccount" className="underline ml-1" target='blank'>HC Wallet</a>
         </p>
       </div>
     )

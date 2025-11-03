@@ -7,6 +7,8 @@ import { connectSnap, getSnap } from '@/lib/snap.ts';
 const Navbar = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
 
+  console.log('state is: ', state)
+
   const handleClick = async () => {
     try {
       await connectSnap();
