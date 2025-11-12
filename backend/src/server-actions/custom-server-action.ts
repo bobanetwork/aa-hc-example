@@ -2,17 +2,16 @@ import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
 import {
-    generateResponseV7, getParsedRequest,
+    generateResponseV7,
+    getParsedRequest,
     OffchainParameter,
     ServerActionResponse
 } from "@bobanetwork/aa-hc-sdk-server";
 
 /**
  * Custom Server Action
- * ---
  * A Custom Server Action is a callable function defined on the server side that allows for specific server-side operations to be executed on demand
  * within the AA HC environment. An Example is illustrated below
- *
  */
 
 const web3 = new Web3();
