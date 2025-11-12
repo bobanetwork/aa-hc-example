@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@bobanetwork/aa-hc-sdk-client':
+        specifier: ^1.0.0
+        version: 1.0.0(react@18.3.1)
       '@metamask/keyring-api':
         specifier: ^8.0.0
         version: 8.1.3(webextension-polyfill@0.12.0)
@@ -204,6 +207,11 @@ packages:
   '@babel/types@7.28.0':
     resolution: {integrity: sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg==}
     engines: {node: '>=6.9.0'}
+
+  '@bobanetwork/aa-hc-sdk-client@1.0.0':
+    resolution: {integrity: sha512-oInsYMjyFfeUWF6K2sohEZbS1JbfUrM55+nhKdeyp+2fRZiwPy5wmegV/HgFXHeVzoSnUm8+m62EQiuqQJeFxQ==}
+    peerDependencies:
+      react: ^18.0.0
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -2160,6 +2168,14 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
+
+  '@bobanetwork/aa-hc-sdk-client@1.0.0(react@18.3.1)':
+    dependencies:
+      ethers: 6.15.0
+      react: 18.3.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
