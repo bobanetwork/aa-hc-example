@@ -25,7 +25,7 @@
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@bobanetwork/aa-hc-sdk-server": "^1.0.3",
+    "@bobanetwork/aa-hc-sdk-server": "2.0.1",
     "@types/express": "^4.17.21",
     "axios": "^1.7.2",
     "body-parser": "^1.20.2",

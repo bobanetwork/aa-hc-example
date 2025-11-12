@@ -4,8 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev:sepolia": "cross-env-shell dotenv -e .env-boba-sepolia \"vite dev\"",
-    "dev:local": "cross-env-shell dotenv -e .env-local \"vite dev\"",
+    "dev": "cross-env-shell dotenv -e .env-boba-sepolia \"vite dev\"",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
