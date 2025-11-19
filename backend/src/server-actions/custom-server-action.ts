@@ -1,6 +1,6 @@
-import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
+import { decodeAbiParameters, encodeAbiParameters, stringToHex } from "viem";
 import {
     generateResponseV7,
     getParsedRequest,
@@ -14,17 +14,14 @@ import {
  * within the AA HC environment. An Example is illustrated below
  */
 
-const web3 = new Web3();
-
 export async function action(params: OffchainParameter): Promise<ServerActionResponse> {
     const request = getParsedRequest(params)
 
     try {
-        // Tokensymbol was encoded with a string in the smart-contract
-        const tokenSymbol = web3.eth.abi.decodeParameter(
-            "string",
-            request["reqBytes"]
-        ) as string;
+        const tokenSymbol = decodeAbiParameters(
+            [{ type: "string" }],
+            request["reqBytes"] as `0x${string}`
+        )[0];
 
         const headers = {
             accept: "application/json",
@@ -49,12 +46,15 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
         );
 
         const tokenPrice = priceResponse.data.data.price;
-        const encodedTokenPrice = web3.eth.abi.encodeParameter("string", tokenPrice);
+        const encodedTokenPrice = encodeAbiParameters(
+            [{ type: "string" }],
+            [tokenPrice]
+        );
 
         console.log("ENCODED TOKEN PRICE = ", encodedTokenPrice);
         return generateResponseV7(request, 0, encodedTokenPrice);
     } catch (error: any) {
         console.log("received error: ", error);
-        return generateResponseV7(request, 1, web3.utils.asciiToHex(error.message));
+        return generateResponseV7(request, 1, stringToHex(error.message));
     }
 }
