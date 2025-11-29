@@ -38,6 +38,13 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
         console.log(`Token char codes:`, [...tokenSymbol].map(c => c.charCodeAt(0)));
         
         tokenSymbol = tokenSymbol.replace(/\0/g, '').trim();
+        
+        if (tokenSymbol.length > 0 && tokenSymbol.charCodeAt(0) < 32) {
+            console.log(`Removing leading control character (code: ${tokenSymbol.charCodeAt(0)})`);
+            tokenSymbol = tokenSymbol.substring(1);
+        }
+        
+        console.log(`Cleaned tokenSymbol: "${tokenSymbol}" (length: ${tokenSymbol.length})`);
 
         const headers = {
             accept: "application/json",
