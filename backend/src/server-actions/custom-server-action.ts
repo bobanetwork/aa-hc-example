@@ -32,6 +32,12 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
                 tokenSymbol = hexToString(request["reqBytes"] as `0x${string}`).replace(/\0/g, '').trim();
             }
         }
+        
+        console.log(`Decoded tokenSymbol: "${tokenSymbol}"`);
+        console.log(`Token length: ${tokenSymbol.length}`);
+        console.log(`Token char codes:`, [...tokenSymbol].map(c => c.charCodeAt(0)));
+        
+        tokenSymbol = tokenSymbol.replace(/\0/g, '').trim();
 
         const headers = {
             accept: "application/json",
