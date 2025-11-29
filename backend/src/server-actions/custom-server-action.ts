@@ -43,13 +43,19 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
             {headers}
         );
         
+        console.log(`Looking for token: "${tokenSymbol}"`);
+        console.log(`Available tokens (first 10):`, coinListResponse.data.data.coins.slice(0, 10).map((c: any) => ({ symbol: c.symbol, name: c.name })));
+        
         const token = coinListResponse.data.data.coins.find(
             (c: any) => c.symbol === tokenSymbol
         );
 
         if (!token) {
+            console.log(`All available symbols:`, coinListResponse.data.data.coins.map((c: any) => c.symbol).join(", "));
             throw new Error(`Token ${tokenSymbol} not found`);
         }
+        
+        console.log(`Found token: ${token.symbol} (${token.name})`);
 
         const priceResponse = await axios.get(
             `https://api.coinranking.com/v2/coin/${token.uuid}/price`,
