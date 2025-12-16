@@ -118,7 +118,7 @@ const generateResponseV7 = async (
 
     const account = privateKeyToAccount(process.env.OC_PRIVKEY! as `0x${string}`);
     const signature = await account.signMessage({
-        message: ooHash,
+        message: { raw: ooHash },
     });
 
     return {
