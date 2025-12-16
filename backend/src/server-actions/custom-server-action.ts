@@ -22,7 +22,6 @@ import {privateKeyToAccount} from "viem/accounts";
  * A Custom Server Action is a callable function defined on the server side that allows for specific server-side operations to be executed on demand
  * within the AA HC environment. An Example is illustrated below
  */
-
 const generateResponseV7 = async (
     req: {
         readonly srcAddr: string;
@@ -117,9 +116,12 @@ const generateResponseV7 = async (
     );
 
     const account = privateKeyToAccount(process.env.OC_PRIVKEY! as `0x${string}`);
+    console.log("signing...");
     const signature = await account.signMessage({
         message: { raw: ooHash },
     });
+    console.log("Message signed:", signature);
+    console.log("returning", {success: errorCode === 0, response: respPayload, signature: signature});
 
     return {
         success: errorCode === 0,
@@ -187,7 +189,9 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
         );
 
         console.log("Calling generateResponseV7 with", request, encodedTokenPrice)
-        return generateResponseV7(request, 0, encodedTokenPrice);
+        const res = generateResponseV7(request, 0, encodedTokenPrice);
+        console.log("generated response: ", res);
+        return res;
     } catch (error: any) {
         console.log("Error in custom server action:", error.message);
         return generateResponseV7(request, 1, stringToHex(error.message));
