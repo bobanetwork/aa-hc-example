@@ -117,13 +117,13 @@ const generateResponseV7 = async (
     );
 
     const account = privateKeyToAccount(process.env.OC_PRIVKEY! as `0x${string}`);
-    const signature = await account.signMessage({
-        message: { raw: ooHash },
+    const signature = await account.sign({
+        hash: ooHash,
     });
 
     return {
         success: errorCode === 0,
-        response: respPayload,
+        response: toHex(respPayload),
         signature: signature,
     };
 };
