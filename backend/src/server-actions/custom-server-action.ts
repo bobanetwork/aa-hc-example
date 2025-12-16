@@ -116,6 +116,7 @@ const generateResponseV7 = async (
     );
 
     const account = privateKeyToAccount(process.env.OC_PRIVKEY! as `0x${string}`);
+    console.log('ooHash:', ooHash);
     console.log("signing...");
     const signature = await account.signMessage({
         message: { raw: ooHash },
@@ -189,7 +190,7 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
         );
 
         console.log("Calling generateResponseV7 with", request, encodedTokenPrice)
-        const res = generateResponseV7(request, 0, encodedTokenPrice);
+        const res = await generateResponseV7(request, 0, encodedTokenPrice);
         console.log("generated response: ", res);
         return res;
     } catch (error: any) {
