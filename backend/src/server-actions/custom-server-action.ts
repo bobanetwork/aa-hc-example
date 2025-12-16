@@ -33,18 +33,12 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
             }
         }
         
-        console.log(`Decoded tokenSymbol: "${tokenSymbol}"`);
-        console.log(`Token length: ${tokenSymbol.length}`);
-        console.log(`Token char codes:`, [...tokenSymbol].map(c => c.charCodeAt(0)));
-        
         tokenSymbol = tokenSymbol.replace(/\0/g, '').trim();
         
         if (tokenSymbol.length > 0 && tokenSymbol.charCodeAt(0) < 32) {
             console.log(`Removing leading control character (code: ${tokenSymbol.charCodeAt(0)})`);
             tokenSymbol = tokenSymbol.substring(1);
         }
-        
-        console.log(`Cleaned tokenSymbol: "${tokenSymbol}" (length: ${tokenSymbol.length})`);
 
         const headers = {
             accept: "application/json",
@@ -55,9 +49,6 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
             "https://api.coinranking.com/v2/coins",
             {headers}
         );
-        
-        console.log(`Looking for token: "${tokenSymbol}"`);
-        console.log(`Available tokens (first 10):`, coinListResponse.data.data.coins.slice(0, 10).map((c: any) => ({ symbol: c.symbol, name: c.name })));
         
         const token = coinListResponse.data.data.coins.find(
             (c: any) => c.symbol === tokenSymbol
@@ -81,6 +72,7 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
             [tokenPrice]
         );
 
+        console.log("Calling generateResponseV7 with", request, encodedTokenPrice)
         return generateResponseV7(request, 0, encodedTokenPrice);
     } catch (error: any) {
         console.log("Error in custom server action:", error.message);
