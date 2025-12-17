@@ -51,22 +51,40 @@ const generateResponseV7 = async (
 
     const err_code = errorCode;
 
+    console.log("=== DETAILED HASH DEBUG ===");
+    console.log("Input params:");
+    console.log("  srcAddr:", req.srcAddr);
+    console.log("  srcNonce:", req.srcNonce.toString());
+    console.log("  opNonce:", req.opNonce.toString());
+    console.log("  errorCode:", err_code);
+    console.log("  respPayload:", respPayload);
+    console.log("  respPayload length:", (respPayload as string).length);
+    console.log("Config:");
+    console.log("  OC_HYBRID_ACCOUNT:", process.env.OC_HYBRID_ACCOUNT);
+    console.log("  HC_HELPER_ADDR:", process.env.HC_HELPER_ADDR);
+    console.log("  ENTRY_POINTS:", process.env.ENTRY_POINTS);
+    console.log("  CHAIN_ID:", process.env.CHAIN_ID);
+
     const enc_merged_response = encodeAbiParameters(
         parseAbiParameters("address, uint256, uint32, bytes"),
         [req.srcAddr.toLowerCase() as `0x${string}`, BigInt(req.srcNonce), err_code, respPayload as `0x${string}`],
     );
+    console.log("enc_merged_response:", enc_merged_response);
 
     const p1_enc = encodeAbiParameters(
         parseAbiParameters("bytes32, bytes"),
         [toHex(req.skey), enc_merged_response as `0x${string}`],
     );
     const putResponseCallData = selectorHex("PutResponse(bytes32,bytes)") + p1_enc.slice(2);
+    console.log("putResponseCallData:", putResponseCallData);
 
     const p2_enc = encodeAbiParameters(
         parseAbiParameters("address, uint256, bytes"),
         [process.env.HC_HELPER_ADDR.toLowerCase() as `0x${string}`, BigInt(0), putResponseCallData as `0x${string}`],
     );
     const executeCallData = selectorHex("execute(address,uint256,bytes)") + p2_enc.slice(2);
+    console.log("executeCallData length:", (executeCallData as string).length);
+    console.log("executeCallData first 66 chars:", (executeCallData as string).substring(0, 66));
 
     const respPayloadBytes = hexToBytes(respPayload as `0x${string}`);
     const call_gas_limit = 705 * respPayloadBytes.length + 170000;
@@ -74,6 +92,10 @@ const generateResponseV7 = async (
     const pre_verification_gas = 0x10000;
     const max_fee_per_gas = 0;
     const max_priority_fee_per_gas = 0;
+    console.log("Gas values:");
+    console.log("  call_gas_limit:", call_gas_limit);
+    console.log("  verification_gas_limit:", verification_gas_limit);
+    console.log("  pre_verification_gas:", pre_verification_gas);
 
     const verificationGasEncoded = encodeAbiParameters(
         parseAbiParameters("uint128"),
@@ -87,10 +109,25 @@ const generateResponseV7 = async (
     const verificationGasPart = verificationGasEncoded.slice(34, 66);
     const callGasPart = callGasEncoded.slice(34, 66);
     const accountGasLimits = ("0x" + verificationGasPart + callGasPart) as `0x${string}`;
+    console.log("accountGasLimits:", accountGasLimits);
 
     const initCodeHash = keccak256("0x");
     const callDataHash = keccak256(executeCallData as `0x${string}`);
     const paymasterAndDataHash = keccak256("0x");
+    console.log("Hashes:");
+    console.log("  initCodeHash:", initCodeHash);
+    console.log("  callDataHash:", callDataHash);
+    console.log("  paymasterAndDataHash:", paymasterAndDataHash);
+
+    console.log("Packed params:");
+    console.log("  sender (OC_HYBRID_ACCOUNT):", process.env.OC_HYBRID_ACCOUNT);
+    console.log("  nonce (opNonce):", req.opNonce.toString());
+    console.log("  initCodeHash:", initCodeHash);
+    console.log("  callDataHash:", callDataHash);
+    console.log("  accountGasLimits:", accountGasLimits);
+    console.log("  preVerificationGas:", pre_verification_gas);
+    console.log("  gasFees:", ("0x" + "0".repeat(64)));
+    console.log("  paymasterAndDataHash:", paymasterAndDataHash);
 
     const packed = encodeAbiParameters(
         parseAbiParameters("address, uint256, bytes32, bytes32, bytes32, uint256, bytes32, bytes32"),
@@ -105,23 +142,28 @@ const generateResponseV7 = async (
             paymasterAndDataHash,
         ],
     );
+    console.log("packed:", packed);
 
     const packedHash = keccak256(packed);
+    console.log("packedHash:", packedHash);
+
     const ooHash = keccak256(
         encodeAbiParameters(
             parseAbiParameters("bytes32, address, uint256"),
             [packedHash, process.env.ENTRY_POINTS!.toLowerCase() as `0x${string}`, BigInt(process.env.CHAIN_ID!)],
         ),
     );
+    console.log("Final ooHash components:");
+    console.log("  packedHash:", packedHash);
+    console.log("  entryPoint:", process.env.ENTRY_POINTS);
+    console.log("  chainId:", process.env.CHAIN_ID);
+    console.log("=== FINAL ooHash:", ooHash, "===");
+    console.log("=== END DEBUG ===");
 
     const account = privateKeyToAccount(process.env.OC_PRIVKEY! as `0x${string}`);
-    console.log('ooHash:', ooHash);
-    console.log("signing...");
     const signature = await account.signMessage({
         message: { raw: ooHash },
     });
-    console.log("Message signed:", signature);
-    console.log("returning", {success: errorCode === 0, response: respPayload, signature: signature});
 
     return {
         success: errorCode === 0,
