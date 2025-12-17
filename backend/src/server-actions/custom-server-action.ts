@@ -75,14 +75,14 @@ const generateResponseV7 = async (
         parseAbiParameters("bytes32, bytes"),
         [toHex(req.skey), enc_merged_response as `0x${string}`],
     );
-    const putResponseCallData = selectorHex("PutResponse(bytes32,bytes)") + p1_enc.slice(2);
+    const putResponseCallData = selectorHex("PutResponse(bytes32,bytes)") + p1_enc.slice(66);
     console.log("putResponseCallData:", putResponseCallData);
 
     const p2_enc = encodeAbiParameters(
         parseAbiParameters("address, uint256, bytes"),
         [process.env.HC_HELPER_ADDR.toLowerCase() as `0x${string}`, BigInt(0), putResponseCallData as `0x${string}`],
     );
-    const executeCallData = selectorHex("execute(address,uint256,bytes)") + p2_enc.slice(2);
+    const executeCallData = selectorHex("execute(address,uint256,bytes)") + p2_enc.slice(66);
     console.log("executeCallData length:", (executeCallData as string).length);
     console.log("executeCallData first 66 chars:", (executeCallData as string).substring(0, 66));
 
