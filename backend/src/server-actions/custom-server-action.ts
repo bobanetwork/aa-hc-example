@@ -35,7 +35,7 @@ const generateResponseV7 = async (
 ): Promise<ServerActionResponse> => {
     function selectorHex(name: string): string {
         const hex = toHex(keccak256(name as `0x${string}`));
-        return hex.slice(0, 10); // Keep 0x prefix
+        return hex.slice(0, 10);
     }
     if (
         !process.env.HC_HELPER_ADDR ||
@@ -49,59 +49,58 @@ const generateResponseV7 = async (
         );
     }
 
-    const resp2 = encodeAbiParameters(
+    const err_code = errorCode;
+
+    const enc_merged_response = encodeAbiParameters(
         parseAbiParameters("address, uint256, uint32, bytes"),
-        [req.srcAddr as `0x${string}`, BigInt(req.srcNonce), errorCode, respPayload as `0x${string}`],
+        [req.srcAddr.toLowerCase() as `0x${string}`, BigInt(req.srcNonce), err_code, respPayload as `0x${string}`],
     );
 
-    const putResponseCallData = encodeAbiParameters(
+    const p1_enc = encodeAbiParameters(
         parseAbiParameters("bytes32, bytes"),
-        [toHex(req.skey), resp2],
+        [toHex(req.skey), enc_merged_response as `0x${string}`],
     );
-    const p_enc1 =
-        selectorHex("PutResponse(bytes32,bytes)") + putResponseCallData.slice(2);
+    const putResponseCallData = selectorHex("PutResponse(bytes32,bytes)") + p1_enc.slice(2);
 
-    const executeCallData = encodeAbiParameters(
+    const p2_enc = encodeAbiParameters(
         parseAbiParameters("address, uint256, bytes"),
-        [checksumAddress(process.env.HC_HELPER_ADDR as `0x${string}`), BigInt(0), p_enc1 as `0x${string}`],
+        [process.env.HC_HELPER_ADDR.toLowerCase() as `0x${string}`, BigInt(0), putResponseCallData as `0x${string}`],
     );
-    const p_enc2 =
-        selectorHex("execute(address,uint256,bytes)") + executeCallData.slice(2);
-
-    const limits = {
-        verificationGasLimit: "0x10000",
-        preVerificationGas: "0x10000",
-    };
+    const executeCallData = selectorHex("execute(address,uint256,bytes)") + p2_enc.slice(2);
 
     const respPayloadBytes = hexToBytes(respPayload as `0x${string}`);
-    const callGas = 705 * respPayloadBytes.length + 170000;
+    const call_gas_limit = 705 * respPayloadBytes.length + 170000;
+    const verification_gas_limit = 0x10000;
+    const pre_verification_gas = 0x10000;
+    const max_fee_per_gas = 0;
+    const max_priority_fee_per_gas = 0;
 
     const verificationGasEncoded = encodeAbiParameters(
         parseAbiParameters("uint128"),
-        [BigInt(hexToNumber(limits.verificationGasLimit as `0x${string}`))],
+        [BigInt(verification_gas_limit)],
     );
     const callGasEncoded = encodeAbiParameters(
         parseAbiParameters("uint128"),
-        [BigInt(callGas)],
+        [BigInt(call_gas_limit)],
     );
 
-    const verificationGasPart = verificationGasEncoded.slice(34, 66); // 32 chars
-    const callGasPart = callGasEncoded.slice(34, 66); // 32 chars
-    const accountGasLimits = "0x" + verificationGasPart + callGasPart;
+    const verificationGasPart = verificationGasEncoded.slice(34, 66);
+    const callGasPart = callGasEncoded.slice(34, 66);
+    const accountGasLimits = ("0x" + verificationGasPart + callGasPart) as `0x${string}`;
 
     const initCodeHash = keccak256("0x");
-    const callDataHash = keccak256(p_enc2 as `0x${string}`);
+    const callDataHash = keccak256(executeCallData as `0x${string}`);
     const paymasterAndDataHash = keccak256("0x");
 
     const packed = encodeAbiParameters(
         parseAbiParameters("address, uint256, bytes32, bytes32, bytes32, uint256, bytes32, bytes32"),
         [
-            process.env.OC_HYBRID_ACCOUNT as `0x${string}`,
+            process.env.OC_HYBRID_ACCOUNT!.toLowerCase() as `0x${string}`,
             BigInt(req.opNonce),
             initCodeHash,
             callDataHash,
-            accountGasLimits as `0x${string}`,
-            BigInt(hexToNumber(limits.preVerificationGas as `0x${string}`)),
+            accountGasLimits,
+            BigInt(pre_verification_gas),
             ("0x" + "0".repeat(64)) as `0x${string}`,
             paymasterAndDataHash,
         ],
@@ -111,7 +110,7 @@ const generateResponseV7 = async (
     const ooHash = keccak256(
         encodeAbiParameters(
             parseAbiParameters("bytes32, address, uint256"),
-            [packedHash, process.env.ENTRY_POINTS as `0x${string}`, BigInt(process.env.CHAIN_ID)],
+            [packedHash, process.env.ENTRY_POINTS!.toLowerCase() as `0x${string}`, BigInt(process.env.CHAIN_ID!)],
         ),
     );
 
