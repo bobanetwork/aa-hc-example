@@ -37,7 +37,6 @@ const generateResponseV7 = async (
         const hash = keccak256(toBytes(name));
         return hash.slice(2, 10);
     }
-
     if (
         !process.env.HC_HELPER_ADDR ||
         !process.env.OC_HYBRID_ACCOUNT ||
@@ -76,14 +75,14 @@ const generateResponseV7 = async (
         parseAbiParameters("bytes32, bytes"),
         [toHex(req.skey), enc_merged_response as `0x${string}`],
     );
-    const putResponseCallData = "0x" + selector("PutResponse(bytes32,bytes)") + p1_enc.slice(66);
+    const putResponseCallData = "0x" + selector("PutResponse(bytes32,bytes)") + p1_enc.slice(2);
     console.log("putResponseCallData:", putResponseCallData);
 
     const p2_enc = encodeAbiParameters(
         parseAbiParameters("address, uint256, bytes"),
         [process.env.HC_HELPER_ADDR.toLowerCase() as `0x${string}`, BigInt(0), putResponseCallData as `0x${string}`],
     );
-    const executeCallData = "0x" + selector("execute(address,uint256,bytes)") + p2_enc.slice(66);
+    const executeCallData = "0x" + selector("execute(address,uint256,bytes)") + p2_enc.slice(2);
     console.log("executeCallData length:", (executeCallData as string).length);
     console.log("executeCallData first 66 chars:", (executeCallData as string).substring(0, 66));
 
