@@ -34,7 +34,7 @@ const generateResponseV7 = async (
     respPayload: any,
 ): Promise<ServerActionResponse> => {
     function selectorHex(name: string): string {
-        const hex = keccak256(toHex(name));
+        const hex = toHex(keccak256(name as `0x${string}`));
         return hex.slice(0, 10);
     }
     if (
