@@ -1,11 +1,16 @@
-import Web3 from "web3";
 import axios from "axios";
 import "dotenv/config";
+import {
+    decodeAbiParameters,
+    encodeAbiParameters,
+    hexToString,
+    stringToHex,
+} from "viem";
 import {
     generateResponseV7,
     getParsedRequest,
     OffchainParameter,
-    ServerActionResponse
+    ServerActionResponse,
 } from "@bobanetwork/aa-hc-sdk-server";
 
 /**
@@ -14,17 +19,31 @@ import {
  * within the AA HC environment. An Example is illustrated below
  */
 
-const web3 = new Web3();
-
 export async function action(params: OffchainParameter): Promise<ServerActionResponse> {
     const request = getParsedRequest(params)
 
     try {
-        // Tokensymbol was encoded with a string in the smart-contract
-        const tokenSymbol = web3.eth.abi.decodeParameter(
-            "string",
-            request["reqBytes"]
-        ) as string;
+        let tokenSymbol: string;
+        
+        try {
+            tokenSymbol = decodeAbiParameters(
+                [{ type: "string" }],
+                request["reqBytes"] as `0x${string}`
+            )[0];
+        } catch (abiError: any) {
+            try {
+                tokenSymbol = hexToString(request["reqBytes"] as `0x${string}`, { size: 32 });
+            } catch (hexError: any) {
+                tokenSymbol = hexToString(request["reqBytes"] as `0x${string}`).replace(/\0/g, '').trim();
+            }
+        }
+        
+        tokenSymbol = tokenSymbol.replace(/\0/g, '').trim();
+        
+        if (tokenSymbol.length > 0 && tokenSymbol.charCodeAt(0) < 32) {
+            console.log(`Removing leading control character (code: ${tokenSymbol.charCodeAt(0)})`);
+            tokenSymbol = tokenSymbol.substring(1);
+        }
 
         const headers = {
             accept: "application/json",
@@ -35,13 +54,17 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
             "https://api.coinranking.com/v2/coins",
             {headers}
         );
+        
         const token = coinListResponse.data.data.coins.find(
             (c: any) => c.symbol === tokenSymbol
         );
 
         if (!token) {
+            console.log(`All available symbols:`, coinListResponse.data.data.coins.map((c: any) => c.symbol).join(", "));
             throw new Error(`Token ${tokenSymbol} not found`);
         }
+        
+        console.log(`Found token: ${token.symbol} (${token.name})`);
 
         const priceResponse = await axios.get(
             `https://api.coinranking.com/v2/coin/${token.uuid}/price`,
@@ -49,12 +72,17 @@ export async function action(params: OffchainParameter): Promise<ServerActionRes
         );
 
         const tokenPrice = priceResponse.data.data.price;
-        const encodedTokenPrice = web3.eth.abi.encodeParameter("string", tokenPrice);
+        const encodedTokenPrice = encodeAbiParameters(
+            [{ type: "string" }],
+            [tokenPrice]
+        );
 
-        console.log("ENCODED TOKEN PRICE = ", encodedTokenPrice);
-        return generateResponseV7(request, 0, encodedTokenPrice);
+        console.log("Calling generateResponseV7 with", request, encodedTokenPrice)
+        const res = await generateResponseV7(request, 0, encodedTokenPrice);
+        console.log("generated response: ", res);
+        return res;
     } catch (error: any) {
-        console.log("received error: ", error);
-        return generateResponseV7(request, 1, web3.utils.asciiToHex(error.message));
+        console.log("Error in custom server action:", error.message);
+        return generateResponseV7(request, 1, stringToHex(error.message));
     }
 }
