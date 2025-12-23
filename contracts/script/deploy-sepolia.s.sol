@@ -6,11 +6,7 @@ import "../contracts/HybridAccount.sol";
 import "../contracts/HybridAccountFactory.sol";
 import "../contracts/HCHelper.sol";
 import "../contracts/TokenPrice.sol";
-import "@account-abstraction/contracts/core/EntryPoint.sol";
-import "@account-abstraction/contracts/samples/SimpleAccountFactory.sol";
-import "@account-abstraction/contracts/samples/TokenPaymaster.sol";
-import "@account-abstraction/contracts/samples/VerifyingPaymaster.sol";
-import "@account-abstraction/contracts/samples/VerifyingPaymaster.sol";
+import "@account-abstraction/core/EntryPoint.sol";
 
 contract DeployExample is Script {
     uint256 public deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -22,7 +18,6 @@ contract DeployExample is Script {
 
     HybridAccount public hybridAccount;
     IHCHelper public hcHelper;
-    TokenPaymaster public tokenPaymaster;
 
     function run() public {
         deployerAddress = vm.addr(deployerPrivateKey);
@@ -41,16 +36,11 @@ contract DeployExample is Script {
         }
 
         TokenPrice tokenPrice = new TokenPrice(payable(hybridAccount));
-        console.log("Contract created");
-
-        console.log("Allowance before:", IERC20(0x4200000000000000000000000000000000000023).allowance(deployerAddress, address(hcHelper)));
         IERC20(0x4200000000000000000000000000000000000023).approve(address(hcHelper), 30000000000000000);
-        console.log("Allowance after:", IERC20(0x4200000000000000000000000000000000000023).allowance(deployerAddress, address(hcHelper)));
 
         // Permit caller
         hybridAccount.PermitCaller(address(tokenPrice), true);
         console.log(address(deployerAddress));
-
         console.log("\n=== Deployment Verification ===");
         console.log("HCHelper address:", address(hcHelper));
         console.log("HybridAccount address:", address(hybridAccount));
@@ -62,9 +52,6 @@ contract DeployExample is Script {
         } catch {
             console.log("Could not fetch HybridAccount owner");
         }
-
-        console.log("HybridAccount balance:", address(hybridAccount).balance);
-
         vm.stopBroadcast();
     }
 }

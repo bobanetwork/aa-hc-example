@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.12;
 
-import "@account-abstraction/contracts/interfaces/INonceManager.sol";
+import "@account-abstraction/interfaces/INonceManager.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract HCHelper is ReentrancyGuard, Ownable {
+contract HCHelper is ReentrancyGuard, UUPSUpgradeable, Initializable {
     using SafeERC20 for IERC20;
 
     event SystemAccountSet(address oldAccount, address newAccount);
@@ -16,15 +17,26 @@ contract HCHelper is ReentrancyGuard, Ownable {
     // Response data is stored here by PutResponse() and then consumed by TryCallOffchain().
     mapping(bytes32=>bytes)  ResponseCache;
 
+    // AA EntryPoint
+    address public immutable entryPoint;
+
+    // Owner
+    address public owner;
+
+    // Account which is used to insert system error responses. Currently a single
+    // address but could be extended to a list of authorized accounts if needed.
+    address public systemAccount;
+
     // BOBA token address
     address public tokenAddr;
 
     // Token amount required to purchase each prepaid credit (may be 0 for testing)
     uint256 public pricePerCall;
 
-    // Account which is used to insert system error responses. Currently a single
-    // address but could be extended to a list of authorized accounts if needed.
-    address public systemAccount;
+    // Limit on the maximum credit balance which an account may hold, enforced
+    // when purchasing credits. This allows system testing or temporary promotions
+    // with a low or zero credit price.
+    uint64 public maxCredits;
 
     // Data stored per RegisteredCaller
     struct callerInfo {
@@ -36,13 +48,31 @@ contract HCHelper is ReentrancyGuard, Ownable {
     // Contracts which are allowed to use Hybrid Compute.
     mapping(address=>callerInfo) public RegisteredCallers;
 
-    // AA EntryPoint
-    address immutable entryPoint;
+    // Vesion identifier
+    string public constant version = "0.5.0";
+
+    modifier onlyOwner() {
+        _onlyOwner();
+        _;
+    }
+    function _onlyOwner() internal view {
+        require(msg.sender == owner || msg.sender == address(this), "only owner");
+    }
 
     // Constructor
-    constructor(address _entryPoint, address _tokenAddr, address _owner) Ownable(_owner) {
+    constructor(address _entryPoint) {
 	entryPoint = _entryPoint;
-	tokenAddr = _tokenAddr;
+    }
+
+    // Set the initial owner
+    function initialize(address _owner) public virtual initializer {
+        owner = _owner;
+    }
+
+    // Allow upgrade through UUPSUpgradeable
+    function _authorizeUpgrade(address newImplementation) internal view override {
+        (newImplementation);
+        _onlyOwner();
     }
 
     // Change the SystemAccount address (used for error responses)
@@ -59,17 +89,86 @@ contract HCHelper is ReentrancyGuard, Ownable {
         emit RegisteredUrl(contract_addr, url);
     }
 
-    // Set or change the per-call token price (0 is allowed). Does not affect
-    // existing credit balances, only applies to new AddCredit() calls.
-    function SetPrice(uint256 _pricePerCall) public onlyOwner {
+    // This method allows a HybridAccount to register its offchain URL, creating an entry
+    // in RegisteredCallers. The bundler will call a special method on the offchain url, passing
+    // the address of the contract which is attempting to register it. The registration will
+    // only succeed if the server sends a response accepting it.
+    function SelfRegister(string calldata url) public returns (bool) {
+        address contract_addr = msg.sender;
+        bool success = true;
+
+        require(contract_addr.codehash != keccak256(""), "SelfRegister must be called by a contract");
+        if(bytes(url).length == 0) {
+            RegisteredCallers[contract_addr].url = "";
+            emit RegisteredUrl(contract_addr, "");
+        } else {
+            // This is a modified subset of TryCallOffchain()
+            bytes32 userKey = keccak256(abi.encodePacked("_register_", msg.sender));
+            bytes memory req = abi.encodeWithSignature("_register(address,string)", contract_addr, url);
+
+            bytes32 subKey = keccak256(abi.encodePacked(userKey, req));
+            bytes32 mapKey = keccak256(abi.encodePacked(msg.sender, subKey));
+
+            bool found;
+	    uint32 errCode;
+            bytes memory ret;
+
+            (found, errCode, ret) = getEntry(mapKey);
+
+	    if (found) {
+                if (errCode == 0) {
+	            bool reg_success = abi.decode(ret, (bool));
+                    if (reg_success) {
+                        RegisteredCallers[contract_addr].owner = contract_addr;
+                        RegisteredCallers[contract_addr].url = url;
+                        emit RegisteredUrl(contract_addr, url);
+                    }
+                    return reg_success;
+                }
+                return false;
+	    } else {
+	        // If no off-chain response, check for a system error response.
+                bytes32 errKey = keccak256(abi.encodePacked(address(this), subKey));
+
+	        (found, errCode, ret) = getEntry(errKey);
+	        if (found) {
+	            return false;
+	        } else {
+	            // Nothing found, so trigger a new request.
+                    bytes memory prefix = "_HC_TRIG";
+                    bytes memory r2 = bytes.concat(prefix, abi.encodePacked(msg.sender, userKey, req));
+                    assembly {
+                        revert(add(r2, 32), mload(r2))
+	            }
+	        }
+	    }
+        }
+    }
+
+    // Reassign ownership of a registered caller. Not needed under normal circumstances.
+    function ReassignOwner(address contract_addr, address new_owner) public {
+        require(new_owner != address(0), "Must supply a new_owner");
+        require(RegisteredCallers[contract_addr].owner != address(0), "Caller is not registered");
+        require(msg.sender == RegisteredCallers[contract_addr].owner, "Only existing owner may reassign");
+        RegisteredCallers[contract_addr].owner = new_owner;
+    }
+
+    // Set or change the per-call token price (0 is allowed), token,
+    // and maximum credit balance. Does not affect existing balances,
+    // only new AddCredit() purchases.
+    function SetPaymentInfo(address _tokenAddr, uint256 _pricePerCall, uint64 _maxCredits) public onlyOwner {
+	tokenAddr = _tokenAddr;
 	pricePerCall = _pricePerCall;
+        maxCredits = _maxCredits;
     }
 
     // Purchase credits allowing the specified contract to perform HC calls.
     // The token cost is (pricePerCall() * numCredits) and is non-refundable
     function AddCredit(address contract_addr, uint256 numCredits) public nonReentrant {
+        require(tokenAddr != address(0), "Payment info not initialized");
         uint256 tokenPrice = numCredits * pricePerCall;
         RegisteredCallers[contract_addr].credits += numCredits;
+        require(RegisteredCallers[contract_addr].credits <= maxCredits, "Purchase exceeds maxCredits limit");
         IERC20(tokenAddr).safeTransferFrom(msg.sender, address(this), tokenPrice);
     }
 

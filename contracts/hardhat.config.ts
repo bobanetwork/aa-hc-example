@@ -3,6 +3,7 @@ import {HardhatUserConfig} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-ignition-ethers";
+import "@nomicfoundation/hardhat-foundry";
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ const config: HardhatUserConfig & {
     etherscan: { apiKey: any; customChains: any };
 } = {
     solidity: {
-        version: "0.8.25",
+        version: "0.8.26",
         settings: {
             optimizer: {enabled: true, runs: 200},
         },
@@ -34,11 +35,7 @@ const config: HardhatUserConfig & {
         boba_sepolia: {
             url: "https://sepolia.boba.network",
             accounts: [privateKeyToUse],
-        },
-        boba_local: {
-            url: "http://localhost:9545",
-            accounts: [privateKeyToUse],
-        },
+        }
     },
     etherscan: {
         apiKey: {
