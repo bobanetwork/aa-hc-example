@@ -36,9 +36,9 @@ Every AA-HC example consists of
 
 | Name             | Address                                          | Explainer                           |
 |------------------|--------------------------------------------------|-------------------------------------|
-| BACKEND          | https://aa-hc-example.onrender.com/hc       |                                     |
-| FRONTEND         | https://aa-hc-example-fe.onrender.com     |                                     |
-| HC_HELPER_ADDR   | 0x1c64EC0A5E2C58295c3208a63209A2A719dF68D8       | HC Helper is system-wide available  |
+| BACKEND          | https://pricefeed-backen.onrender.com       |                                     |
+| FRONTEND         | https://pricefeed-frontend.onrender.com/     |                                     |
+| HC_HELPER_ADDR   | 0x11c4DbbaC4A0A47a7c76b5603bc219c5dAe752D6       | HC Helper is system-wide available  |
 | TOKEN_PRICE_ADDR | 0xcad49c0381c1B0779A318c2326Db43A6073adC1e | 
 | RPC_URL          | https://gateway.tenderly.co/public/boba-sepolia	 |                                     |
 | -> More RPC URls | https://chainlist.org/chain/28882	               |                                     |
