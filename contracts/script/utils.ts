@@ -1,22 +1,8 @@
-import * as os from "os";
-import {execSync, ProcessEnvOptions, spawn} from "child_process";
-import { Readable } from "stream";
+import {spawn} from "child_process";
+import {Readable} from "stream";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
 import * as path from "path";
-
-export const getLocalIpAddress = () => {
-  const networkInterfaces = os.networkInterfaces();
-  for (const interfaceName in networkInterfaces) {
-    for (const iface of networkInterfaces[interfaceName]!) {
-      // Skip internal and non-IPv4 addresses
-      if (iface.family === "IPv4" && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  throw new Error("No Local IP-Address found");
-};
 
 export const updateEnvVariable = (key: string, value: string, customEnvPath?: string) => {
   const envPath = path.resolve(__dirname, customEnvPath ?? "../.env")
@@ -34,16 +20,6 @@ export const updateEnvVariable = (key: string, value: string, customEnvPath?: st
   fs.writeFileSync(envPath, envFile);
   dotenv.config();
 };
-
-export const isPortInUse = (port: number) => {
-  try {
-    execSync(`nc -z localhost ${port}`);
-    return true;
-  } catch (error) {
-    console.warn("[Warn] Could not check if port in use.")
-    return false;
-  }
-}
 
 export const execPromise = (
     command: string,
@@ -128,15 +104,10 @@ export const parseDeployAddresses = (latestBroadcast: string): DeployedContracts
   try {
     const data = fs.readFileSync(jsonPath, "utf8");
     const jsonData = JSON.parse(data);
-
-    const contracts: DeployedContracts =
-        jsonData.transactions.map((transaction: any) => ({
-          contractName: transaction.contractName ?? "",
-          address: transaction.contractAddress ?? "",
-        }));
-
-
-    return contracts;
+    return jsonData.transactions.map((transaction: any) => ({
+        contractName: transaction.contractName ?? "",
+        address: transaction.contractAddress ?? "",
+    }));
   } catch (err) {
     console.error("Error reading or parsing the file:", err);
     throw new Error('[parseDeployAddresses]: Could not read or parse deployed contract broadcast json.')
@@ -150,62 +121,3 @@ export const getContractFromDeployAddresses = (contracts: DeployedContracts, con
   }
   return addr;
 }
-
-export const hybridAccountABI = [
-  {
-      "inputs": [
-          {
-              "internalType": "address",
-              "name": "caller",
-              "type": "address"
-          },
-          {
-              "internalType": "bool",
-              "name": "allowed",
-              "type": "bool"
-          }
-      ],
-      "name": "PermitCaller",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-  }
-];
-export const hcHelperABI = [
-  {
-      "inputs": [
-          {
-              "internalType": "address",
-              "name": "contract_addr",
-              "type": "address"
-          },
-          {
-              "internalType": "string",
-              "name": "url",
-              "type": "string"
-          }
-      ],
-      "name": "RegisterUrl",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-  },
-  {
-      "inputs": [
-          {
-              "internalType": "address",
-              "name": "contract_addr",
-              "type": "address"
-          },
-          {
-              "internalType": "uint256",
-              "name": "numCredits",
-              "type": "uint256"
-          }
-      ],
-      "name": "AddCredit",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-  }
-]

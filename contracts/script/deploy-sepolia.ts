@@ -37,48 +37,26 @@ async function main() {
         const implementationContract = getContractFromDeployAddresses(contracts, configuration.NAME_OF_CUSTOM_CONTRACT)
 
         // Verify Contracts
-        await execPromise(
-            `cast call --rpc-url=${configuration.RPC_URL} ${hybridAccountAddress} "getDeposit()"`
-        );
+        try {
+            await execPromise(
+                `cast call --rpc-url=${configuration.RPC_URL} ${hybridAccountAddress} "getDeposit()"`
+            );
+        } catch (e) {
+            console.log("Verification failed. Please retry.")
+        }
 
         updateEnvVariable("HYBRID_ACCOUNT", hybridAccountAddress);
         updateEnvVariable("CUSTOM_CONTRACT", implementationContract);
+        updateEnvVariable("BACKEND_URL", configuration.BACKEND_URL)
 
         console.log(`Verifying Hybrid Account ${hybridAccountAddress}`);
-
         await execPromise(
             `npx hardhat verify --network boba_sepolia ${implementationContract} ${hybridAccountAddress}`
         );
-
-        updateEnvVariable("BACKEND_URL", configuration.BACKEND_URL)
-
-        const frontendEnvPath = '../../frontend/.env-boba-sepolia'
-        updateEnvVariable("VITE_SMART_CONTRACT", implementationContract, frontendEnvPath);
-        updateEnvVariable("VITE_SNAP_ORIGIN", 'npm:@bobanetwork/snap-account-abstraction-keyring-hc', frontendEnvPath);
-        updateEnvVariable("VITE_SNAP_VERSION", configuration.DEFAULT_SNAP_VERSION, frontendEnvPath);
-        updateEnvVariable("VITE_RPC_PROVIDER", configuration.RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPath);
-
-        const frontendEnvPathSnapLocal = '../../frontend/.env-local-boba-sepolia-snaplocal'
-        updateEnvVariable("VITE_SMART_CONTRACT", implementationContract, frontendEnvPathSnapLocal);
-        updateEnvVariable("VITE_SNAP_ORIGIN", 'local:http://localhost:8080', frontendEnvPathSnapLocal);
-        updateEnvVariable("VITE_SNAP_VERSION", configuration.DEFAULT_SNAP_VERSION, frontendEnvPathSnapLocal);
-        updateEnvVariable("VITE_RPC_PROVIDER", configuration.RPC_URL ?? 'https://sepolia.boba.network', frontendEnvPathSnapLocal);
-
-        const backendEnvPath = path.resolve(__dirname, "../../backend/.env-local");
-        updateEnvVariable("OC_HYBRID_ACCOUNT", hybridAccountAddress, backendEnvPath);
-        updateEnvVariable("ENTRY_POINTS", configuration.ENTRYPOINT_ADDR, backendEnvPath);
-        updateEnvVariable("CHAIN_ID", "2882", backendEnvPath);
-        updateEnvVariable("PRIVATE_KEY", configuration.PRIVATE_KEY!, backendEnvPath);
-        updateEnvVariable(
-            "HC_HELPER_ADDR",
-            configuration.HC_HELPER_ADDR,
-            backendEnvPath
-        );
-
-        console.log('\n 1. Reach out to the BOBA Foundation to call REGISTER_URL and to ADD_CREDITS to your Hybrid Account.')
+        console.log('\n Please reach out to the BOBA Foundation to call REGISTER_URL on your Backend URL and Hybrid Account:')
         console.table({
             YOUR_BACKEND_URL: configuration.BACKEND_URL,
-            YOUR_HYBRID_ACCOUNT: hybridAccountAddress
+            YOUR_HYBRID_ACCOUNT: hybridAccountAddress,
         });
 
     } catch (error) {
