@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bobanetwork/aa-hc-sdk-server':
-        specifier: 2.0.1
-        version: 2.0.1(typescript@5.9.3)(zod@3.25.76)
+        specifier: 2.1.0
+        version: 2.1.0(typescript@5.9.3)(zod@3.25.76)
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.25
@@ -246,8 +246,8 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@bobanetwork/aa-hc-sdk-server@2.0.1':
-    resolution: {integrity: sha512-3kIKJf8m+1Dj1Wh0KV1P31MlHDgGC5n+JPRqxxHC/+rNH5L1BoenYOl61x/FYQJ4UtDpatnuB/tZnAt9ln0p7Q==}
+  '@bobanetwork/aa-hc-sdk-server@2.1.0':
+    resolution: {integrity: sha512-yNuwAK9X5iL/lIMe8WtE9zAbjQV970t/LRAhsOGZPeqxbsaADlZLGpTeGybCm181gRzRBpLFnuOK5vQ659LU0A==}
     peerDependencies:
       typescript: ^5.0.0
 
@@ -2956,7 +2956,7 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@bobanetwork/aa-hc-sdk-server@2.0.1(typescript@5.9.3)(zod@3.25.76)':
+  '@bobanetwork/aa-hc-sdk-server@2.1.0(typescript@5.9.3)(zod@3.25.76)':
     dependencies:
       '@types/mocha': 10.0.10
       body-parser: 1.20.3
